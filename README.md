@@ -6,8 +6,6 @@
 [![License](https://img.shields.io/github/license/tempsies/kronos)](https://www.mozilla.org/en-US/MPL/2.0/)
 [![Discord](https://img.shields.io/discord/880676053729837057?color=blue&label=discord&logo=Discord)](https://discord.gg/ChBNXJUvx2)
 
-[![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)]
-
 ## Features
 **Kronos is a open source, cross-platform game development library with a robust ecosystem.** Listed below are current and planned (\*) features:
 - Assertions and logger
