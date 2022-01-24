@@ -8,7 +8,6 @@ import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
 import net.acidfrog.kronos.core.lang.assertions.Asserts;
-import net.acidfrog.kronos.core.lang.input.InputHandler;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 
 public class Window {
@@ -68,14 +67,12 @@ public class Window {
 	}
 	
 	public void run() {
-		Logger.instance.logInfo(Version.getVersion());
+		Logger.instance.logInfo("LWJGL Version " + Version.getVersion());
 		
 		initialize();
 		
 		while (!GLFW.glfwWindowShouldClose(pointer)) {
 			GLFW.glfwPollEvents();
-
-			System.out.println(InputHandler.instance.isMouseDragging());
 
 			GL11.glClearColor(1.0f, 0f, 0f, 1.0f);
 			GL11.glClear(GL11.GL_COLOR_BUFFER_BIT);
