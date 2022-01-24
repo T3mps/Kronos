@@ -35,4 +35,4 @@
   - Constraints\*
 
 ## Preview
-![](https://gyazo.com/28cf0f7c20d332ea7717eae12db208ee)
+![](assets/screenshot_1)
