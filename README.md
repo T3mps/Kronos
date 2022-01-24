@@ -35,3 +35,6 @@
 
 ## Preview
 ![](assets/screenshot_1.gif)
+
+[![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)](https://twitter.com/AcidFrogLLC)
+[![Forks](https://img.shields.io/github/forks/tempsies/kronos?style=social)](https://github.com/Tempsies/Kronos)
