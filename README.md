@@ -1,4 +1,4 @@
-![logo](kronos_logo.svg)
+![logo](assets/kronos_logo.svg)
 
 [![Kronos Version](https://img.shields.io/badge/Version-alpha%200.1-lightgrey)](https://acidfrog.net/)
 [![Java Version](https://img.shields.io/badge/Java-17.0.2-red)](https://www.oracle.com/java/technologies/java-se-glance.html)
@@ -35,4 +35,4 @@
   - Constraints\*
 
 ## Preview
-![](screenshot_1.png)
+![](assets/screenshot_1)
