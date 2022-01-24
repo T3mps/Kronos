@@ -1,2 +1,1 @@
-# Kronos
-Kronos is a cross-platform Java game development framework.
+![logo](kronos_logo.svg)
