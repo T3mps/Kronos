@@ -1,2 +1,2 @@
 ![logo](kronos_logo.svg)
-[![Discord Chat](https://img.shields.io/discord/348229412858101762?logo=discord)](https://discord.gg/VBYDqjGtaJ)
+[![Java Version](https://img.shields.io/badge/Java-17.0.2-red)
