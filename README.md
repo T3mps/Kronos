@@ -35,5 +35,4 @@
   - Constraints\*
 
 ## Preview
-![](assets/screenshot_1.png)
-![](assets/screenshot_2.png)
+![](assets/screenshot_1.gif)
