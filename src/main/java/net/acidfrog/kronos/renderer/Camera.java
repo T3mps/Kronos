@@ -1,13 +1,9 @@
 package net.acidfrog.kronos.renderer;
 
-import net.acidfrog.kronos.math.Matrix4;
-import net.acidfrog.kronos.math.Vector2;
-import net.acidfrog.kronos.math.Vector3;
-
 public class Camera {
 
-    private Matrix4 projection, view;
-    private Vector2 position;
+    private Matrix4f projection, view;
+    private Vector2f position;
 
     private final float width = 32f * 40f;
     private final float height = 32f * 21f;
@@ -16,15 +12,15 @@ public class Camera {
     private float zdist = 20f;
 
     public Camera(Vector2 position) {
-        this.projection = new Matrix4();
-        this.view = new Matrix4();
+        this.projection = new Matrix4f();
+        this.view = new Matrix4f();
         this.position = position;
         defineProjectionMatrix();
     }
 
     public void defineProjectionMatrix() {
         projection.identity();
-        projection.orthogonalize(0f, width, 0, height, near, far);
+        projection.ortho(0f, width, 0, height, near, far);
     }
 
     public Matrix4 getProjectionMatrix() {
