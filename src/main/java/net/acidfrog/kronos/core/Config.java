@@ -36,6 +36,9 @@ public class Config {
     
     // scene vars
     public static final String SCENE_SAVE_PATH     =   path("data", "scenes");
+
+    // render vars
+    public static final String SHADER_PATH    =   path("assets", "shaders");
     
     static {
         if (IM_FASTMATH) SIN_LOOKUP_BITS = 14;

@@ -617,6 +617,14 @@ public class Vector2 {
 		return x == 0 && y == 0;
 	}
 
+	public Vector3 toVector3(float z) {
+		return new Vector3(x, y, z);
+	}
+
+	public Vector3 toVector3() {
+		return new Vector3(x, y, 0);
+	}
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -235,7 +235,7 @@ public final class Std {
 
 	}
 
-	public static class Booleans {
+	public static final class Booleans {
 		
 		public static final boolean ON = true;
 		public static final boolean OFF = false;
@@ -294,7 +294,7 @@ public final class Std {
 
 	}
 
-	public static class Strings {
+	public static final class Strings {
 
 		public static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
@@ -786,7 +786,7 @@ public final class Std {
 		}
 	}
 
-	public static class Arrays {
+	public static final class Arrays {
 
 		public static final boolean[] EMPTY_BOOLEAN_ARRAY = { };
 

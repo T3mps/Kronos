@@ -1,4 +1,4 @@
-![logo](.assets/kronos_logo.svg)
+![logo](.githubassets/kronos_logo.svg)
 
 [![Kronos Version](https://img.shields.io/badge/version-alpha%200.1-lightgrey)](https://acidfrog.net/)
 [![Downloads](https://img.shields.io/github/downloads/tempsies/kronos/total)](https://github.com/Tempsies/Kronos)
@@ -34,7 +34,7 @@
   - Constraints\*
 
 ## Preview
-![](.assets/screenshot_1.gif)
+![](.githubassets/screenshot_1.gif)
 
 [![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)](https://twitter.com/AcidFrogLLC)
 [![Forks](https://img.shields.io/github/forks/tempsies/kronos?style=social)](https://github.com/Tempsies/Kronos)

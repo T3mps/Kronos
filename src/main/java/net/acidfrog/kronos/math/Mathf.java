@@ -179,10 +179,19 @@ public class Mathf {
 		return (float) Math.tan(rad);
 	}
 
+	static float safeAsin(float r) {
+		return r <= -1.0f ? -PIHalf : r >= 1.0f ? PIHalf : (float) Math.asin(r);
+	}
+	
+	static float safeAcos(float r) {
+		return r <= -1.0f ? PI : r >= 1.0f ? 0 : (float) Math.acos(r);
+	}
+
 	public static float atan2(float y, float x) {
 		if (Config.FASTMATH) return q_atan2(y, x);
 		return (float) Math.atan2(y, x);
 	}
+
 
 	// https://math.stackexchange.com/questions/1098487/atan2-faster-approximation/1105038#answer-1105038
 	private static float q_atan2(float y, float x) {

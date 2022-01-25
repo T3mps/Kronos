@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.lang.input;
+package net.acidfrog.kronos.core.event;
 
 import org.lwjgl.glfw.GLFW;
 

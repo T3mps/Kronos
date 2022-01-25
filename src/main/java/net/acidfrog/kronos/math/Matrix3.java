@@ -31,14 +31,18 @@ public class Matrix3 {
             m20, m21, m22);
     }
 
-    public Matrix3(Matrix3 mat3) {
-        set(mat3);
-    }
-    
-    public Matrix3(Matrix2 mat2) {
+     public Matrix3(Matrix2 mat2) {
         set(mat2);
     }
 
+    public Matrix3(Matrix3 mat3) {
+        set(mat3);
+    }
+
+    public Matrix3(Quaternion quat) {
+        set(quat);
+    }
+    
     public Matrix3(float[] mat3) {
         set(mat3);
     }
@@ -50,30 +54,37 @@ public class Matrix3 {
     /**
      * Sets the values of this matrix.
      */
-    public void set(float a, float b, float c,
-                    float d, float e, float f,
-                    float g, float h, float i) {
+    public Matrix3 set(float a, float b, float c,
+                       float d, float e, float f,
+                       float g, float h, float i) {
         m00 = a; m01 = b; m02 = c;
         m10 = d; m11 = e; m12 = f;
         m20 = g; m21 = h; m22 = i;
+        return this;
     }
 
     /**
      * Sets this matrix to have the same values as the given matrix.
      */
-    public void set(Matrix3 m) {
-        m00 = m.m00; m01 = m.m01; m02 = m.m02;
-        m10 = m.m10; m11 = m.m11; m12 = m.m12;
-        m20 = m.m20; m21 = m.m21; m22 = m.m22;
-    }
-
-    /**
-     * Sets this matrix to have the same values as the given matrix.
-     */
-    public void set(Matrix2 m) {
+    public Matrix3 set(Matrix2 m) {
         m00 = m.m00; m01 = m.m01; m02 = 0f;
         m10 = m.m10; m11 = m.m11; m12 = 0f;
         m20 =    0f; m21 =    0f; m22 = 0f;
+        return this;
+    }
+
+    /**
+     * Sets this matrix to have the same values as the given matrix.
+     */
+    public Matrix3 set(Matrix3 m) {
+        m00 = m.m00; m01 = m.m01; m02 = m.m02;
+        m10 = m.m10; m11 = m.m11; m12 = m.m12;
+        m20 = m.m20; m21 = m.m21; m22 = m.m22;
+        return this;
+    }
+
+    public Matrix3 set(Quaternion q) {
+        return rotate(q);
     }
 
     public void set(float[] m) {
@@ -291,8 +302,31 @@ public class Matrix3 {
         return this;
     }
 
-    public Matrix3 rotate(/*Quaternion quat*/) {
-        //TODO: implement
+    /**
+     * Rotates this matrix by a given Quaternion.
+     * @param quat
+     * @return
+     */
+    public Matrix3 rotate(Quaternion quat) {
+        float w2 = quat.w * quat.w;
+        float x2 = quat.x * quat.x;
+        float y2 = quat.y * quat.y;
+        float z2 = quat.z * quat.z;
+        float zw = quat.z * quat.w, dzw = zw + zw;
+        float xy = quat.x * quat.y, dxy = xy + xy;
+        float xz = quat.x * quat.z, dxz = xz + xz;
+        float yw = quat.y * quat.w, dyw = yw + yw;
+        float yz = quat.y * quat.z, dyz = yz + yz;
+        float xw = quat.x * quat.w, dxw = xw + xw;
+        m00 = w2 + x2 - z2 - y2;
+        m01 = dxy + dzw;
+        m02 = dxz - dyw;
+        m10 = -dzw + dxy;
+        m11 = y2 - z2 + w2 - x2;
+        m12 = dyz + dxw;
+        m20 = dyw + dxz;
+        m21 = dyz - dxw;
+        m22 = z2 - y2 - x2 + w2;
         return this;
     }
 
@@ -320,21 +354,13 @@ public class Matrix3 {
         return transpose(new Matrix3());
     }
 
-    public Vector3 getRow(int row, Vector3 out) throws IndexOutOfBoundsException {
+    public Vector3 getRow(int row) throws IndexOutOfBoundsException {
         switch (row) {
-            case 0:
-                out.set(m00, m10, m20);
-                break;
-            case 1:
-                out.set(m01, m11, m21);
-                break;
-            case 2:
-                out.set(m02, m12, m22);
-                break;
-            default:
-                throw new IndexOutOfBoundsException(row + " is out of bounds for " + this.toString());
+            case 0: return new Vector3(m00, m10, m20);
+            case 1: return new Vector3(m01, m11, m21);
+            case 2: return new Vector3(m02, m12, m22);
+            default: throw new IndexOutOfBoundsException(row + " is out of bounds for " + this.toString());
         }
-        return out;
     }
 
     public Matrix3 setRow(int index, Vector3 row) {
@@ -477,7 +503,9 @@ public class Matrix3 {
     }
 
     public float[] toArray() {
-        return new float[] { m00, m01, m02, m10, m11, m12, m20, m21, m22 };
+        return new float[] {m00, m01, m02,
+                            m10, m11, m12,
+                            m20, m21, m22};
     }
 
     public Matrix3 fromArray(float[] array) {

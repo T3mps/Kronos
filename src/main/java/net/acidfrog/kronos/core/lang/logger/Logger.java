@@ -10,12 +10,10 @@ import java.util.List;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import net.acidfrog.kronos.core.Config;
 import net.acidfrog.kronos.core.Config.OSArbiter;
-import net.acidfrog.kronos.core.lang.IDArbiter;
 import net.acidfrog.kronos.core.lang.annotations.Debug;
 
 /**
@@ -64,29 +62,30 @@ public final class Logger {
     private static final String EXTENSION = ".log";
 
     private final String instanceName;
-    private final String instanceID;
+    private final long instanceID;
     private final File directory;
     private final PrintStream log;
     private final PrintStream error;
+    private boolean initialized = false;
 
     private Logger(final PrintStream log, final PrintStream error) {
         this.instanceName = LocalDate.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy"));
-        this.instanceID = IDArbiter.next();
+        this.instanceID = System.currentTimeMillis();
         this.directory = new File(Config.LOGGER_SAVE_PATH);
         this.log = log;
         this.error = error;
-
-       initialize();
     }
 
-    public boolean initialize() {
-        if (directory.mkdirs()) log(Level.INFO, "Created directory: " + directory.getAbsolutePath());
-        log(Level.INFO, "Logger(" + instanceID + ") initialized @ " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")));
-        return true;
+    public void initialize() {
+        if (!initialized) {
+            if (directory.mkdirs()) log(Level.INFO, "Created directory: " + directory.getAbsolutePath());
+            initialized = true;
+            log(Level.INFO, "Logger " + instanceID + " initialized");
+        } else logError("Logger already initialized!");
     }
 
     public void close(int n) {
-        log(Level.INFO, "Logger(" + instanceID + ") { " + n + " } closed @ " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")));
+        log(Level.INFO, "Logger " + instanceID + " closed");
         
         synchronized(this) {
             log.close();
@@ -109,10 +108,15 @@ public final class Logger {
 
     private void log(final Level level, final String message) {
         boolean isError = level.ordinal() >= 4;
-        String output = level.getPrepend() + message;
-        logToFile(output);
-        output = level.fg + level.bg + output + LogColors.RESET + "\n";
-        (isError ? error : log).print(output);
+
+        if (initialized) logToFile(level.getPrepend() + message);
+        else System.err.print(fString(Level.ERROR, "Logger(" + instanceID + ") has not been initialized; will not log to file."));
+
+        (isError ? error : log).print(fString(level, message));
+    }
+
+    private String fString(final Level level, final String message) {
+        return level.fg + level.bg + level.getPrepend() + message + LogColors.RESET + "\n";
     }
 
     public void logTrace(final String message) {
