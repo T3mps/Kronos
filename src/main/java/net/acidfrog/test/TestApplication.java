@@ -42,17 +42,17 @@ public class TestApplication extends KronosApplication {
 
                 eboID = GL30.glGenBuffers();
                 GL30.glBindBuffer(GL30.GL_ELEMENT_ARRAY_BUFFER, eboID);
-                GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, elementBuffer,GL30. GL_STATIC_DRAW);
+                GL30.glBufferData(GL30.GL_ELEMENT_ARRAY_BUFFER, elementBuffer, GL30. GL_STATIC_DRAW);
 
                 // Add the vertex attribute pointers
                 int positionsSize = 3;
                 int colorSize = 4;
-                int floatSizeBytes = 4;
-                int vertexSizeBytes = (positionsSize + colorSize) * floatSizeBytes;
+                int vertexSizeBytes = (positionsSize + colorSize) * Float.BYTES;
+
                 GL30.glVertexAttribPointer(0, positionsSize, GL30.GL_FLOAT, false, vertexSizeBytes, 0);
                 GL30.glEnableVertexAttribArray(0);
 
-                GL30.glVertexAttribPointer(1, colorSize, GL30.GL_FLOAT, false, vertexSizeBytes, positionsSize * floatSizeBytes);
+                GL30.glVertexAttribPointer(1, colorSize, GL30.GL_FLOAT, false, vertexSizeBytes, positionsSize * Float.BYTES);
                 GL30.glEnableVertexAttribArray(1);
             }
         }); 

@@ -6,13 +6,11 @@ import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.joml.Matrix4f;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.math.Matrix4;
-import net.acidfrog.kronos.math.Vector2;
-import net.acidfrog.kronos.math.Vector3;
 
 public class Shader {
 
@@ -111,14 +109,15 @@ public class Shader {
         GL30.glUseProgram(0);
     }
 
-    public Shader setUniform(String name, Matrix4 matrix) {
+    public Shader setUniform(String name, Matrix4f matrix) {
         int location = GL30.glGetUniformLocation(shaderProgramID, name);
-        FloatBuffer buffer = matrix.toFloatBuffer();
+        FloatBuffer buffer = BufferUtils.createFloatBuffer(16);
+        matrix.get(buffer);
         GL30.glUniformMatrix4fv(location, false, buffer);
         return this;
     }
 
-    public void uploadUniform(String name, Matrix4 value) {
+    public void uploadUniform(String name, Matrix4f value) {
         
     }
 

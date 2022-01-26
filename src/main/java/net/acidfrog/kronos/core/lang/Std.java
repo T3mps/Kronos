@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.math.Mathf;
+import net.acidfrog.kronos.core.mathk.Mathk;
 
 public final class Std {
 
@@ -518,7 +518,7 @@ public final class Std {
 			for (int i = 1; i <= str1.length(); i++) {
 				for (int j = 1; j <= str2.length(); j++) {
 					int cost = (str1.charAt(i - 1) == str2.charAt(j - 1)) ? 0 : 1;
-					distance[i][j] = Mathf.min(Mathf.min(distance[i - 1][j] + 1, distance[i][j - 1] + 1), distance[i - 1][j - 1] + cost);
+					distance[i][j] = Mathk.min(Mathk.min(distance[i - 1][j] + 1, distance[i][j - 1] + 1), distance[i - 1][j - 1] + cost);
 				}
 			}
 
@@ -549,7 +549,7 @@ public final class Std {
 				if (dif == comparisonString.length()) dist++;
 			}
 
-			return dist == 0 ? dist + Mathf.abs(referenceString.length() - comparisonString.length()) : dist;
+			return dist == 0 ? dist + Mathk.abs(referenceString.length() - comparisonString.length()) : dist;
 		}
 
 		public static String alphabetize(String str) {
@@ -665,7 +665,7 @@ public final class Std {
 			if (str == null) return null;
 
 			if (str.length() > maxWidth) {
-				final int ix = Mathf.min(maxWidth, str.length());
+				final int ix = Mathk.min(maxWidth, str.length());
 				return str.substring(0, ix);
 			}
 
@@ -718,31 +718,31 @@ public final class Std {
 			public static String randomName() {
 				StringBuilder sb = new StringBuilder();
 
-				sb.append(phonetics[consonantIndex[Mathf.random(consonantIndex.length - 7)]]);
-				sb.append(phonetics[vowelIndex[Mathf.random(vowelIndex.length - 1)]]);
-				String next = phonetics[Mathf.random(phonetics.length - 5)];
+				sb.append(phonetics[consonantIndex[Mathk.random(consonantIndex.length - 7)]]);
+				sb.append(phonetics[vowelIndex[Mathk.random(vowelIndex.length - 1)]]);
+				String next = phonetics[Mathk.random(phonetics.length - 5)];
 				sb.append(next);
 				
 				for (int i = 0; i < vowelIndex.length; i++) {
 					if (vowelIndex[i] == next.charAt(next.length() - 1) || ((next.length() > 1) ? vowelIndex[i] == next.charAt(next.length() - 2) : true)) {
-						sb.append(phonetics[consonantIndex[Mathf.random(consonantIndex.length - 1)]]);
+						sb.append(phonetics[consonantIndex[Mathk.random(consonantIndex.length - 1)]]);
 						break;
 					}
-					if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathf.random(vowelIndex.length - 1)]]);
+					if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathk.random(vowelIndex.length - 1)]]);
 				}
 				
 
-				int iterations = Mathf.randomSign();
+				int iterations = Mathk.randomSign();
 
 				do {
 					for (int i = 0; i < vowelIndex.length; i++) {
 						if (vowelIndex[i] == next.charAt(next.length() - 1) || ((next.length() > 1) ? vowelIndex[i] == next.charAt(next.length() - 2) : true)) {
-							sb.append(phonetics[consonantIndex[Mathf.random(consonantIndex.length - 1)]]);
+							sb.append(phonetics[consonantIndex[Mathk.random(consonantIndex.length - 1)]]);
 							break;
 						}
-						if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathf.random(vowelIndex.length - 1)]]);
+						if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathk.random(vowelIndex.length - 1)]]);
 					}
-					iterations = Mathf.randomSign();
+					iterations = Mathk.randomSign();
 				} while (iterations == 1);
 
 				String result = sb.toString();
@@ -755,30 +755,30 @@ public final class Std {
 			public static String randomTownName() {
 				StringBuilder sb = new StringBuilder();
 
-				sb.append(phonetics[Mathf.random(phonetics.length - 1)]);
+				sb.append(phonetics[Mathk.random(phonetics.length - 1)]);
 				
 				for (int i = 0; i < vowelIndex.length; i++) {
 					if (sb.toString().contains(phonetics[vowelIndex[i]])) {
-						sb.append(phonetics[consonantIndex[Mathf.random(consonantIndex.length - 1)]]);
+						sb.append(phonetics[consonantIndex[Mathk.random(consonantIndex.length - 1)]]);
 						break;
 					}
-					if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathf.random(vowelIndex.length - 1)]]);
+					if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathk.random(vowelIndex.length - 1)]]);
 				}
 
-				int iterations = Mathf.random(5);
+				int iterations = Mathk.random(5);
 
 				do {			
 					for (int i = 0; i < vowelIndex.length; i++) {
 						if (sb.toString().contains(phonetics[vowelIndex[i]])) {
-							sb.append(phonetics[Mathf.random(phonetics.length - 1)]);
+							sb.append(phonetics[Mathk.random(phonetics.length - 1)]);
 							break;
 						}
-						if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathf.random(vowelIndex.length - 1)]]);
+						if (i == vowelIndex.length - 1) sb.append(phonetics[vowelIndex[Mathk.random(vowelIndex.length - 1)]]);
 					}
 				} while(--iterations > 0);
 
-				if (sb.length() == 3 && Mathf.randomSign() == 1) sb.append(appends[Mathf.random(appends.length - 1)]);
-				else if (sb.length() == 4 && Mathf.random(3) == 1) sb.append(appends[Mathf.random(appends.length - 1)]);
+				if (sb.length() == 3 && Mathk.randomSign() == 1) sb.append(appends[Mathk.random(appends.length - 1)]);
+				else if (sb.length() == 4 && Mathk.random(3) == 1) sb.append(appends[Mathk.random(appends.length - 1)]);
 
 				String result = sb.toString();
 				return result.substring(0, 1).toUpperCase() + result.substring(1);
