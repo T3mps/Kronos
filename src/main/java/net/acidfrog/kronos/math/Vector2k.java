@@ -1,107 +1,376 @@
-package net.acidfrog.kronos.core.mathk;
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2022 Ethan Temprovich.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package net.acidfrog.kronos.math;
 
-import net.acidfrog.kronos.core.mathk.Mathk.Epsilon;
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+//#ifdef __HAS_NIO__
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+//#endif
+
+import net.acidfrog.kronos.math.Mathk.Epsilon;
 
 /**
- * A 2D vector.
- * 
+ * Represents a 2D vector with single-precision.
+ *
  * @author Ethan Temprovich
  */
-public class Vector2k {
+public class Vector2k implements Externalizable, Cloneable {
 
-	public static final Vector2k UP 		= 	new Vector2k(+-0,  +1);
-	public static final Vector2k DOWN 	= 	new Vector2k(+-0,  -1);
-	public static final Vector2k LEFT 	= 	new Vector2k( -1, +-0);
-	public static final Vector2k RIGHT   =   new Vector2k( +1, +-0);
-	public static final Vector2k ONE 	= 	new Vector2k( +1,  +1);
-	public static final Vector2k ZERO 	= 	new Vector2k(+-0, +-0);
-
-	public float x;
-	public float y;
-
-	public Vector2k() {
-		this.x = 0.0f;
-		this.y = 0.0f;
-	}
-
-	public Vector2k(float n) {
-		this.x = n;
-		this.y = n;
-	}
-
-	public Vector2k(float x, float y) {
-		this.x = x;
-		this.y = y;
-	}
-
-	public Vector2k(double x, double y) {
-		this.x = (float) x;
-		this.y = (float) y;
-	}
-
-	public Vector2k(Vector2k vector2) {
-		this.x = vector2.x;
-		this.y = vector2.y;
-	}
-
-	public Vector2k(float[] n) {
-		this.x = n[0];
-		this.y = n[1];
-	}
-
-	public Vector2k(float[] n, int offset) {
-		this.x = n[offset];
-		this.y = n[offset + 1];
-	}
+    private static final long serialVersionUID = 1L;
 
 	/**
-	 * Sets this vectors components to the given values.
+	 * The X component of this vector.
 	 */
-	public Vector2k set(float x, float y) {
-		this.x = x;
-		this.y = y;
-		return this;
-	}
-
+    public float x;
 	/**
-	 * Sets this vectors components to the given value.
+	 * The Y component of this vector.
 	 */
-	public Vector2k set(float n) {
-		this.x = n;
-		this.y = n;
-		return this;
-	}
+    public float y;
+    
+    public Vector2k() {
+        set(0.0f);
+    }
 
-	/**
-	 * Sets this vectors components to the given vectors components.
-	 */
-	public Vector2k set(Vector2k vector2) {
-		this.x = vector2.x;
-		this.y = vector2.y;
-		return this;
-	}
+    public Vector2k(float n) {
+        set(n);
+    }
 
-	/**
-	 * Sets this vectors components to the given arrays first indices value and 
-	 * second indices value.
-	 */
-	public Vector2k set(float[] n) {
-		this.x = n[0];
-		this.y = n[1];
-		return this;
-	}
+    public Vector2k(float x, float y) {
+        set(x, y);
+    }
 
-	/**
-	 * Sets this vectors components to the given arrays indice at given offset, 
-	 * and the indice at offsets mask (offset + 1).
-	 */
-	public Vector2k set(float[] n, int offset) {
-		this.x = n[offset];
-		this.y = n[offset + 1];
-		return this;
-	}
+    public Vector2k(double n) {
+        set(n);
+    }
 
-	/**
+    public Vector2k(double x, double y) {
+        set(x, y);
+    }
+
+    public Vector2k(Vector2k v) {
+        set(v);
+    }
+
+    public Vector2k(Vector2ic v) {
+        set(v);
+    }
+
+    public Vector2k(Vector2fc v) {
+        set(v);
+    }
+
+    public Vector2k(Vector2dc v) {
+        set(v);
+    }
+
+    public Vector2k(float[] n) {
+        set(n);
+    }
+
+    public Vector2k(float[] n, int offset) {
+        set(n, offset);
+    }
+
+    public Vector2k(float[] n, int offset, int stride) {
+        set(n, offset, stride);
+    }
+
+    public Vector2k(double[] n) {
+        set(n);
+    }
+
+    public Vector2k(double[] n, int offset) {
+        set(n, offset);
+    }
+
+    public Vector2k(double[] n, int offset, int stride) {
+        set(n, offset, stride);
+    }
+
+    public float x() {
+        return x;
+    }
+
+
+    public float y() {
+        return y;
+    }
+
+//#ifdef __HAS_NIO__
+    public ByteBuffer get(ByteBuffer buffer) {
+        MemUtil.INSTANCE.put(new Vector2f(this), buffer.position(), buffer);
+        return buffer;
+    }
+
+    public ByteBuffer get(int index, ByteBuffer buffer) {
+        MemUtil.INSTANCE.put(new Vector2f(this), index, buffer);
+        return buffer;
+    }
+
+    public FloatBuffer get(FloatBuffer buffer) {
+        MemUtil.INSTANCE.put(new Vector2f(this), buffer.position(), buffer);
+        return buffer;
+    }
+
+    public FloatBuffer get(int index, FloatBuffer buffer) {
+        MemUtil.INSTANCE.put(new Vector2f(this), index, buffer);
+        return buffer;
+    }
+//#endif
+
+//#ifdef __HAS_UNSAFE__
+    public Vector2k getToAddress(long address) {
+        if (Options.NO_UNSAFE)
+            throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
+        MemUtil.MemUtilUnsafe.put(new Vector2f(this), address);
+        return this;
+    }
+//#endif
+
+    public float get(int component) throws IllegalArgumentException {
+        switch (component) {
+        case 0: return x;
+        case 1: return y;
+        default: throw new IllegalArgumentException();
+        }
+    }
+
+    public Vector2i get(int mode, Vector2i dest) {
+        dest.x = Mathk.roundUsing(this.x(), mode);
+        dest.y = Mathk.roundUsing(this.y(), mode);
+        return dest;
+    }
+
+    public Vector2f get(Vector2f dest) {
+        dest.x = this.x();
+        dest.y = this.y();
+        return dest;
+    }
+
+    public Vector2d get(Vector2d dest) {
+        dest.x = this.x();
+        dest.y = this.y();
+        return dest;
+    }
+
+    public Vector2k get(Vector2k dest) {
+        dest.x = this.x();
+        dest.y = this.y();
+        return dest;
+    }
+
+//#ifdef __HAS_NIO__
+    /**
+     * Read this vector from the supplied {@link ByteBuffer} at the current
+     * buffer {@link ByteBuffer#position() position}.
+     * <p>
+     * This method will not increment the position of the given ByteBuffer.
+     * <p>
+     * In order to specify the offset into the ByteBuffer at which
+     * the vector is read, use {@link #set(int, ByteBuffer)}, taking
+     * the absolute position as parameter.
+     *
+     * @param buffer
+     *        values will be read in <code>x, y</code> order
+     * @return this
+     * @see #set(int, ByteBuffer)
+     */
+    public Vector2k set(ByteBuffer buffer) {
+        MemUtil.INSTANCE.get(new Vector2f(this), buffer.position(), buffer);
+        return this;
+    }
+
+    /**
+     * Read this vector from the supplied {@link ByteBuffer} starting at the specified
+     * absolute buffer position/index.
+     * <p>
+     * This method will not increment the position of the given ByteBuffer.
+     *
+     * @param index
+     *        the absolute position into the ByteBuffer
+     * @param buffer
+     *        values will be read in <code>x, y</code> order
+     * @return this
+     */
+    public Vector2k set(int index, ByteBuffer buffer) {
+        MemUtil.INSTANCE.get(new Vector2f(this), index, buffer);
+        return this;
+    }
+
+    /**
+     * Read this vector from the supplied {@link FloatBuffer} at the current
+     * buffer {@link FloatBuffer#position() position}.
+     * <p>
+     * This method will not increment the position of the given FloatBuffer.
+     * <p>
+     * In order to specify the offset into the FloatBuffer at which
+     * the vector is read, use {@link #set(int, FloatBuffer)}, taking
+     * the absolute position as parameter.
+     *
+     * @param buffer
+     *        values will be read in <code>x, y</code> order
+     * @return this
+     * @see #set(int, FloatBuffer)
+     */
+    public Vector2k set(FloatBuffer buffer) {
+        MemUtil.INSTANCE.get(new Vector2f(this), buffer.position(), buffer);
+        return this;
+    }
+
+    /**
+     * Read this vector from the supplied {@link FloatBuffer} starting at the specified
+     * absolute buffer position/index.
+     * <p>
+     * This method will not increment the position of the given FloatBuffer.
+     *
+     * @param index 
+     *        the absolute position into the FloatBuffer
+     * @param buffer
+     *        values will be read in <code>x, y</code> order
+     * @return this
+     */
+    public Vector2k set(int index, FloatBuffer buffer) {
+        MemUtil.INSTANCE.get(new Vector2f(this), index, buffer);
+        return this;
+    }
+//#endif
+
+//#ifdef __HAS_UNSAFE__
+    /**
+     * Set the values of this vector by reading 2 float values from off-heap memory,
+     * starting at the given address.
+     * <p>
+     * This method will throw an {@link UnsupportedOperationException} when JOML is used with `-Djoml.nounsafe`.
+     * <p>
+     * <em>This method is unsafe as it can result in a crash of the JVM process when the specified address range does not belong to this process.</em>
+     * 
+     * @param address
+     *              the off-heap memory address to read the vector values from
+     * @return this
+     */
+    public Vector2k setFromAddress(long address) {
+        if (Options.NO_UNSAFE)
+            throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
+        MemUtil.MemUtilUnsafe.get(new Vector2f(this), address);
+        return this;
+    }
+//#endif
+
+    public Vector2k set(float n) {
+        x = y = n;
+        return this;
+    }
+
+    public Vector2k set(float x, float y) {
+        this.x = x;
+        this.y = y;
+        return this;
+    }
+
+    public Vector2k set(double n) {
+        x = (float)n;
+        y = (float)n;
+        return this;
+    }
+
+    public Vector2k set(double x, double y) {
+        this.x = (float)x;
+        this.y = (float)y;
+        return this;
+    }
+
+    public Vector2k set(Vector2k v) {
+        x = v.x;
+        y = v.y;
+        return this;
+    }
+
+    public Vector2k set(Vector2ic v) {
+        x = v.x();
+        y = v.y();
+        return this;
+    }
+
+    public Vector2k set(Vector2fc v) {
+        x = v.x();
+        y = v.y();
+        return this;
+    }
+
+    public Vector2k set(Vector2dc v) {
+        x = (float) v.x();
+        y = (float) v.y();
+        return this;
+    }
+
+    public Vector2k set(float[] n) {
+        return set(n, 0, 1);
+    }
+
+    public Vector2k set(float[] n, int offset) {
+        return set(n, offset, 1);
+    }
+
+    public Vector2k set(float[] n, int offset, int stride) {
+        if (n == null)
+            throw new IllegalArgumentException("Array must not be null");
+        if (offset < 0 || offset >= n.length)
+            throw new IllegalArgumentException("Offset must be >= 0 and < " + n.length);
+        if (stride < 1)
+            throw new IllegalArgumentException("Stride must be >= 1");
+            
+        x = n[offset];
+        y = n[offset + stride];
+        return this;
+    }
+
+    public Vector2k set(double[] n) {
+        return set(n, 0, 1);
+    }
+
+    public Vector2k set(double[] n, int offset) {
+        return set(n, offset, 1);
+    }
+
+    public Vector2k set(double[] n, int offset, int stride) {
+        if (n == null)
+            throw new IllegalArgumentException("Array must not be null");
+        if (offset < 0 || offset >= n.length)
+            throw new IllegalArgumentException("Offset must be >= 0 and < " + n.length);
+        if (stride < 1)
+            throw new IllegalArgumentException("Stride must be >= 1");
+            
+        x = (float) n[offset];
+        y = (float) n[offset + stride];
+        return this;
+    }
+
+   	/**
 	 * Sets the x and y values of this vector 0.
 	 */
 	public void zero() {
@@ -510,7 +779,7 @@ public class Vector2k {
 		// component
 		// as the second argument. The returned angle is in radians. We convert it to
 		// degrees.
-		float angle = Mathk.atan2(y, x) * Mathk.TO_DEGREES;
+		float angle = Mathk.toDegrees(Mathk.atan2(y, x));
 
 		// The angle returned by the arctangent method is between -180 and 180. Thus, if
 		// the angle is negative, we add 360 degrees to the angle. This makes it so that
@@ -619,7 +888,20 @@ public class Vector2k {
 		return x == 0 && y == 0;
 	}
 
-	@Override
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeFloat(x);
+        out.writeFloat(y);
+    }
+
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        x = in.readFloat();
+        y = in.readFloat();
+    }
+
+    @Override
 	public int hashCode() {
 		final int prime = 31;
 		int result = 1;
@@ -638,6 +920,11 @@ public class Vector2k {
 		return true;
 	}
 
+    @Override
+    public Vector2k clone() {
+        return new Vector2k(this);
+    }
+
 	@Override
 	public String toString() {
 		StringBuilder builder = new StringBuilder();
@@ -647,6 +934,6 @@ public class Vector2k {
 		builder.append(y);
 		builder.append("]");
 		return builder.toString();
-	}	
+	}
 
 }

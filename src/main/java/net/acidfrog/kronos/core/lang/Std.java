@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.core.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 
 public final class Std {
 

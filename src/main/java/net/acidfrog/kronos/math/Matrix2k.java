@@ -1,21 +1,42 @@
-package net.acidfrog.kronos.core.mathk;
-
-import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
-import net.acidfrog.kronos.core.lang.error.KronosGeometryError;
-
-/**
- * Defines a <code>2x2</code> matrix alongside associated functions to transform it. The matrix
- * is column-major to match OpenGL's interpretation:
- * <p>
- *      m00  m10<br></br>
- *      m01  m11<br></br>
- * </p>
- * 
- * @author Ethan Temprovich
+/*
+ * The MIT License
+ *
+ * Copyright (c) 2022 Ethan Temprovich
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-public class Matrix2k {
+package net.acidfrog.kronos.math;
 
-	public float m00, m01;
+//#ifdef __HAS_NIO__
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+//#endif
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+public class Matrix2k implements Externalizable, Cloneable {
+
+    private static final long serialVersionUID = 1L;
+
+    public float m00, m01;
 	public float m10, m11;
 
 	public Matrix2k() {
@@ -27,64 +48,180 @@ public class Matrix2k {
 		set(radians);
 	}
 
-	public Matrix2k(float m00, float m01, float m10, float m11) {
-		set(m00, m01,
-			m10, m11);
+    public Matrix2k(float m00, float m01, float m10, float m11) {
+        set(m00, m01,
+            m10, m11);
+    }
+
+    public Matrix2k(double radians) {
+        set(radians);
+    }
+
+    public Matrix2k(double m00, double m01, double m10, double m11) {
+        set(m00, m01,
+            m10, m11);
+    }
+
+	public Matrix2k(Matrix2k mat) {
+		set(mat);
 	}
 
-	public Matrix2k(Matrix2k mat2) {
-		set(mat2);
-	}
+    public Matrix2k(Matrix2fc mat) {
+        set(mat);
+    }
+
+    public Matrix2k(Matrix2dc mat) {
+        set(mat);
+    }
 
 	public Matrix2k(float[] mat2) {
 		set(mat2);
 	}
 
 	public Matrix2k(float[] mat2, int offset) {
-		set(mat2, offset);
+        set(mat2, offset);
 	}
+
+    public Matrix2k(float[] mat2, int offset, int stride) {
+        set(mat2, offset, stride);
+    }
+
+    public float m00() {
+        return m00;
+    }
+
+    public float m01() {
+        return m01;
+    }
+
+    public float m10() {
+        return m10;
+    }
+
+    public float m11() {
+        return m11;
+    }
+
+//#ifdef __HAS_NIO__
+    public FloatBuffer get(FloatBuffer buffer) {
+        return get(buffer.position(), buffer);
+    }
+
+    public FloatBuffer get(int index, FloatBuffer buffer) {
+        MemUtil.INSTANCE.put(new Matrix2f(this), index, buffer);
+        return buffer;
+    }
+
+    public ByteBuffer get(ByteBuffer buffer) {
+        return get(buffer.position(), buffer);
+    }
+
+    public ByteBuffer get(int index, ByteBuffer buffer) {
+        MemUtil.INSTANCE.put(new Matrix2f(this), index, buffer);
+        return buffer;
+    }
+
+    public FloatBuffer getTransposed(FloatBuffer buffer) {
+        return get(buffer.position(), buffer);
+    }
+
+    public FloatBuffer getTransposed(int index, FloatBuffer buffer) {
+        MemUtil.INSTANCE.putTransposed(new Matrix2f(this), index, buffer);
+        return buffer;
+    }
+
+    public ByteBuffer getTransposed(ByteBuffer buffer) {
+        return get(buffer.position(), buffer);
+    }
+
+    public ByteBuffer getTransposed(int index, ByteBuffer buffer) {
+        MemUtil.INSTANCE.putTransposed(new Matrix2f(this), index, buffer);
+        return buffer;
+    }
+//#endif
+//#ifdef __HAS_UNSAFE__
+    public Matrix2k getToAddress(long address) {
+        if (Options.NO_UNSAFE)
+            throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
+        MemUtil.MemUtilUnsafe.put(new Matrix2f(this), address);
+        return this;
+    }
+//#endif
+
+    public float[] get(float[] arr, int offset) {
+        MemUtil.INSTANCE.copy(new Matrix2f(this), arr, offset);
+        return arr;
+    }
+
+    public float[] get(float[] arr) {
+        return get(arr, 0);
+    }
 
 	/**
 	 * Sets this matrix to a rotation matrix with the given radians.
 	 */
-	public void set(float radians) {
+	public Matrix2k set(float radians) {
 		float c = Mathk.cos(radians);
 		float s = Mathk.sin(radians);
 
 		m00 = c; m01 = -s;
 		m10 = s; m11 =  c;
+        return this;
 	}
 
 	/**
 	 * Sets the values of this matrix.
 	 */
-	public void set(float a, float b, float c, float d) {
+	public Matrix2k set(float a, float b, float c, float d) {
 		m00 = a; m01 = b;
 		m10 = c; m11 = d;
+        return this;
 	}
+
+    public Matrix2k set(double radians) {
+        return set((float) radians);
+    }
+
+    public Matrix2k set(double a, double b, double c, double d) {
+        return set((float) a, (float) b,
+                   (float) c, (float) d);
+    }
 
 	/**
 	 * Sets this matrix to have the same values as the given matrix.
 	 */
-	public void set(Matrix2k m) {
+	public Matrix2k set(Matrix2k m) {
 		m00 = m.m00; m01 = m.m01;
 		m10 = m.m10; m11 = m.m11;
+        return this;
 	}
+
+    public Matrix2k set(Matrix2fc m) {
+        return set(m.m00(), m.m01(),
+                   m.m10(), m.m11());
+    }
+
+    public Matrix2k set(Matrix2dc m) {
+        return set(m.m00(), m.m01(),
+                   m.m10(), m.m11());
+    }
 
 	/**
 	 * Sets this matrix to have the same values as the given array.
 	 */
-	public void set(float[] m) {
-		if(m.length != 4) throw new KronosGeometryError(KronosErrorLibrary.MATRIX_NOT_2X2);
-		set(m, 0);
+	public Matrix2k set(float[] m) {
+		return set(m, 0, 1);
 	}
 
-	public void set(float[] m, int offset) {
-		if(offset + 3 >= m.length) throw new KronosGeometryError(KronosErrorLibrary.INVALID_OFFSET);
-
-		m00 = m[offset + 0]; m01 = m[offset + 1];
-		m10 = m[offset + 2]; m11 = m[offset + 3];
+	public Matrix2k set(float[] m, int offset) {
+		return set(m, offset, 1);
 	}
+
+    public Matrix2k set(float[] m, int offset, int stride) {
+        m00 = m[offset + 0 * stride]; m01 = m[offset + 1 * stride];
+        m10 = m[offset + 2 * stride]; m11 = m[offset + 3 * stride];
+        return this;
+    }
 
 	// "Cross product" 
 	public float determinant() {
@@ -109,7 +246,7 @@ public class Matrix2k {
 	 */
 	public Matrix2k invert(Matrix2k out) {
 		float det = determinant();
-		if (det == 0f) throw new KronosGeometryError(KronosErrorLibrary.ZERO_MATRIX_TRANSFORM_ATTEMPT);
+		if (det == 0f) throw new IllegalArgumentException("Matrix is not invertible.");
 		float invDet = 1f / det;
 		out.m00 =  m11 * invDet;
 		out.m01 = -m01 * invDet;
@@ -305,6 +442,27 @@ public class Matrix2k {
 		return this;
 	}
 
+    @Override
+    public Matrix2k clone() {
+        return new Matrix2k(this);
+    }
+
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeFloat(m00);
+        out.writeFloat(m01);
+        out.writeFloat(m10);
+        out.writeFloat(m11);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException {
+        m00 = in.readFloat();
+        m01 = in.readFloat();
+        m10 = in.readFloat();
+        m11 = in.readFloat();
+    }
+
 	@Override
 	public int hashCode() {
 		final int prime = 31;
@@ -344,5 +502,5 @@ public class Matrix2k {
 		builder.append("]");
 		return builder.toString();
 	}
-
+    
 }

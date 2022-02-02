@@ -1,11 +1,9 @@
 package net.acidfrog.kronos.scene;
 
-import org.joml.Vector2f;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.opengl.GL30;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.renderer.Camera;
 import net.acidfrog.kronos.renderer.Shader;
 
 public class Scene {
@@ -15,10 +13,10 @@ public class Scene {
 
     public float[] vertexArray = {
         // position               // color
-         100.5f, 0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
-        0.5f,  100.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
-         100.5f,  100.5f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
-        0.5f, 0.5f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f, // Bottom left  3
+         0.5f, -0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
+        -0.5f,  0.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
+         0.5f,  0.5f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
+        -0.5f, -0.5f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f, // Bottom left  3
     };
 
     // IMPORTANT: Must be in counter-clockwise order
@@ -39,11 +37,9 @@ public class Scene {
 
     private final String sceneName;
     private int sceneIndex;
-    private Camera camera;
 
     public Scene(String name) {
         this.sceneName = name;
-        this.camera = new Camera(new Vector2f(0));
     }
 
     public void initialize() {
@@ -61,8 +57,6 @@ public class Scene {
     public void render() {
         // temporary
         defaultShader.bind();
-        defaultShader.uploadUniform("uProjection", camera.getProjectionMatrix());
-        defaultShader.uploadUniform("uView", camera.getViewMatrix());
 
         GL30.glBindVertexArray(vaoID);
 

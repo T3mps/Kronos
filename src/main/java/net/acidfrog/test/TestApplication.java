@@ -7,6 +7,7 @@ import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL30;
 
 import net.acidfrog.kronos.core.Config;
+import net.acidfrog.kronos.core.Settings;
 import net.acidfrog.kronos.core.application.KronosApplication;
 import net.acidfrog.kronos.renderer.Shader;
 import net.acidfrog.kronos.scene.Scene;
