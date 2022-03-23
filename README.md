@@ -9,13 +9,17 @@
 ## Features
 **Kronos is a open source, cross-platform game development library with a robust ecosystem.** Listed below are current and planned (\*) features:
 - Assertions and logger
-- Math Library
+- Math Library (JOML+)
   - Math functions
   - Vector2
   - Vector3
+  - Vector4
   - Matrix2
   - Matrix3
-  - Xorshift
+  - Matrix4
+  - Quaternion
+  - MT19937
+  - Xorshift128
 - Standard Library (STD)
   - String Utils
   - Array Utils
@@ -24,14 +28,13 @@
 - Serialization
 - Entity Component System (ECS)
 - Scene System
-- Physics Library:
-  - Bodies (Rigid, Soft\*)
-  - Particle Physics\*
-  - Seperating Axis Theorem (SAT)
-  - Gilbert–Johnson–Keerthi (GJK)
-  - Spatial Partitioning
-  - Raycasting\*
-  - Constraints\*
+- Collision Detection Library
+  - Dynamic AABB Tree Broadphase
+  - Separating Axis Theorem Narrowphase
+  - GJK Raycast & Distance Algorithm
+  - Dynamic Manifold Solving (\*)
+  - Warm Starting (\*)
+  - Iterative Impulse Resolution (\*)
 
 ## Preview
 ![](.githubassets/screenshot_1.gif)
