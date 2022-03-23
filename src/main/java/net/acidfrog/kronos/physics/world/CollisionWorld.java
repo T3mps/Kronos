@@ -23,7 +23,7 @@ public final class CollisionWorld<T extends Rigidbody> implements World<T> {
     protected List<T> bodies;
 
     public CollisionWorld() {
-        this(new DynamicAABBTree<T>(false, true), new SAT(), new GJK());
+        this(new DynamicAABBTree<T>(true, true), new SAT(), new GJK());
     }
 
     public CollisionWorld(BroadphaseDetector<T> broadphaseDetector, NarrowphaseDetector narrowphaseDetector, RaycastDetector raycastDetector) {

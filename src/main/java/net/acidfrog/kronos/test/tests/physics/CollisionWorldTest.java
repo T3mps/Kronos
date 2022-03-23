@@ -141,7 +141,7 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 		if (counter++ % 30 == 0) {
 			Vector2k position = new Vector2k(Mathk.random(-WIDTH * 2, WIDTH * 2), Mathk.random(-HEIGHT * 2, HEIGHT * 2));
             float rotation = Mathk.randomRadians();
-            Collider collider = Geometry.generatePolygon(Mathk.random(8, 32), Mathk.random(8, 32));
+            Collider collider = Geometry.generatePolygon(Mathk.random(32, 128), Mathk.random(32, 128));
             Material material = Material.values()[Mathk.random(Material.values().length - 2)];
             Rigidbody rb = new Rigidbody(new Transform(position, rotation), collider, material, Body.Type.DYNAMIC);
             world.add(rb);
