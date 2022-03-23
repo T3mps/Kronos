@@ -2,18 +2,20 @@ package net.acidfrog.kronos.scene;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.awt.Graphics2D;
 
+import net.acidfrog.kronos.core.lang.annotations.Debug;
 import net.acidfrog.kronos.core.lang.assertions.Asserts;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 
-public class SceneManager {
+public final class SceneManager {
 
     public static final SceneManager instance = new SceneManager();
 
     private Scene currentScene;
     private boolean sceneLoaded;
     private static Map<Integer, Scene> scenes = new HashMap<Integer, Scene>();
-
+    
     private static int sceneIndex = 0;
 
     private SceneManager() {
@@ -35,13 +37,14 @@ public class SceneManager {
         else sceneLoaded = false;
     }
 
-    public void render() {
+    @Debug
+    public void render(Graphics2D g2d) {
         Asserts.assertTrue(sceneLoaded, "No scene loaded!");
         
-        if (currentScene != null) currentScene.render();
+        if (currentScene != null) currentScene.render(g2d);
         else sceneLoaded = false;
     }
-
+    
     public void close() {
         if (currentScene != null) currentScene.close();
     }
@@ -64,7 +67,7 @@ public class SceneManager {
         return false;
     }
 
-    public boolean previousScene() {
+    public boolean prevScene() {
         int i = currentScene.getIndex() - 1;
         
         if (i >= 0) {
@@ -92,7 +95,6 @@ public class SceneManager {
     }
 
     public void addScene(Scene scene) {
-        scene.initialize();
         scenes.put(scene.setIndex(sceneIndex++), scene);
         loadScene(scene);
     }
@@ -117,5 +119,5 @@ public class SceneManager {
         Scene scene = getSceneByName(name);
         if (scene != null) removeScene(scene);
     }
-
+    
 }

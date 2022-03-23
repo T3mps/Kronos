@@ -1,83 +1,98 @@
 package net.acidfrog.kronos.scene;
 
-import org.lwjgl.opengl.GL20;
-import org.lwjgl.opengl.GL30;
+import java.util.ArrayList;
+import java.util.List;
+import java.awt.Graphics2D;
 
+import net.acidfrog.kronos.core.lang.Std;
+import net.acidfrog.kronos.core.lang.UUID;
+import net.acidfrog.kronos.core.lang.annotations.Debug;
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.renderer.Shader;
+import net.acidfrog.kronos.scene.ecs.Entity;
 
 public class Scene {
-    
-    // temporary
-    public int vertexID, fragmentID, shaderProgram;
 
-    public float[] vertexArray = {
-        // position               // color
-         0.5f, -0.5f, 0.0f,       1.0f, 0.0f, 0.0f, 1.0f, // Bottom right 0
-        -0.5f,  0.5f, 0.0f,       0.0f, 1.0f, 0.0f, 1.0f, // Top left     1
-         0.5f,  0.5f, 0.0f ,      1.0f, 0.0f, 1.0f, 1.0f, // Top right    2
-        -0.5f, -0.5f, 0.0f,       1.0f, 1.0f, 0.0f, 1.0f, // Bottom left  3
-    };
-
-    // IMPORTANT: Must be in counter-clockwise order
-    public int[] elementArray = {
-            /*
-                    x        x
-                    x        x
-             */
-            2, 1, 0, // Top right triangle
-            0, 1, 3 // bottom left triangle
-    };
-
-    public int vaoID, vboID, eboID;
-    
-    public Shader defaultShader;
-
-    // end temporary
-
-    private final String sceneName;
+    private int width, height;
     private int sceneIndex;
+    private final String name;
+    private final List<Entity> entities;
 
-    public Scene(String name) {
-        this.sceneName = name;
-    }
-
-    public void initialize() {
-        Logger.instance.logWarn("Scene[" + sceneIndex + "] '" + sceneName + "' is not implemented yet.");
+    public Scene(String name, int width, int height, boolean useGravity) {
+        this.name = name;
+        this.width = width;
+        this.height = height;
+        this.entities = new ArrayList<Entity>();
     }
 
     public void update(float dt) {
-        // camera.position.x -= dt * 50.0f;
-        // camera.position.y -= dt * 20.0f;
+        for (Entity e : entities) e.update(dt);
     }
 
     public void physicsUpdate(float pdt) {
+        for (Entity e : entities) e.physicsUpdate(pdt);
     }
 
-    public void render() {
-        // temporary
-        defaultShader.bind();
+    @Debug
+    public void render(Graphics2D g2d) {
+    }
 
-        GL30.glBindVertexArray(vaoID);
+    public Entity getEntity(int index) {
+        return entities.get(index);
+    }
+    
+    public Entity getEntityByID(UUID id) {
+        for (Entity entity : entities) if (entity.getID().equals(id)) return entity;
+        Logger.instance.logError("No entity found with id " + id);
+        return null;
+    }
 
-        GL20.glEnableVertexAttribArray(0);
-        GL20.glEnableVertexAttribArray(1);
-        
-        GL20.glDrawElements(GL30.GL_TRIANGLES, elementArray.length, GL30.GL_UNSIGNED_INT, 0);
+    public int getEntityIndex(Entity entity) {
+        return entities.indexOf(entity);
+    }
 
-        GL20.glDisableVertexAttribArray(0);
-        GL20.glDisableVertexAttribArray(1);
+    public int getEntityIndexByID(String id) {
+        for (int i = 0; i < entities.size(); i++) if (entities.get(i).getID().equals(id)) return i;
+        Logger.instance.logError("No entity found with id " + id);
+        return Std.Arrays.INVALID_INDEX;
+    }
 
-        GL30.glBindVertexArray(0);
-        
-        defaultShader.unbind();
+    public Scene addEntity(Entity entity) {
+        entities.add(entity);
+        entity.onEnable();
+        return this;
+    }
+
+    public void setEntity(int index, Entity entity) {
+        entities.set(index, entity);
+        entity.onEnable();
+    }
+
+    public void removeEntity(Entity entity) {
+        entity.onDisable();
+        entities.remove(entity);
+    }
+
+    public int getEntityCount() {
+        return entities.size();
+    }
+
+    public List<Entity> getEntities() {
+        return entities;
     }
 
     public void close() {
     }
 
     public String getName() {
-        return sceneName;
+        return name;
+    }
+    
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
     }
 
     public int getIndex() {

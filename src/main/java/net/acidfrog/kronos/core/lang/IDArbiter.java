@@ -1,34 +1,52 @@
 package net.acidfrog.kronos.core.lang;
 
-import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import net.acidfrog.kronos.core.lang.annotations.Internal;
+import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
+import net.acidfrog.kronos.core.lang.error.KronosGeometryError;
+
+/**
+ * This class is used to assign unsigned IDs. At runtime an array
+ * of unsigned integers from {@value 0} to {@value 16,777,216 (2^24)}
+ * will be cached. An atomic pointer will keep track of which index
+ * to assign next. The first ID assigned will always be {@value 0}.
+ * This class is threadsafe.
+ * 
+ * @author Ethan Temprovich
+ */
+@Internal
 public final class IDArbiter {
-
-    private final static char[] CHARSET = {
-        '0','1','2','3','4','5','6','7','8','9','a','b','c','d','e','f','g','h','i','j','k','l',
-        'm','n','o','p','q','r','s','t','u','v','w','x','y','z','A','B','C','D','E','F','G','H',
-        'I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z','-','.','_','~'
-    };
-
-    private IDArbiter() { }
-
-    public static String next() {
-        UUID u = UUID.randomUUID();
-        return toIDString(u.getMostSignificantBits()) + toIDString(u.getLeastSignificantBits());
-    }
-
-    private static String toIDString(long i) {
-        char[] result = new char[32];
-        int offset = 1 << 5;
-        int pointer = offset;
-        long b = (1 << 6) - 1; // 63 0b00111111
-        
-        do {
-            result[--pointer] = CHARSET[(int) (i & b)]; // 0 - 63 | CHARSET.length
-            i >>>= 6;
-        } while (i != 0);
-        
-        return new String(result, pointer, (offset - pointer));
-    }
     
+    /** 2^24 | 16777216 */
+    public static final int MAX_ID_COUNT = 1 << 24 ;
+     
+    /** The cached ids. */
+    private static final int[] cache = new int[MAX_ID_COUNT];
+    static { for (int i = 0; i < MAX_ID_COUNT; i++) cache[i] = i; }
+
+    /**
+     * The atomic pointer, which holds the current index. Starts at -1
+     * because the first ID is {@value 0}.
+     * 
+     * @see #next()
+     */
+    private static volatile AtomicInteger pointer = new AtomicInteger(-1);
+
+    /** Hidden constructor. */
+    private IDArbiter() {}
+
+    /**
+     * Moves the {@link #pointer} to the next availible id and returns it.
+     * 
+     * @return the next availible id.
+     */
+    public static int next() {
+        synchronized (IDArbiter.class) {
+            if (pointer.intValue() + 1 < MAX_ID_COUNT) {
+                return cache[pointer.incrementAndGet()];
+            } throw new KronosGeometryError(KronosErrorLibrary.INDEX_OUT_OF_BOUNDS);
+        }
+    }
+
 }

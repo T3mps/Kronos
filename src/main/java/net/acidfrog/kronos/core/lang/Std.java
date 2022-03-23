@@ -5,8 +5,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.mathk.Mathk;
 
+/**
+ * The 'Standard Library' for Kronos. Contains inner$classes
+ * that operate on JDK classes (such as String), and tuples.
+ * 
+ * @author Ethan Temprovich
+ */
 public final class Std {
 
 	public static class Pair<T, U> implements Comparable<Pair<T, U>> {
@@ -235,7 +241,7 @@ public final class Std {
 
 	}
 
-	public static final class Booleans {
+	public static class Booleans {
 		
 		public static final boolean ON = true;
 		public static final boolean OFF = false;
@@ -276,6 +282,17 @@ public final class Std {
 
 		public static boolean toBoolean(double value) { return value != 0; }
 		
+		public static boolean toBoolean(String value) {
+			if (value == null) return false;
+			value = value.toLowerCase().trim();
+
+			return value.equalsIgnoreCase("true") ||
+				   value.equalsIgnoreCase("yes")  ||
+				   value.equalsIgnoreCase("on")   ||
+				   value.equalsIgnoreCase("1")    ||
+				   value.equalsIgnoreCase("y");
+		}
+
 		public static byte toByte(boolean value) { return (byte) (value ? 1 : 0); }
 		
 		public static short toShort(boolean value) { return (short) (value ? 1 : 0); }
@@ -294,7 +311,7 @@ public final class Std {
 
 	}
 
-	public static final class Strings {
+	public static class Strings {
 
 		public static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyz".toCharArray();
 
@@ -373,6 +390,12 @@ public final class Std {
 			if (isEmpty(str) || isEmpty(suffix)) return false;
 			if (str.substring(str.length() - suffix.length()).equals(suffix)) return true;
 			return false;
+		}
+
+		public static String joinWords(char delimiter, char[]... arr) {
+			StringBuilder sb = new StringBuilder(new String(arr[0]) + delimiter);
+			for (int i = 1; i < arr.length; i++) sb.append(new String(arr[i]) + (i < arr.length - 1 ? delimiter : ""));
+			return sb.toString();
 		}
 
 		public static String join(List<String> list, String delimiter) {
@@ -624,6 +647,11 @@ public final class Std {
 			return new String(chars, 0, pos);
 		}
 
+		public static String remove(String str, char... remove) {
+			for (char c : remove) str = remove(str, c);
+			return str;
+		}
+
 		public static String prepend(String str, String prefix) {
 			if (str == null) return null;
 			if (prefix == null) return str;
@@ -784,9 +812,14 @@ public final class Std {
 				return result.substring(0, 1).toUpperCase() + result.substring(1);
 			}
 		}
+
+        public static int compare(String s1, String s2) {
+			int d = temprovichDistance(s1, s2);
+			return Mathk.signum(d);
+        }
 	}
 
-	public static final class Arrays {
+	public static class Arrays {
 
 		public static final boolean[] EMPTY_BOOLEAN_ARRAY = { };
 
@@ -807,6 +840,62 @@ public final class Std {
 		public static final String[] EMPTY_STRING_ARRAY = { };
 
 		public static final int INVALID_INDEX = -1;
+
+		public static void printArray(final byte[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
+
+		public static void printArray(final short[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
+
+		public static void printArray(final char[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
+
+		public static void printArray(final int[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
+
+		public static void printArray(final long[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
+
+		public static void printArray(final float[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
+
+		public static void printArray(final double[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i] + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
+
+		public static <T> void printArray(final T[] array) {
+			for (int i = 0; i < array.length; i++) {
+				System.out.print(array[i].toString() + ((i == array.length - 1) ? "" : ", "));
+			}
+			System.out.println();
+		}
 
 		public static byte[] sort(final byte[] array) {
 			return quicksort(array, 0, array.length - 1);
@@ -833,6 +922,10 @@ public final class Std {
 		}
 
 		public static double[] sort(final double[] array) {
+			return quicksort(array, 0, array.length - 1);
+		}
+
+		public static <T extends Comparable<T>> T[] sort(final T[] array) {
 			return quicksort(array, 0, array.length - 1);
 		}
 
@@ -1017,6 +1110,32 @@ public final class Std {
 
 			return array;
 		}
+
+		private static <T extends Comparable<T>> T[] quicksort(T[] array, int from, int to) {
+			if (from >= to) return array;
+
+			int lp = from;
+			int rp = to;
+			T pivot = array[(from + to) / 2];
+
+			while (lp <= rp) {
+				while (array[lp].compareTo(pivot) < 0) lp++;
+				while (array[rp].compareTo(pivot) > 0) rp--;
+
+				if (lp <= rp) {
+					T temp = array[lp];
+					array[lp] = array[rp];
+					array[rp] = temp;
+					lp++;
+					rp--;
+				}
+			}
+
+			if (from < rp) quicksort(array, from, rp);
+			if (to   > lp) quicksort(array, lp, to);
+
+			return array;
+		} 
 
 		public static boolean[] add(final boolean[] array, final boolean element) {
 			final boolean[] newArray = (boolean[]) copyArrayGrow1(array, Boolean.TYPE);

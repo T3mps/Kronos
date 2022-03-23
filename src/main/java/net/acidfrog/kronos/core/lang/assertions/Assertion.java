@@ -2,7 +2,12 @@ package net.acidfrog.kronos.core.lang.assertions;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
 
-public class Assertion extends Error {
+/**
+ * Error that is thrown when an assertion fails.
+ * 
+ * @author Ethan Temprovich
+ */
+final class Assertion extends Error {
 
     public Assertion() {
         Logger.instance.logFatal("Assertion failed.");
