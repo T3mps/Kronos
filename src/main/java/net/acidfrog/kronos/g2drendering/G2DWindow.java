@@ -16,7 +16,6 @@ import java.awt.FontMetrics;
 import net.acidfrog.kronos.mathk.Vector2k;
 import net.acidfrog.kronos.mathk.Vector3f;
 import net.acidfrog.kronos.physics.geometry.AABB;
-import net.acidfrog.kronos.scene.ecs.Entity;
 import net.acidfrog.kronos.test.util.InputHandler;
 
 public class G2DWindow {
@@ -291,12 +290,12 @@ public class G2DWindow {
         if (index < strings.size() && index >= 0) strings.set(index, string);
     }
 
-    public void setContentStrings(List<Entity> entities) {
-        List<String> strings = new ArrayList<String>();
-        for (Entity e : entities) strings.add(e.getID().toString());
-        if (strings.size() * (fontSize * 0.8f) > realSize.y - titleMargin) realSize.y = strings.size() * (fontSize * 0.8f) + titleMargin;
-        this.strings = strings;
-    }
+    // public void setContentStrings(List<Entity> entities) {
+    //     List<String> strings = new ArrayList<String>();
+    //     for (Entity e : entities) strings.add(e.getID().toString());
+    //     if (strings.size() * (fontSize * 0.8f) > realSize.y - titleMargin) realSize.y = strings.size() * (fontSize * 0.8f) + titleMargin;
+    //     this.strings = strings;
+    // }
 
     public G2DWindow addContentString(String string) {
         this.strings.add(string);

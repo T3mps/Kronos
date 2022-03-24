@@ -16,8 +16,21 @@ public final class KronosErrorLibrary {
     public static final KronosErrorMessage INVALID_COMPARISON_TARGET = new KronosErrorMessage("Invalid comparison target");
     public static final KronosErrorMessage INDEX_OUT_OF_BOUNDS = new KronosErrorMessage("The specified index is out of bounds");
     
-    // ecs
+    // IO
+    public static final KronosErrorMessage FILE_NOT_FOUND = new KronosErrorMessage("File not found");
+    public static final KronosErrorMessage FILE_IS_DIRECTORY = new KronosErrorMessage("File is a directory; can not stream a directory");
+    public static final KronosErrorMessage FILE_READ_ERROR = new KronosErrorMessage("File read error");
+
+    // ECS
     public static final KronosErrorMessage INVALID_COMPONENT = new KronosErrorMessage("Invalid component");
+    public static final KronosErrorMessage COMPONENT_NOT_FOUND = new KronosErrorMessage("Component not found");
+    public static final KronosErrorMessage ADD_COMPONENT_WHILE_ENABLED = new KronosErrorMessage("Cannot add component while entity is enabled");
+    public static final KronosErrorMessage COMPONENT_NOT_ATTACHED = new KronosErrorMessage("Component is not attached to an entity");
+    public static final KronosErrorMessage COMPONENT_ALREADY_ATTACHED = new KronosErrorMessage("Component already attached to an entity");
+    public static final KronosErrorMessage COMPONENT_ALREADY_ENABLED = new KronosErrorMessage("Component already enabled");
+    public static final KronosErrorMessage COMPONENT_ALREADY_DISABLED = new KronosErrorMessage("Component already disabled");
+    public static final KronosErrorMessage ENTITY_ALREADY_ENABLED = new KronosErrorMessage("Entity already enabled");
+    public static final KronosErrorMessage ENTITY_ALREADY_DISABLED = new KronosErrorMessage("Entity already disabled");
 
     // COLLECTIONS ERRORS
     public static final KronosErrorMessage COLLECTION_IS_EMPTY = new KronosErrorMessage("Collection is empty");

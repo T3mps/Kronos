@@ -2,8 +2,6 @@ package net.acidfrog.kronos.physics.geometry;
 
 import net.acidfrog.kronos.mathk.Mathk;
 import net.acidfrog.kronos.mathk.Vector2k;
-import net.acidfrog.kronos.scene.ecs.component.Component;
-import net.acidfrog.kronos.scene.ecs.component.TransformComponent;
 
 /**
  * Represents a 2D transform object. This is used to represent the position and
@@ -20,7 +18,7 @@ import net.acidfrog.kronos.scene.ecs.component.TransformComponent;
  * @see TransformComponent
  * @see Rotation
  */
-public class Transform extends Component implements Cloneable {
+public class Transform implements Cloneable {
 
     /** The identity instance. */
     public static final Transform IDENTITY = new Transform().identity();
