@@ -2,7 +2,7 @@ package net.acidfrog.kronos.core.lang.datastructure;
 
 import net.acidfrog.kronos.core.lang.Std;
 
-public class Bimap<K, A, B> {
+public class Bimap<K, A, B> implements DataStructure {
     
     private K key;
     private Std.Pair<A, B> value;

@@ -1,6 +1,5 @@
 package net.acidfrog.kronos.core.lang.datastructure.tree;
 
-import net.acidfrog.kronos.core.lang.datastructure.tree.Tree.Node;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 
@@ -44,7 +43,7 @@ public final class BinarySearchTreeNode<E extends Comparable<E>> extends Tree.No
     }
 
     @Override
-	public int compareTo(Node<E> other) {
+	public int compareTo(Tree.Node<E> other) {
         if (!(other instanceof BinarySearchTreeNode<E>)) throw new KronosError(KronosErrorLibrary.INVALID_NODE_TYPE);
 		return this.value.compareTo(other.getValue());
 	}

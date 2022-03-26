@@ -398,6 +398,12 @@ public final class Std {
 			return sb.toString();
 		}
 
+		public static <T> String join(T[] arr, String delimiter) {
+			StringBuilder sb = new StringBuilder();
+			for (int i = 0; i < arr.length; i++) sb.append(arr[i] + (i < arr.length - 1 ? delimiter : ""));
+			return sb.toString();
+		}
+
 		public static String join(List<String> list, String delimiter) {
 			if (list == null) return null;
 			if (list.size() == 0) return EMPTY;

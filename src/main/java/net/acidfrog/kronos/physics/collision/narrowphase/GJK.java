@@ -1,5 +1,6 @@
 package net.acidfrog.kronos.physics.collision.narrowphase;
 
+import net.acidfrog.kronos.core.lang.annotations.Out;
 import net.acidfrog.kronos.mathk.Mathk;
 import net.acidfrog.kronos.mathk.Vector2k;
 import net.acidfrog.kronos.physics.Physics;
@@ -27,7 +28,7 @@ public final class GJK implements DistanceDetector, RaycastDetector {
      * @see DistanceDetector#distance(Collider, Transform, Collider, Transform, Separation)
      */
     @Override
-    public boolean distance(Collider shapeA, Transform transformA, Collider shapeB, Transform transformB, /** out */ Separation separation) {
+    public boolean distance(Collider shapeA, Transform transformA, Collider shapeB, Transform transformB, @Out Separation separation) {
         if (shapeA instanceof Circle && shapeB instanceof Circle) return CircleDetector.detect((Circle) shapeA, transformA, (Circle) shapeB, transformB);
 
         final class MinkowskiDiff {
@@ -170,7 +171,7 @@ public final class GJK implements DistanceDetector, RaycastDetector {
      * @see RaycastDetector#raycast(Ray, float, Collider, Transform, RaycastResult)
      */
     @Override
-    public boolean raycast(Ray ray, float maxDistance, Collider shape, Transform transform, /** out */ RaycastResult result) {
+    public boolean raycast(Ray ray, float maxDistance, Collider shape, Transform transform, @Out RaycastResult result) {
         if (shape instanceof Circle) return CircleDetector.raycast(ray, maxDistance, (Circle) shape, transform, result);
         
         // make sure start isn't inside the shape

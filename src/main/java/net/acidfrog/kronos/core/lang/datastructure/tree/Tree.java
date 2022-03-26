@@ -6,8 +6,7 @@ import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 
-@Internal
-public abstract class Tree<E extends Comparable<E>> implements Comparable<Tree<E>>, Iterable<E>, Cloneable {
+public @Internal abstract class Tree<E extends Comparable<E>> implements Comparable<Tree<E>>, Iterable<E>, Cloneable {
 
     protected int size;
 
@@ -55,42 +54,41 @@ public abstract class Tree<E extends Comparable<E>> implements Comparable<Tree<E
 
     @Override
     public abstract int compareTo(Tree<E> o);
+      
+    public static @Internal class Node<F extends Comparable<F>> implements Comparable<Node<F>> {
+
+        Node<F> parent;
     
-    @Internal
-    public static abstract class Node<F extends Comparable<F>> implements Comparable<Node<F>> {
-        
-        protected Node<F> parent;
-
-        protected final F value;
-
+        final F value;
+    
         public Node(F value) {
             this(value, null);
         }
-
+    
         public Node(F value, Node<F> parent) {
             if (value == null) throw new KronosError(KronosErrorLibrary.NULL_TREE_NODE_VALUE);
             this.value = value;
             this.parent = parent;
         }
-
+    
         public Node<F> getParent() {
             return parent;
         }
-
+    
         public F getValue() {
             return value;
         }
-
+    
         @Override
         public int compareTo(Node<F> other) {
             return this.value.compareTo(other.value);
         }
-
+    
         @Override
         public String toString() {
             return value.toString();
         }
-
+    
     }
     
 }

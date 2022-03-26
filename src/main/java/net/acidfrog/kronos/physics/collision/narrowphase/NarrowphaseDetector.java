@@ -1,5 +1,6 @@
 package net.acidfrog.kronos.physics.collision.narrowphase;
 
+import net.acidfrog.kronos.core.lang.annotations.Out;
 import net.acidfrog.kronos.physics.geometry.Collider;
 import net.acidfrog.kronos.physics.geometry.Transform;
 
@@ -34,7 +35,7 @@ public sealed interface NarrowphaseDetector permits SAT {
      * @param penetration the {@link Penetration penetration} object
      * @return {@code true} if the two colliders are colliding, {@code false} otherwise.
      */
-    public abstract boolean detect(Collider colliderA, Transform transformA, Collider colliderB, Transform transformB, /** out */ Penetration penetration);
+    public abstract boolean detect(Collider colliderA, Transform transformA, Collider colliderB, Transform transformB, @Out Penetration penetration);
 
     /**
      * Determines if the first {@link Collider collider} contains the second.

@@ -1,6 +1,7 @@
 package net.acidfrog.kronos.physics.collision.narrowphase;
 
 import net.acidfrog.kronos.core.lang.annotations.Internal;
+import net.acidfrog.kronos.core.lang.annotations.Out;
 import net.acidfrog.kronos.mathk.Intervalf;
 import net.acidfrog.kronos.mathk.Mathk;
 import net.acidfrog.kronos.mathk.Vector2k;
@@ -56,7 +57,7 @@ public final class CircleDetector /* implements NarrowphaseDetector, RaycastDete
      * @param penetration The {@link Penetration} object to populate
      * @return {@code true} if the circles are colliding, {@code false} otherwise
      */
-    public static boolean detect(Circle circleA, Transform transformA, Circle circleB, Transform transformB, /** out */ Penetration penetration) {
+    public static boolean detect(Circle circleA, Transform transformA, Circle circleB, Transform transformB, @Out Penetration penetration) {
         penetration.clear();
         Vector2k centerA = transformA.getTransformed(circleA.getCenter());
         Vector2k centerB = transformB.getTransformed(circleB.getCenter());
@@ -112,7 +113,7 @@ public final class CircleDetector /* implements NarrowphaseDetector, RaycastDete
      * @param separation the {@link Separation} object to store the separation data
      * @return {@code true} if the circles are separated, {@code false} otherwise 
      */
-    public static boolean distance(Circle circleA, Transform transformA, Circle circleB, Transform transformB, /** out */ Separation separation) {
+    public static boolean distance(Circle circleA, Transform transformA, Circle circleB, Transform transformB, @Out Separation separation) {
         Vector2k centerA = transformA.getTransformed(circleA.getCenter());
         Vector2k centerB = transformB.getTransformed(circleB.getCenter());
         float ra = circleA.getRadius();
@@ -143,7 +144,7 @@ public final class CircleDetector /* implements NarrowphaseDetector, RaycastDete
      * @param result The {@link RaycastResult} to fill with the result of the query
      * @return {@code true} if the query was successful, {@code false} otherwise
      */
-    public static boolean raycast(Ray ray, float maxDistance, Circle circle, Transform transform, /** out */ RaycastResult result) {
+    public static boolean raycast(Ray ray, float maxDistance, Circle circle, Transform transform, @Out RaycastResult result) {
         Vector2k start = ray.getStart();
         Vector2k direction = ray.getDirectionVector();
         Vector2k center = transform.getTransformed(circle.getCenter());

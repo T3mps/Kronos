@@ -15,7 +15,8 @@ public final class KronosErrorLibrary {
     public static final KronosErrorMessage OFFSET_OUT_OF_BOUNDS = new KronosErrorMessage("Offset out of bounds");
     public static final KronosErrorMessage INVALID_COMPARISON_TARGET = new KronosErrorMessage("Invalid comparison target");
     public static final KronosErrorMessage INDEX_OUT_OF_BOUNDS = new KronosErrorMessage("The specified index is out of bounds");
-    
+    public static final KronosErrorMessage INVALID_ZERO_POINT_CONSTRUCTOR = new KronosErrorMessage("Invalid zero point constructor, type must contain a constructor with no parameters");
+
     // IO
     public static final KronosErrorMessage FILE_NOT_FOUND = new KronosErrorMessage("File not found");
     public static final KronosErrorMessage FILE_IS_DIRECTORY = new KronosErrorMessage("File is a directory; can not stream a directory");

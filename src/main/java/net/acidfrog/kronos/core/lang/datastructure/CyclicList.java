@@ -4,12 +4,12 @@ import java.util.LinkedList;
 
 import net.acidfrog.kronos.mathk.Mathk;
 
-public class CyclicList<E> implements Cloneable {
-
-    private final LinkedList<E> data;
-
+public final class CyclicList<E> implements DataStructure, Cloneable {
+    
     private E head;
     private E tail;
+
+    private final LinkedList<E> data;
 
     public CyclicList() {
         this.data = new LinkedList<E>();
