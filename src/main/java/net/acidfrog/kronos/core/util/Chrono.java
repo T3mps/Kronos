@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core;
+package net.acidfrog.kronos.core.util;
 
 public final class Chrono {
 

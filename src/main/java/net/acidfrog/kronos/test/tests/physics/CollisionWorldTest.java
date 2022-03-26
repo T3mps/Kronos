@@ -13,6 +13,7 @@ import javax.swing.JFrame;
 
 import net.acidfrog.kronos.core.Config;
 import net.acidfrog.kronos.core.lang.logger.Logger;
+import net.acidfrog.kronos.core.util.Chrono;
 import net.acidfrog.kronos.g2drendering.Camera;
 import net.acidfrog.kronos.g2drendering.G2DRenderer;
 import net.acidfrog.kronos.mathk.Mathk;
@@ -85,17 +86,17 @@ public class CollisionWorldTest extends Canvas implements Runnable {
     public void run() {
 		this.requestFocus();
 		boolean render = false;
-		long lastTime = System.nanoTime();
+		long lastTime = Chrono.now();
 		double amountOfTicks = 60.0;
 		double ns = 1_000_000_000 / amountOfTicks;
 		float deltaTime = 0;
-		long timer = System.currentTimeMillis();
+		long timer = Chrono.nowMillis();
 		int ticks = 0;
 		int frames = 0;
 
 		while (running) {
 			render = true;
-			long now = System.nanoTime();
+			long now = Chrono.now();
 			deltaTime += (now - lastTime) / ns;
 			lastTime = now;
 
@@ -118,7 +119,7 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 				}
 			}
 
-			if (System.currentTimeMillis() - timer > 1000) {
+			if (Chrono.nowMillis() - timer > 1000) {
 				timer += 1000;
 				fps = frames;
 				ups = ticks;

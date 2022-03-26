@@ -104,7 +104,7 @@ public final class Logger implements LoggerI {
             writer.append("[" + sdf.format(new Date()) + "]" + level.getPrepend() + message + "\n");
             writer.close();
         } catch (IOException e) {
-            logError("Failed to write to log file: " + e.getMessage());
+            error.println("Failed to write to log file: " + e.getMessage());
             return false;
         }
 

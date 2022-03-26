@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.lang;
+package net.acidfrog.kronos.core.util;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

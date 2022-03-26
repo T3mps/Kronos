@@ -3,7 +3,6 @@ package net.acidfrog.kronos.physics.geometry;
 import net.acidfrog.kronos.mathk.Intervalf;
 import net.acidfrog.kronos.mathk.Mathk;
 import net.acidfrog.kronos.mathk.Vector2k;
-import net.acidfrog.kronos.core.lang.Validatable;
 
 /**
  * Represents a rectangle. A rectangle is defined by a width and height.

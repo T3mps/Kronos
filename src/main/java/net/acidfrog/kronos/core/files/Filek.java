@@ -1,7 +1,6 @@
 package net.acidfrog.kronos.core.files;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -79,21 +78,6 @@ public class Filek {
 			}
 		}
 		return output.toString();
-	}
-
-    public byte[] readBytes () {
-		InputStream input = read();
-		try {
-			// return StreamUtils.copyStreamToByteArray(input, estimateLength());
-		} catch (IOException e) {
-			throw new KronosError(KronosErrorLibrary.FILE_READ_ERROR);
-		} finally {
-			try {
-				input.close();
-			} catch (Throwable ignored) {
-                Logger.instance.logWarn("Failed to close input stream.");
-			}
-		}
 	}
 
     private int estimateLength () {

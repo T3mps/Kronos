@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.lang;
+package net.acidfrog.kronos.core.util;
 
 /**
  * Implemented by classes that could have invalid instances. The

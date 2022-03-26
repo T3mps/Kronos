@@ -30,8 +30,8 @@ public class Camera {
       if (InputHandler.instance.isKey(KeyEvent.VK_A)) position.x += delta;
       if (InputHandler.instance.isKey(KeyEvent.VK_D)) position.x -= delta;
 
-      if (InputHandler.instance.isKey(KeyEvent.VK_MINUS)       && zoomLevel > MIN_ZOOM) zoomOut();
-      else if (InputHandler.instance.isKey(KeyEvent.VK_EQUALS) && zoomLevel < MAX_ZOOM) zoomIn();
+      if (InputHandler.instance.isKey(KeyEvent.VK_Q)      && zoomLevel > MIN_ZOOM) zoomOut();
+      else if (InputHandler.instance.isKey(KeyEvent.VK_E) && zoomLevel < MAX_ZOOM) zoomIn();
 
       if (InputHandler.instance.isKey(KeyEvent.VK_SPACE)) { originalSize(); position.zero(); }
     }

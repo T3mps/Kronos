@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.lang;
+package net.acidfrog.kronos.core.util;
 
 /**
  * Immutable reference to a type.

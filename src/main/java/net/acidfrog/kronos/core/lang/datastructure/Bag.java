@@ -1,5 +1,7 @@
 package net.acidfrog.kronos.core.lang.datastructure;
 
+import java.util.Iterator;
+
 import net.acidfrog.kronos.mathk.Mathk;
 
 /**
@@ -9,7 +11,7 @@ import net.acidfrog.kronos.mathk.Mathk;
  * 
  * @author Ethan Temprovich
  */
-public class Bag<E> {
+public class Bag<E> implements Iterable<E> {
 
     private static final int DEFAULT_INITIAL_CAPACITY = 64;
 
@@ -105,5 +107,10 @@ public class Bag<E> {
 		data = (E[])new Object[newCapacity];
 		System.arraycopy(oldData, 0, data, 0, oldData.length);
 	}
+
+    @Override
+    public Iterator<E> iterator() {
+        return new BagIterator<E>();
+    }
     
 }

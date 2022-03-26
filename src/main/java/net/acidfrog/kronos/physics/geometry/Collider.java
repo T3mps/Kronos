@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.physics.geometry;
 
-import net.acidfrog.kronos.core.lang.Validatable;
+import net.acidfrog.kronos.core.util.Validatable;
 import net.acidfrog.kronos.mathk.Vector2k;
 
 /**

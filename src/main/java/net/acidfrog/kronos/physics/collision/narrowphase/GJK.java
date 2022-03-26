@@ -30,7 +30,7 @@ public final class GJK implements DistanceDetector, RaycastDetector {
     public boolean distance(Collider shapeA, Transform transformA, Collider shapeB, Transform transformB, /** out */ Separation separation) {
         if (shapeA instanceof Circle && shapeB instanceof Circle) return CircleDetector.detect((Circle) shapeA, transformA, (Circle) shapeB, transformB);
 
-        class MinkowskiDiff {
+        final class MinkowskiDiff {
         
             final Collider shapeA, shapeB;
             final Transform transformA, transformB;

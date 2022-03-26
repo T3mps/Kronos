@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.mathk;
 
-import net.acidfrog.kronos.core.lang.Validatable;
+import net.acidfrog.kronos.core.util.Validatable;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.core.lang.error.KronosGeometryError;
 
