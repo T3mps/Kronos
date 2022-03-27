@@ -1,28 +1,23 @@
 package net.acidfrog.kronos.scene.ecs.signal;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Signal<T> {
 
-    private List<Listener<T>> listeners = new ArrayList<Listener<T>>();
-
-    public Signal() {}
-
-    public void add(Listener<T> listener) {
-        listeners.add(listener);
+    private List<SignalListener<T>> listeners = new CopyOnWriteArrayList<SignalListener<T>>();
+    
+    public void register(SignalListener<T> l) {
+        if (listeners.contains(l)) return;
+        listeners.add(l);
     }
-
-    public void remove(Listener<T> listener) {
-        listeners.remove(listener);
+    
+    public void unregister(SignalListener<T> l) {
+        listeners.remove(l);
     }
-
-    public void removeAll() {
-        listeners.clear();
-    }
-
-    public void dispatch(T data) {
-        for (Listener<T> listener : listeners) listener.receive(this, data);
+    
+    public void dispatch(T t) {
+        for (SignalListener<T> l : listeners) l.receive(t);
     }
     
 }

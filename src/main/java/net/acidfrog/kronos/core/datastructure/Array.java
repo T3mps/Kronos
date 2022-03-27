@@ -108,6 +108,15 @@ public class Array<T> {
         size -= count;
     }
 
+    public <T> void remove(T t) {
+        for (int i = 0; i < size; i++) {
+            if (array[i] == t) {
+                remove(i);
+                break;
+            }
+        }
+    }
+
     public void resize(int newSize) {
         T[] newArray = (T[]) new Object[newSize];
         System.arraycopy(array, 0, newArray, 0, size);

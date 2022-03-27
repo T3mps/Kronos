@@ -9,14 +9,15 @@ import java.util.Map.Entry;
 
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
-import net.acidfrog.kronos.scene.ecs.process.EngineProcess;
+import net.acidfrog.kronos.core.util.UUID;
 
 public class Engine {
 
     private List<Entity> entities = new ArrayList<Entity>();
+    private Map<UUID, Entity> entitiesById = new HashMap<UUID, Entity>();
     private Map<Family, List<Entity>> views = new HashMap<Family, List<Entity>>();
     private List<Command> commands = new ArrayList<Command>();
-    private List<EngineProcess> processes = new ArrayList<EngineProcess>();
+    private List<EngineSystem> systems = new ArrayList<EngineSystem>();
     private List<EntityListener> listeners = new ArrayList<EntityListener>();
     private Map<Family, List<EntityListener>> filteredListeners = new HashMap<Family, List<EntityListener>>();
     private boolean updating = false;
@@ -26,7 +27,7 @@ public class Engine {
         updating = true;
         
         // update systems
-        for (EngineProcess p : processes) if (p.isEnabled()) {
+        for (EngineSystem p : systems) if (p.isEnabled()) {
             p.update(dt);
         }
         
@@ -47,14 +48,14 @@ public class Engine {
         entities.clear();
         views.clear();
 
-        for (int i = processes.size() - 1; i >= 0; i--) {
-            EngineProcess p = processes.get(i);
+        for (int i = systems.size() - 1; i >= 0; i--) {
+            EngineSystem p = systems.get(i);
             p.disable();
             p.onEngineUnbind(this);
             p.unbind();
         }
         
-        processes.clear();
+        systems.clear();
     }
 
     public List<Entity> getMembersOf(Family family) {
@@ -68,6 +69,14 @@ public class Engine {
         }
 
         return Collections.unmodifiableList(view);
+    }
+
+    public Entity getEntity(int index) {
+        return entities.get(index);
+    }
+
+    public Entity getEntity(UUID uuid) {
+        return entitiesById.get(uuid);
     }
     
     private void initView(Family family, List<Entity> view) {
@@ -114,7 +123,8 @@ public class Engine {
         if (e.isEnabled()) throw new KronosError(KronosErrorLibrary.ENTITY_ALREADY_ENABLED);
         
         entities.add(e);
-        e.defineEngine(this);
+        entitiesById.put(e.getUUID(), e);
+        e.setEngine(this);
         e.enable();
         
         addEntityToViews(e);
@@ -129,10 +139,8 @@ public class Engine {
     }
 
     private void addEntityToViews(Entity e) {
-        for (Family family : views.keySet()) {
-            if (family.isMember(e)) {
-                views.get(family).add(e);
-            }
+        for (Family family : views.keySet()) if (family.isMember(e)) {
+            views.get(family).add(e);
         }
     }
 
@@ -159,6 +167,7 @@ public class Engine {
         e.disable();
         e.removeEngine();
         entities.remove(e);
+        entitiesById.remove(e.getUUID());
        
         removeEntityFromViews(e);        
     }
@@ -176,56 +185,56 @@ public class Engine {
         while (!entities.isEmpty()) removeEntityInternal(entities.get(0));
     }
 
-    public void addProcess(EngineProcess p) throws IllegalStateException, IllegalArgumentException {
+    public void addSystem(EngineSystem p) throws IllegalStateException, IllegalArgumentException {
         if (updating) throw new IllegalStateException("cannot add system while updating");
         
-        if (processes.contains(p)) throw new IllegalArgumentException("system already added");
+        if (systems.contains(p)) throw new IllegalArgumentException("system already added");
         
         p.bind(this);
-        processes.add(p);
+        systems.add(p);
         p.onEngineBind(this);
     }
 
-    public void removeProcess(EngineProcess p) throws IllegalStateException, IllegalArgumentException {
+    public void removeSystem(EngineSystem p) throws IllegalStateException, IllegalArgumentException {
         if (updating) throw new IllegalStateException("cannot remove system while updating");
         
-        if (!processes.contains(p)) throw new IllegalArgumentException("system is unknown");
+        if (!systems.contains(p)) throw new IllegalArgumentException("system is unknown");
         
         p.onEngineUnbind(this);
-        processes.remove(p);
+        systems.remove(p);
         p.unbind();        
     }
 
-    public boolean hasProcess(Class<?> clazz) {
-        for (EngineProcess p : processes) if (p.getClass() == clazz) {
+    public boolean hasSystem(Class<?> clazz) {
+        for (EngineSystem p : systems) if (p.getClass() == clazz) {
             return true;
         }
 
         return false;
     }
 
-    public <T> T getProcess(Class<T> clazz) throws IllegalArgumentException {
-        for (EngineProcess p : processes) if (clazz.isInstance(p)) {
+    public <T> T getSystem(Class<T> clazz) throws IllegalArgumentException {
+        for (EngineSystem p : systems) if (clazz.isInstance(p)) {
             return clazz.cast(p);
         }
         
         throw new IllegalArgumentException("system not found " + clazz.getName());
     }
     
-    public EngineProcess getProcess(int index) {
-        return processes.get(index);
+    public EngineSystem getSystem(int index) {
+        return systems.get(index);
     }
 
-    public boolean hasProcess(EngineProcess p) {
-        return processes.contains(p);
+    public boolean hasSystem(EngineSystem p) {
+        return systems.contains(p);
     }
     
-    public int processCount() {
-        return processes.size();
+    public int systemCount() {
+        return systems.size();
     }
 
     public int entityCount() {
         return entities.size();
     }
-
+    
 }

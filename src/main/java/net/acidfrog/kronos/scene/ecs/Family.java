@@ -4,20 +4,32 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class Family {
-    
-    public Set<Class<? >> types = new HashSet<Class<?>>();
 
-    public Family(Class<?>... types) {
+    private Set<Class<?>> types = new HashSet<Class<?>>();
+
+    private Family(Class<?>... types) {
         for (Class<?> type : types) this.types.add(type);
     }
 
-    public Family() {}
+    public static Family define(Class<?>... types) {
+        return new Family(types);
+    }
+
+    public static Family define(Family family) {
+        return new Family(family.types.toArray(new Class<?>[0]));
+    }
+
+    public static Family define(Family original, Class<?>... types) {
+        Family family = new Family(original.types.toArray(new Class<?>[0]));
+        for (Class<?> type : types) family.types.add(type);
+        return family;
+    }
 
     public boolean isMember(Entity e) {
-        for (Class<?> type : types) if (e.hasComponent(type)) {
-            return true;
+        for (Class<?> type : types) if (!e.hasComponent(type)) {
+            return false;
         }
-        return false;
+        return true;
     }
 
     @Override

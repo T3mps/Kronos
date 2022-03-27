@@ -1,85 +1,88 @@
 package net.acidfrog.kronos.scene.ecs;
+
 import java.util.HashMap;
 import java.util.Map;
 
-import net.acidfrog.kronos.core.util.IDArbiter;
-import net.acidfrog.kronos.core.util.UUID;
 import net.acidfrog.kronos.core.datastructure.Bag;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
-import net.acidfrog.kronos.scene.ecs.component.Component;
+import net.acidfrog.kronos.core.util.UUID;
 import net.acidfrog.kronos.scene.ecs.signal.Signal;
 
 public final class Entity {
 
-    private final UUID uuid;
+    public int flags;
+    private Engine engine;
+    private UUID uuid;
+    public final Signal<Entity> onComponentAdd;
+    public final Signal<Entity> onComponentRemove;
+    
+    private Bag<Component> components;
+    private Map<Class<?>, Component> componentMap;
 
     private boolean enabled;
-
-    private final Bag<Component> components;
-    private final Map<Class<?>, Component> map;
-
-    private final Signal<Entity> onComponentAdd;
-    private Engine engine;
-
+    
     public Entity() {
-        this.uuid = UUID.generate();
-        this.components = new Bag<Component>();
-        this.map = new HashMap<Class<?>, Component>();
-        this.onComponentAdd = new Signal<Entity>();
+        this.flags = 0;
         this.engine = null;
+        this.uuid = UUID.generate();
+        this.onComponentAdd = new Signal<Entity>();
+        this.onComponentRemove = new Signal<Entity>();
+        this.components = new Bag<Component>();
+        this.componentMap = new HashMap<Class<?>, Component>();
+        this.enabled = false;
     }
 
-    public Entity addComponent(Component com) {
-        if (enabled || engine != null) throw new KronosError(KronosErrorLibrary.ADD_COMPONENT_WHILE_ENABLED);
-        if (com.getParent() != null) throw new KronosError(KronosErrorLibrary.COMPONENT_ALREADY_ATTACHED);
+    public void addComponent(Component c) {
+        if (enabled || engine != null) throw new KronosError(KronosErrorLibrary.ENTITY_ALREADY_ENABLED);
+        if (c.getParent() != null) throw new KronosError(KronosErrorLibrary.COMPONENT_ALREADY_ATTACHED);
+        
+        components.add(c);
+        c.setParent(this);
+        onComponentAdd();
 
-        components.add(com);
-        com.setParent(this);
-        com.enable();
-        onComponentAdd.dispatch(this);
-        return this;
+        if (enabled && !c.isEnabled()) c.enable();
     }
 
-    public <T extends Component> T getComponent(Class<T> type) {
-        Component com = map.get(type);
-        if (com != null) return type.cast(com);
+    public boolean hasComponent(Class<?> clazz) {
+        if (componentMap.containsKey(clazz)) return true;
 
-        for (Component c : components) if (type.isInstance(c)) {
-            map.put(type, c);
-            return type.cast(c);
+        for (Component c : components) if (clazz.isInstance(c)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public <T extends Component> T getComponent(Class<T> clazz) {
+        Component com = componentMap.get(clazz);
+        if (com != null) return clazz.cast(com);
+        
+        for (Component c : components) {
+            if (clazz.isInstance(c)) {
+                componentMap.put(clazz, c);
+                return clazz.cast(c);
+            }
         }
 
         throw new KronosError(KronosErrorLibrary.COMPONENT_NOT_FOUND);
     }
 
-    public boolean hasComponent(Class<?> type) {
-        if (map.containsKey(type)) return true;
-        
-        for (Component c : components) if (type.isInstance(c)) {
-            return true;
-        }
-        return false;
+    void onComponentAdd() {
+        onComponentAdd.dispatch(this);
     }
 
-    public boolean isEnabled() {
-        return enabled;
+    public Engine getEngine() {
+        return engine;
     }
 
-    public Entity enable() {
-        if (enabled) throw new KronosError(KronosErrorLibrary.ENTITY_ALREADY_ENABLED);
-        for (Component c : components) if (!c.isEnabled()) c.enable();
-        enabled = true;
+    public Entity setEngine(Engine engine) {
+        this.engine = engine;
         return this;
     }
 
-    public Entity disable() {
-        if (!enabled) throw new KronosError(KronosErrorLibrary.ENTITY_NOT_ENABLED);
-        for (int i = components.size() - 1; i >= 0; --i) {
-            Component c = components.get(i);
-            if (c.isEnabled()) c.disable();
-        }  
-        enabled = false;
+    public Entity removeEngine() {
+        this.engine = null;
         return this;
     }
 
@@ -87,16 +90,22 @@ public final class Entity {
         return uuid;
     }
 
-    public Engine getEngine() {
-        return engine;
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void defineEngine(Engine engine) {
-        this.engine = engine;
+    public Entity enable() {
+        if (enabled) return this;
+        for (Component c : components) if (!c.isEnabled()) c.enable();
+        enabled = true;
+        return this;
     }
 
-    public void removeEngine() {
-        this.engine = null;
+    public Entity disable() {
+        if (!enabled) return this;
+        for (Component c : components) if (c.isEnabled()) c.disable();
+        enabled = false;
+        return this;
     }
-    
+
 }

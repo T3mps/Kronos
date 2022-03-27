@@ -9,7 +9,7 @@ import net.acidfrog.kronos.mathk.Mathk;
  * 
  * @author Ethan Temprovich
  */
-public abstract @Internal sealed class Pool<T> permits ZeroPointPool<T> {
+public abstract @Internal class Pool<T> {
 
     private static final int DEFAULT_INITIAL_CAPACITY = 16;
 

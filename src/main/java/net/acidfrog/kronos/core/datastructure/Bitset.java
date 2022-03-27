@@ -124,6 +124,12 @@ public final class Bitset {
 		for (int i = 0; i < bits.length; i++) bits[i] = 0L;
 	}
 
+    public void clear (int index) {
+		final int word = index >>> 6;
+		if (word >= bits.length) return;
+		bits[word] &= ~(1L << (index & 0x3F));
+	}
+
     public int size() {
 		return bits.length << 6;
 	}

@@ -4,5 +4,5 @@ package net.acidfrog.kronos.scene.ecs;
 public interface Command {
 
     void execute();
-    
+
 }
