@@ -32,6 +32,8 @@ public final class KronosErrorLibrary {
     public static final KronosErrorMessage COMPONENT_ALREADY_DISABLED = new KronosErrorMessage("Component already disabled");
     public static final KronosErrorMessage ENTITY_ALREADY_ENABLED = new KronosErrorMessage("Entity already enabled");
     public static final KronosErrorMessage ENTITY_NOT_ENABLED = new KronosErrorMessage("Entity is not enabled");
+    public static final KronosErrorMessage ENTITY_NOT_ADDED_TO_THIS_ENGINE = new KronosErrorMessage("Entity is not added to this engine");
+    public static final KronosErrorMessage ENTITY_ALREADY_ADDED_TO_ENGINE = new KronosErrorMessage("Entity already added to engine");
 
     // COLLECTIONS ERRORS
     public static final KronosErrorMessage COLLECTION_IS_EMPTY = new KronosErrorMessage("Collection is empty");

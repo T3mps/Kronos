@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import net.acidfrog.kronos.core.lang.error.KronosError;
+import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.scene.ecs.process.EngineProcess;
 
 public class Engine {
@@ -20,7 +22,6 @@ public class Engine {
     private boolean updating = false;
     
     public void update(float dt) {
-        // assert updating == false;
         if (updating) return;
         updating = true;
         
@@ -46,28 +47,32 @@ public class Engine {
         entities.clear();
         views.clear();
 
-        for (int i = processes.size() - 1; i >= 0; --i) {
+        for (int i = processes.size() - 1; i >= 0; i--) {
             EngineProcess p = processes.get(i);
             p.disable();
             p.onEngineUnbind(this);
             p.unbind();
         }
+        
         processes.clear();
     }
 
-    public List<Entity> getEntities(Family family) {
+    public List<Entity> getMembersOf(Family family) {
         List<Entity> view = views.get(family);
+
         if (view == null) {
-            view = new ArrayList<>();
+            view = new ArrayList<Entity>();
             views.put(family, view);
+
             initView(family, view);
         }
+
         return Collections.unmodifiableList(view);
     }
     
     private void initView(Family family, List<Entity> view) {
-        // assert view.isEmpty();
         if (!view.isEmpty()) return;
+
         for (Entity e : entities) if (family.isMember(e)) {
             view.add(e);
         }
@@ -105,13 +110,8 @@ public class Engine {
     }
 
     private void addEntityInternal(Entity e) {
-        if (e.getEngine() != null) {
-            throw new IllegalArgumentException(
-                    "entity already added to an engine");
-        }
-        assert e.getEngine() == null;
-        assert !e.isEnabled();
-        assert !entities.contains(e);
+        if (e.getEngine() != null || entities.contains(e)) throw new KronosError(KronosErrorLibrary.ENTITY_ALREADY_ADDED_TO_ENGINE);
+        if (e.isEnabled()) throw new KronosError(KronosErrorLibrary.ENTITY_ALREADY_ENABLED);
         
         entities.add(e);
         e.defineEngine(this);
@@ -119,7 +119,6 @@ public class Engine {
         
         addEntityToViews(e);
 
-        // inform listeners
         for (EntityListener l : listeners) l.onEntityAdd(e);
         
         for (Entry<Family, List<EntityListener>> entry : filteredListeners.entrySet()) {
@@ -143,13 +142,9 @@ public class Engine {
     }
 
     private void removeEntityInternal(Entity e) {
-        if (e.getEngine() != this) {
-            // silently ignore this event (best practice)
-            return;
-        }
-        assert e.getEngine() == this;
-        assert e.isEnabled();
-        assert entities.contains(e);
+        if (e.getEngine() != this) return;
+        if (!e.isEnabled()) throw new KronosError(KronosErrorLibrary.ENTITY_NOT_ENABLED);
+        if (!entities.contains(e)) throw new KronosError(KronosErrorLibrary.ENTITY_NOT_ADDED_TO_THIS_ENGINE);
 
         // inform listeners as long as the entity is still active
         for (EntityListener l : listeners) l.onEntityRemove(e);
@@ -216,19 +211,18 @@ public class Engine {
         
         throw new IllegalArgumentException("system not found " + clazz.getName());
     }
-
-    public final List<Entity> getMembersOf(Family family) {
-        return null;
-    }
     
     public EngineProcess getProcess(int index) {
         return processes.get(index);
+    }
+
+    public boolean hasProcess(EngineProcess p) {
+        return processes.contains(p);
     }
     
     public int processCount() {
         return processes.size();
     }
-
 
     public int entityCount() {
         return entities.size();

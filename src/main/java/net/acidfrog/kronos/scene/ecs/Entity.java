@@ -13,7 +13,6 @@ import net.acidfrog.kronos.scene.ecs.signal.Signal;
 public final class Entity {
 
     private final UUID uuid;
-    private final long index;
 
     private boolean enabled;
 
@@ -25,7 +24,6 @@ public final class Entity {
 
     public Entity() {
         this.uuid = UUID.generate();
-        this.index = IDArbiter.next();
         this.components = new Bag<Component>();
         this.map = new HashMap<Class<?>, Component>();
         this.onComponentAdd = new Signal<Entity>();
@@ -87,10 +85,6 @@ public final class Entity {
 
     public UUID getUUID() {
         return uuid;
-    }
-
-    public long getIndex() {
-        return index;
     }
 
     public Engine getEngine() {
