@@ -1,8 +1,8 @@
-package net.acidfrog.kronos.core.lang.datastructure;
+package net.acidfrog.kronos.core.datastructure;
 
 import java.util.Arrays;
 
-public final class BinaryHeap<T extends BinaryHeap.Node> implements DataStructure {
+public final class BinaryHeap<T extends BinaryHeap.Node> {
 
     public int size;
 

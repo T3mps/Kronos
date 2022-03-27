@@ -1,7 +1,7 @@
 package net.acidfrog.kronos.core.util.pool;
 
+import net.acidfrog.kronos.core.datastructure.Array;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
-import net.acidfrog.kronos.core.lang.datastructure.Array;
 import net.acidfrog.kronos.mathk.Mathk;
 
 /**

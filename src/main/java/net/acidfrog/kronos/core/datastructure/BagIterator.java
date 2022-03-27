@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.lang.datastructure;
+package net.acidfrog.kronos.core.datastructure;
 
 import java.util.Iterator;
 

@@ -31,7 +31,7 @@ public abstract non-sealed class ComponentProcessor extends EngineProcess {
     }
 
     @Override
-    public void onEngineUnbind() {
+    public void onEngineUnbind(Engine engine) {
         entities = null;
     }
     

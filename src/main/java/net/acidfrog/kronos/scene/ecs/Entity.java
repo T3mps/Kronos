@@ -3,8 +3,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.acidfrog.kronos.core.util.IDArbiter;
-import net.acidfrog.kronos.core.lang.UUID;
-import net.acidfrog.kronos.core.lang.datastructure.Bag;
+import net.acidfrog.kronos.core.util.UUID;
+import net.acidfrog.kronos.core.datastructure.Bag;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.scene.ecs.component.Component;
@@ -99,6 +99,10 @@ public final class Entity {
 
     public void defineEngine(Engine engine) {
         this.engine = engine;
+    }
+
+    public void removeEngine() {
+        this.engine = null;
     }
     
 }

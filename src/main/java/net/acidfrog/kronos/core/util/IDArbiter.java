@@ -3,8 +3,8 @@ package net.acidfrog.kronos.core.util;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.acidfrog.kronos.core.lang.annotations.Internal;
+import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
-import net.acidfrog.kronos.core.lang.error.KronosGeometryError;
 
 /**
  * This class is used to assign unsigned IDs. At runtime an array
@@ -45,7 +45,7 @@ public final class IDArbiter {
         synchronized (IDArbiter.class) {
             if (pointer.intValue() + 1 < MAX_ID_COUNT) {
                 return cache[pointer.incrementAndGet()];
-            } throw new KronosGeometryError(KronosErrorLibrary.INDEX_OUT_OF_BOUNDS);
+            } throw new KronosError(KronosErrorLibrary.INDEX_OUT_OF_BOUNDS);
         }
     }
 

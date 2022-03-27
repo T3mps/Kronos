@@ -13,7 +13,7 @@ public abstract sealed class EngineProcess permits ComponentProcessor {
 
     public void onEngineBind(Engine engine) {}
 
-    public void onEngineUnbind() {}
+    public void onEngineUnbind(Engine engine) {}
 
     public void onStateChange() {}
 
@@ -21,8 +21,13 @@ public abstract sealed class EngineProcess permits ComponentProcessor {
         return engine;
     }
 
-    public EngineProcess bindEngine(Engine engine) {
+    public EngineProcess bind(Engine engine) {
         this.engine = engine;
+        return this;
+    }
+
+    public EngineProcess unbind() {
+        engine = null;
         return this;
     }
 

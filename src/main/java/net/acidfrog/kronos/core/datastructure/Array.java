@@ -1,8 +1,8 @@
-package net.acidfrog.kronos.core.lang.datastructure;
+package net.acidfrog.kronos.core.datastructure;
 
 import net.acidfrog.kronos.mathk.Mathk;
 
-public class Array<T> implements DataStructure {
+public class Array<T> {
 
     private T[] array;
     private int size;

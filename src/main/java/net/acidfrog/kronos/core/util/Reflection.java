@@ -15,6 +15,8 @@ import net.acidfrog.kronos.core.lang.logger.Logger;
 
 public final class Reflection {
 
+	private Reflection() {}
+
 	/** Returns the Class<?> object associated with the class or interface with the supplied string name. */
 	public static Class<?> forName(String name) throws ReflectionException {
 		try {

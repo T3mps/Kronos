@@ -1,10 +1,10 @@
-package net.acidfrog.kronos.core.lang.datastructure;
+package net.acidfrog.kronos.core.datastructure;
 
 import java.util.LinkedList;
 
 import net.acidfrog.kronos.mathk.Mathk;
 
-public final class CyclicList<E> implements DataStructure, Cloneable {
+public final class CyclicList<E> implements Cloneable {
     
     private E head;
     private E tail;

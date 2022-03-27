@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.lang.datastructure.tree;
+package net.acidfrog.kronos.core.datastructure.tree;
 
 import java.util.Iterator;
 
@@ -6,7 +6,7 @@ import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 
 /**
- * A binary search tree. This is a self-balancing binary search tree.
+ * A a self-balancing binary search tree.
  * 
  * @author Ethan Temprovich
  */
@@ -63,7 +63,6 @@ public class BinarySearchTree<E extends Comparable<E>> extends Tree<E> {
 			}
 		}
 
-        
 		// return success
 		this.size++;
 		return true;

@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.lang.datastructure;
+package net.acidfrog.kronos.core.datastructure;
 
 import java.util.Iterator;
 
@@ -11,7 +11,7 @@ import net.acidfrog.kronos.mathk.Mathk;
  * 
  * @author Ethan Temprovich
  */
-public class Bag<E> implements DataStructure, Iterable<E> {
+public class Bag<E> implements Iterable<E> {
 
     private static final int DEFAULT_INITIAL_CAPACITY = 64;
 

@@ -1,9 +1,9 @@
-package net.acidfrog.kronos.core.lang.datastructure;
+package net.acidfrog.kronos.core.datastructure;
 
 import java.util.Arrays;
 
 /** https://github.com/libgdx/libgdx/blob/master/gdx/src/com/badlogic/gdx/utils/Bits.java */
-public final class Bitset implements DataStructure {
+public final class Bitset {
     
     long[] bits = new long[64];
 
