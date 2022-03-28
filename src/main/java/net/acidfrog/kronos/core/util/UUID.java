@@ -18,7 +18,7 @@ import net.acidfrog.kronos.mathk.random.MT19937;
  * The version defines a value that describes how this {@code UUID} was generated.
  * There are four different basic types of UUIDs: time-based, DCE
  * security, name-based, and randomly generated UUIDs.  These types have a
- * version value of 1, 2, 3 and 4, respectively.
+ * version value of 1, 2, 3 or 4, respectively.
  * 
  * <p>
  * Instances of

@@ -1,13 +1,12 @@
-package net.acidfrog.kronos.core.lang.sort;
+package net.acidfrog.kronos.core.datastructure.sort;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public final class BucketSort implements Sorter {
+public final class BucketSort {
 
-    @Override
-    public void sort(int[] array) {
+    public static void sort(int[] array) {
         int min = min(array);
         int max = max(array);
         int bucketCount = max - min + 1;

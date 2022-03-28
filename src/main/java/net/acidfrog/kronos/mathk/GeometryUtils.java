@@ -23,11 +23,15 @@
  */
 package net.acidfrog.kronos.mathk;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Useful geometry methods.
  * 
  * @author Kai Burjack
  * @author Richard Greenlees
+ * @author Ethan Temprovich
  */
 public class GeometryUtils {
 
@@ -243,5 +247,58 @@ public class GeometryUtils {
         destBitangent.z = f * (-DeltaU2 * (v2.z() - v1.z()) + DeltaU1 * (v3.z() - v1.z()));
         destBitangent.normalize();
     }
+
+    public static List<Vector2k> ramerDouglasPeucker(List<Vector2k> points, float epsilon) {
+        final List<Vector2k> result = new ArrayList<Vector2k>();
+        rdpInternal(result, 0, result.size(), epsilon, result);
+        return result;
+    }
+
+    private static void rdpInternal(List<Vector2k> result, int start, int end, float epsilon, List<Vector2k> points) {
+        if (end - start < 3) {
+            result.add(points.get(start));
+            result.add(points.get(end - 1));
+            return;
+        }
+
+        final Vector2k p1 = points.get(start);
+        final Vector2k p2 = points.get(end - 1);
+        final Vector2k p3 = points.get(end);
+
+        final float d1 = p1.distance(p2);
+        final float d2 = p2.distance(p3);
+        final float d3 = p1.distance(p3);
+
+        final float max = Math.max(d1, Math.max(d2, d3));
+
+        if (max > epsilon) {
+            final int split = findSplit(points, start, end);
+            rdpInternal(result, start, split, epsilon, points);
+            rdpInternal(result, split, end, epsilon, points);
+        } else {
+            result.add(p1);
+            result.add(p3);
+        }
+    }
+
+    private static int findSplit(List<Vector2k> points, int start, int end) {
+        final Vector2k p1 = points.get(start);
+        final Vector2k p2 = points.get(end - 1);
+        final Vector2k p3 = points.get(end);
+
+        final float d1 = p1.distance(p2);
+        final float d2 = p2.distance(p3);
+        final float d3 = p1.distance(p3);
+
+        if (d1 > d2 && d1 > d3) {
+            return start + 1;
+        } else if (d2 > d3) {
+            return end;
+        } else {
+            return end - 1;
+        }
+    }
+
+    
 
 }

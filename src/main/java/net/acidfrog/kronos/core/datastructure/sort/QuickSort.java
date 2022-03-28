@@ -1,14 +1,14 @@
-package net.acidfrog.kronos.core.lang.sort;
+package net.acidfrog.kronos.core.datastructure.sort;
 
-public final class QuickSort implements Sorter {
+public final class QuickSort {
     
-    public QuickSort() {}
+    private QuickSort() {}
 
-    public void sort(int[] array) {
+    public static void sort(int[] array) {
         sort(array, 0, array.length - 1);
     }
 
-    private void sort(int[] array, int low, int high) {
+    private static void sort(int[] array, int low, int high) {
         if (low < high) {
             int pivot = partition(array, low, high);
             sort(array, low, pivot - 1);
@@ -16,7 +16,7 @@ public final class QuickSort implements Sorter {
         }
     }
 
-    private int partition(int[] array, int low, int high) {
+    private static int partition(int[] array, int low, int high) {
         int pivot = array[high];
         int i = low - 1;
         

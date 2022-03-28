@@ -36,7 +36,7 @@ public final class Std {
 
 		public U getPart2() { return p2; }
 		
-		public void setSecond(U p2) { this.p2 = p2; }
+		public void setPart2(U p2) { this.p2 = p2; }
 
 		@Override
 		public String toString() {

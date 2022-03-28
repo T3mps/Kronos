@@ -12,7 +12,7 @@ import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
  * 
  * @author Ethan Temprovich
  */
-public class BinarySearchTreeIterator <E extends Comparable<E>> implements Iterator<E> {
+public class BinarySearchTreeIterator<E extends Comparable<E>> implements Iterator<E> {
 
 	/** The node stack for iterative traversal */
 	final Deque<BinarySearchTreeNode<E>> stack;

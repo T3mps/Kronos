@@ -8,7 +8,6 @@ package net.acidfrog.kronos.core.util;
  * 
  * @author Ethan Temprovich
  */
-@FunctionalInterface
 public interface Validatable {
 
     /**

@@ -236,5 +236,12 @@ public class Engine {
     public int entityCount() {
         return entities.size();
     }
-    
+ 
+    @FunctionalInterface
+    interface Command {
+
+        void execute();
+
+    }
+
 }

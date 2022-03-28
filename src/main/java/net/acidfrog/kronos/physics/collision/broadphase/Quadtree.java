@@ -3,6 +3,7 @@ package net.acidfrog.kronos.physics.collision.broadphase;
 import java.util.Iterator;
 import java.util.List;
 
+import net.acidfrog.kronos.mathk.Vector2k;
 import net.acidfrog.kronos.physics.collision.CollisionPair;
 import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Ray;
@@ -73,6 +74,32 @@ public final class Quadtree<T extends BroadphaseMember> extends BroadphaseDetect
     @Override
     public Iterator<T> raycastIterator(Ray ray, float maxDistance) {
         return null;
+    }
+
+    class Point extends Vector2k {
+
+        private final T member;
+    
+        public Point(Vector2k vector, T member) {
+            super(vector);
+            this.member = member;
+        }
+    
+        public Point(float x, float y, T member) {
+            super(x, y);
+            this.member = member;
+        }
+    
+        public Point(Point point) {
+            this.x = point.x;
+            this.y = point.y;
+            this.member = point.member;
+        }
+    
+        public T getMember() {
+            return member;
+        }
+        
     }
     
 }

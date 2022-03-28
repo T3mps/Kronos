@@ -1,8 +1,10 @@
-package net.acidfrog.kronos.core.lang.sort;
+package net.acidfrog.kronos.core.datastructure.sort;
 
-public final class CountSort implements Sorter {
+public final class CountSort {
     
-    public CountSort() {}
+    static final int MAX_COUNT = 10;
+
+    private CountSort() {}
 
     private static void internalSort(int[] arr, int n, int exp) {
         int[] output = new int[n];
@@ -23,8 +25,7 @@ public final class CountSort implements Sorter {
         for (i = 0; i < n; i++) arr[i] = output[i];
     }
 
-    @Override
-    public void sort(int[] array) {     
+    public static void sort(int[] array) {     
         int n = array.length;
         int exp = 1;
         int i;

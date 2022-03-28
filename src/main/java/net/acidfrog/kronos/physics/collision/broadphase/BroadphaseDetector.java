@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import net.acidfrog.kronos.core.lang.Std.Quad;
 import net.acidfrog.kronos.mathk.Mathk;
 import net.acidfrog.kronos.mathk.Vector2k;
 import net.acidfrog.kronos.physics.collision.CollisionPair;

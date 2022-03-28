@@ -29,6 +29,8 @@ import net.acidfrog.kronos.physics.geometry.Shape;
  */
 public final class SAT implements NarrowphaseDetector {
 
+    public SAT() {}
+
     /**
      * @see NarrowphaseDetector#detect(Collider, Transform, Collider, Transform)
      */

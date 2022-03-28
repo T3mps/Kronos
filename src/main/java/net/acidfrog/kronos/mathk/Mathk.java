@@ -23,6 +23,10 @@
  */
 package net.acidfrog.kronos.mathk;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import net.acidfrog.kronos.mathk.random.Xorshift128;
@@ -487,6 +491,164 @@ public class Mathk {
         return r <= -1.0 ? -PIHalf : r >= 1.0 ? PIHalf : asin(r);
     }
 
+    public static final Map<Long, Long> getPrimeFactorization(long number) {
+        Map<Long, Long> map = new HashMap<Long, Long>();
+        long n = number;
+        int c = 0;
+        // for each potential factor i
+        for (long i = 2; i * i <= n; i++) {
+            c = 0;
+            // if i is a factor of N, repeatedly divide it out
+            while (n % i == 0) {
+                n = n / i;
+                c++;
+            }
+            Long p = map.get(i);
+            if (p == null)
+                p = 0L;
+            p += c;
+            map.put(i, p);
+        }
+        if (n > 1) {
+            Long p = map.get(n);
+            if (p == null)
+                p = 0L;
+            p += 1;
+            map.put(n, p);
+        }
+        return map;
+    }
+
+    public static final boolean isPrime(long number) {
+        if (number == 1)
+            return false;
+        if (number < 4)
+            return true; // 2 and 3 are prime
+        if (number % 2 == 0)
+            return false; // short circuit
+        if (number < 9)
+            return true; // we have already excluded 4, 6 and 8.
+        // (testing for 5 & 7)
+        if (number % 3 == 0)
+            return false; // short circuit
+        long r = (long) (Math.sqrt(number)); // n rounded to the greatest integer
+        // r so that r*r<=n
+        int f = 5;
+        while (f <= r) {
+            if (number % f == 0)
+                return false;
+            if (number % (f + 2) == 0)
+                return false;
+            f += 6;
+        }
+        return true;
+    }
+
+    private static boolean[] sieve = null;
+
+    public static final boolean sieveOfEratosthenes(int number) {
+        if (number == 1) {
+            return false;
+        }
+        if (sieve == null || number >= sieve.length) {
+            int start = 2;
+
+            if (sieve == null) sieve = new boolean[number + 1];
+            else if (number >= sieve.length) sieve = Arrays.copyOf(sieve, number + 1);
+
+            for (int i = start; i <= Math.sqrt(number); i++) {
+                if (!sieve[i]) {
+                    for (int j = i * 2; j <= number; j += i) sieve[j] = true;
+                }
+            }
+        }
+        return !sieve[number];
+    }
+
+    public static final boolean millerRabinTest(int number) {
+        final List<Integer> witnesses = Arrays.asList(2, 325, 9375, 28178, 450775, 9780504, 1795265022);
+
+        if (number == 0 || number == 1) return false;
+        if (number == 2 || number == 3) return true;
+
+        int maximumPowerOf2 = 0;
+        while (((number - 1) % fastRecursiveExponentiation(2, maximumPowerOf2)) == 0) maximumPowerOf2++;
+        maximumPowerOf2--;
+
+        int d = (number - 1) / fastRecursiveExponentiation(2, maximumPowerOf2);
+        boolean isPrime = true;
+
+        for (int a : witnesses) {
+            if (a > number) break;
+
+            if (fastRecursiveExponentiationModulo(a, d, number) != 1) {
+                boolean isLocalPrime = false;
+
+                for (int r = 0; r < maximumPowerOf2; r++) {
+                    if (fastRecursiveExponentiationModulo(a, d * fastRecursiveExponentiation(2, r), number) == (number - 1)) {
+                        isLocalPrime = true;
+                        break;
+                    }
+                }
+
+                if (!isLocalPrime) {
+                    isPrime = false;
+                    break;
+                }
+            }
+        }
+
+        return isPrime;
+    }
+
+    public static long getNumberOfCoprimes(long n) {
+        if(n < 1) return 0;
+        long res = 1;
+        
+        for(int i = 2; i  *i <= n; i++) {
+            int times = 0;
+
+            while(n % i == 0) {
+                res *= (times > 0 ? i : i-1);
+                n /= i;
+                times++;
+            }
+        }
+
+        if(n > 1) res *= n-1;
+        return res;
+    }
+
+    public static int recursiveExponentiation(int base, int exponent) {
+        if (exponent == 0) return 1;
+        if (exponent == 1) return base;
+
+        return recursiveExponentiation(base, exponent - 1) * base;
+    }
+
+    public static int fastRecursiveExponentiation(int base, int exponent) {
+        if (exponent == 0)
+            return 1;
+        if (exponent == 1)
+            return base;
+
+        final int resultOnHalfExponent = fastRecursiveExponentiation(base, exponent / 2);
+        if ((exponent % 2) == 0)
+            return resultOnHalfExponent * resultOnHalfExponent;
+        else
+            return resultOnHalfExponent * resultOnHalfExponent * base;
+
+    }
+
+    public static int fastRecursiveExponentiationModulo(int base, int exponent, int mod) {
+        if (exponent == 0) return 1;
+        if (exponent == 1) return base;
+
+        final int resultOnHalfExponent = fastRecursiveExponentiationModulo(base, exponent / 2, mod);
+        if ((exponent % 2) == 0) return (resultOnHalfExponent * resultOnHalfExponent) % mod;
+        else return (((resultOnHalfExponent * resultOnHalfExponent) % mod) * base) % mod;
+    }
+
     public static Vector2fc rotate(Vector2kc vec, float radians, Vector2kc origin) {
 		float x = vec.x() - origin.x();
 		float y = vec.y() - origin.y();
@@ -624,6 +786,10 @@ public class Mathk {
 
     public static boolean isFinite(float f) {
         return abs(f) <= Float.MAX_VALUE;
+    }
+
+    public static boolean isNormalized(float f) {
+        return abs(f) <= 1.0f;
     }
 
     public static float fma(float a, float b, float c) {
@@ -820,23 +986,21 @@ public class Mathk {
 			odd[i]  = values[2 * i + 1];
 		}
 
-		float[] even_result = fft(even);
-		float[] odd_result  = fft( odd);
-
-		float[] result = new float[n];
+		fft(even);
+		fft( odd);
 
 		for (int i = 0; i < n * 0.5f; i++) {
-			float even_val = even_result[i];
-			float odd_val  = odd_result [i];
+			float even_val = even[i];
+			float odd_val  = odd [i];
 
 			float cos = (float) Mathk.cos(-2 * Mathk.PI * i / n);
 			// float sin = (float) Mathf.sin(-2 * Mathf.PI * i / n);
 
-			result[i] = even_val + (cos * odd_val);
-			result[i + (int) (n * 0.5f)] = even_val - (cos * odd_val);
+			values[i] = even_val + (cos * odd_val);
+			values[i + (int) (n * 0.5f)] = even_val - (cos * odd_val);
 		}
 
-		return result;
+		return values;
 	}
 
     // https://github.com/dyn4j/dyn4j/blob/master/src/main/java/org/dyn4j/geometry/Vector2.java (ln. 188)
