@@ -58,7 +58,7 @@ public class Engine {
         systems.clear();
     }
 
-    public List<Entity> getMembersOf(Family family) {
+    public List<Entity> getView(Family family) {
         List<Entity> view = views.get(family);
 
         if (view == null) {

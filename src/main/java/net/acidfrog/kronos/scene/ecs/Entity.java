@@ -33,7 +33,7 @@ public final class Entity {
         this.enabled = false;
     }
 
-    public void addComponent(Component c) {
+    public Entity addComponent(Component c) {
         if (enabled || engine != null) throw new KronosError(KronosErrorLibrary.ENTITY_ALREADY_ENABLED);
         if (c.getParent() != null) throw new KronosError(KronosErrorLibrary.COMPONENT_ALREADY_ATTACHED);
         
@@ -42,6 +42,8 @@ public final class Entity {
         onComponentAdd();
 
         if (enabled && !c.isEnabled()) c.enable();
+
+        return this;
     }
 
     public boolean hasComponent(Class<?> clazz) {

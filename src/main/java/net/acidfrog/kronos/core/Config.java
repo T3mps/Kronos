@@ -3,6 +3,8 @@ package net.acidfrog.kronos.core;
 import java.io.PrintStream;
 import java.util.Locale;
 
+import org.lwjgl.opengl.GL;
+
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.mathk.Mathk;
@@ -22,6 +24,7 @@ public final class Config {
     // private static final String CONFIG_PATH = "data/.config";
     public static final String JAVA_VERSION = System.getProperty("java.version");
     public static final String JAVA_VENDOR = System.getProperty("java.vendor");
+    public static final String OPENGL_VERSION = "OpenGL 4.6";
 
     // core vars
 
@@ -30,6 +33,8 @@ public final class Config {
 
     /** Release state for Kronos. */
     public static final boolean RELEASE = false;
+
+    public static final String KRONOS_BUILD = (RELEASE ? "Release" : "Dev") + " Build";
 
     /** How many times a second Kronos updates. */
     public static final float REGULAR_UPDATE_RATE = 60.0f;
@@ -153,7 +158,8 @@ public final class Config {
                 else os = NOT_SUPPORTED;
             }
 
-            return os;
+            return os + " " + System.getProperty("os.arch");
         }
+
     }
 }

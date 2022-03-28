@@ -23,7 +23,7 @@ public abstract class IteratingSystem extends EngineSystem {
 
     @Override
     public void onEngineBind(Engine e) {
-        entities = e.getMembersOf(family);
+        entities = e.getView(family);
     }
 
     @Override
