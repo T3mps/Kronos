@@ -34,6 +34,9 @@ public final class KronosErrorLibrary {
     public static final KronosErrorMessage ENTITY_NOT_ENABLED = new KronosErrorMessage("Entity is not enabled");
     public static final KronosErrorMessage ENTITY_NOT_ADDED_TO_THIS_ENGINE = new KronosErrorMessage("Entity is not added to this engine");
     public static final KronosErrorMessage ENTITY_ALREADY_ADDED_TO_ENGINE = new KronosErrorMessage("Entity already added to engine");
+    public static final KronosErrorMessage ENTITY_NOT_BOUND_TO_ENGINE = new KronosErrorMessage("Entity is not bound to this engine");
+    public static final KronosErrorMessage COMPONENT_COUNT_MISMATCH = new KronosErrorMessage("Uneven compairison attempted, component count does not match");
+    public static final KronosErrorMessage UNKNOWN_ENTITY_SYSTEM = new KronosErrorMessage("Operation with unknown entity system attempted");
 
     // COLLECTIONS ERRORS
     public static final KronosErrorMessage COLLECTION_IS_EMPTY = new KronosErrorMessage("Collection is empty");

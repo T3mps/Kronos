@@ -326,6 +326,14 @@ public class Transform implements Cloneable {
         return position;
     }
 
+    public void setPosition(Vector2k position) {
+        this.position.set(position);
+    }
+
+    public void setPosition(float x, float y) {
+        this.position.set(x, y);
+    }
+
     /**
      * @return the {@link Rotation} rotation object of this transform.
      */

@@ -3,7 +3,21 @@ package net.acidfrog.kronos.mathk;
 public final class Knapsack {
 
     @SuppressWarnings("unchecked")
+    public static final <T extends Comparable<T>> T[] get(T[] comparables, float[] weights, int capacity) {
+        int n = comparables.length;
+        if (n != weights.length) throw new IllegalArgumentException("Arrays must be of the same length");
+
+        Item<T>[] items = new Item[n];
+
+        for (int i = 0; i < n; i++) items[i] = new Item<T>(comparables[i], weights[i]);
+
+        return get(items, capacity);
+    }
+
+    @SuppressWarnings("unchecked")
     public static final <T extends Comparable<T>> T[] get(Item<T>[] items, int capacity) {
+        if (capacity < 0) throw new IllegalArgumentException("Capacity must be positive");
+
         T[] result = (T[]) new Comparable[items.length];
         T[] best = (T[]) new Comparable[items.length];
         T[] prev = (T[]) new Comparable[items.length];
@@ -30,15 +44,20 @@ public final class Knapsack {
     }
 
     public static final int[] get(int[] values, int weights[], int capacity) {
+        if (values.length != weights.length) throw new IllegalArgumentException("Arrays must be of the same length");
+        if (capacity < 0) throw new IllegalArgumentException("Capacity must be positive");
+
         int[] result = new int[values.length];
         int[] best = new int[values.length];
         int[] prev = new int[values.length];
+        
         for (int i = 0; i < values.length; i++) {
             if (weights[i] <= capacity) {
                 best[i] = values[i];
                 prev[i] = i;
             }
         }
+
         for (int i = 1; i < values.length; i++) {
             int bestWeight = 0;
             int bestValue = 0;

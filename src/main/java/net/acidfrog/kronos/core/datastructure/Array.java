@@ -1,5 +1,8 @@
 package net.acidfrog.kronos.core.datastructure;
 
+import java.util.Comparator;
+
+import net.acidfrog.kronos.core.datastructure.sort.QuickSort;
 import net.acidfrog.kronos.mathk.Mathk;
 
 public class Array<T> {
@@ -108,7 +111,7 @@ public class Array<T> {
         size -= count;
     }
 
-    public <T> void remove(T t) {
+    public void remove(T t) {
         for (int i = 0; i < size; i++) {
             if (array[i] == t) {
                 remove(i);
@@ -117,6 +120,7 @@ public class Array<T> {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void resize(int newSize) {
         T[] newArray = (T[]) new Object[newSize];
         System.arraycopy(array, 0, newArray, 0, size);
@@ -172,19 +176,11 @@ public class Array<T> {
     }
 
     public void sort() {
-        sort(0, size);
+        // TODO: implement
     }
 
-    public void sort(int from, int to) {
-        for (int i = from; i < to; i++) {
-            for (int j = i + 1; j < to; j++) {
-                if (array[i].hashCode() > array[j].hashCode()) {
-                    T tmp = array[i];
-                    array[i] = array[j];
-                    array[j] = tmp;
-                }
-            }
-        }
+    public void sort(Comparator<T> comparator) {
+
     }
 
     public void reverse() {

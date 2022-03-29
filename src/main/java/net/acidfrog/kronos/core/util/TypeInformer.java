@@ -1,8 +1,7 @@
 package net.acidfrog.kronos.core.util;
 
-import java.lang.constant.Constable;
-
-public interface TypeInformer<T extends Constable> {
+@FunctionalInterface
+public interface TypeInformer<T> {
 
     public T value();
     

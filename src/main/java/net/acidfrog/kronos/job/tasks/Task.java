@@ -1,8 +1,9 @@
 package net.acidfrog.kronos.job.tasks;
 
-@FunctionalInterface
-public interface Task {
+import net.acidfrog.kronos.core.lang.annotations.Internal;
 
-    public void perform();
+public @Internal interface Task {
     
+    public void execute();
+
 }

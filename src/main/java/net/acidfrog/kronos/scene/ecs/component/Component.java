@@ -1,6 +1,8 @@
-package net.acidfrog.kronos.scene.ecs;
+package net.acidfrog.kronos.scene.ecs.component;
 
-public abstract class Component {
+import net.acidfrog.kronos.scene.ecs.Entity;
+
+public abstract class Component implements Comparable<Component> {
 
     private Entity parent;
     private boolean enabled;
@@ -11,11 +13,11 @@ public abstract class Component {
         return parent;
     }
     
-    final void setParent(Entity parent) {
+    public final void setParent(Entity parent) {
         this.parent = parent;
     }
 
-    protected final boolean isEnabled() {
+    public final boolean isEnabled() {
         return enabled;
     }
 

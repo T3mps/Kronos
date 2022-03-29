@@ -18,7 +18,7 @@ public class Job implements Runnable {
     @Override
     public void run() {
         try {
-            task.perform();
+            task.execute();
         } catch (Exception e) {
             Logger.instance.logWarn("Task not performed: " + name);
         }

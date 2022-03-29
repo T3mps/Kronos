@@ -96,7 +96,7 @@ public final class UUID implements Serializable, Comparable<UUID> {
      * @param name the byte array to use to generate the UUID.
      * @return a new UUID.
      */
-    public static UUID generate(byte[] name) {
+    public static UUID fromBytes(byte[] name) {
         MessageDigest md;
         try {
             md = MessageDigest.getInstance("MD5");
@@ -118,7 +118,7 @@ public final class UUID implements Serializable, Comparable<UUID> {
      * @param uuid the string representation of the UUID.
      * @return a new UUID.
      */
-    public static UUID generate(String name) {
+    public static UUID fromString(String name) {
         String[] components = name.split("-");
         if (components.length != 5) throw new IllegalArgumentException("Invalid UUID string: " + name);
         for (int i=0; i<5; i++) components[i] = "0x"+components[i];

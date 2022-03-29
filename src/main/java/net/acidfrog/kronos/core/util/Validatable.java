@@ -15,6 +15,10 @@ public interface Validatable {
      * 
      * @return {@code true} if the inputs are valid, {@code false} otherwise
      */
-    public abstract boolean validate();
+    abstract boolean validate();
+
+    public default boolean isValid() {
+        return validate();
+    }
 
 }

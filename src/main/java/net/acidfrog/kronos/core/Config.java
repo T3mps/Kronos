@@ -3,8 +3,6 @@ package net.acidfrog.kronos.core;
 import java.io.PrintStream;
 import java.util.Locale;
 
-import org.lwjgl.opengl.GL;
-
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.mathk.Mathk;
