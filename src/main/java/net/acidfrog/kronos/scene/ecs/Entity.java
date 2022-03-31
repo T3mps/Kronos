@@ -8,7 +8,6 @@ import java.util.Map;
 import net.acidfrog.kronos.core.datastructure.Bag;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
-import net.acidfrog.kronos.core.util.UUID;
 import net.acidfrog.kronos.scene.ecs.component.Component;
 import net.acidfrog.kronos.scene.ecs.signal.Signal;
 
@@ -17,7 +16,6 @@ public final class Entity {
     public int flags;
     
     private Registry registry;
-    private UUID uuid;
     public final Signal<Entity> onComponentAdd;
     public final Signal<Entity> onComponentRemove;
     
@@ -26,10 +24,9 @@ public final class Entity {
 
     private boolean enabled;
     
-    public Entity() {
+    Entity() {
         this.flags = 0;
         this.registry = null;
-        this.uuid = UUID.generate();
         this.onComponentAdd = new Signal<Entity>();
         this.onComponentRemove = new Signal<Entity>();
         this.components = new Bag<Component>();
@@ -37,42 +34,74 @@ public final class Entity {
         this.enabled = false;
     }
 
-    public final Entity add(final Component c) {
-        if (enabled || registry != null) throw new KronosError(KronosErrorLibrary.ENTITY_ALREADY_ENABLED);
-        if (c.getParent() != null) throw new KronosError(KronosErrorLibrary.COMPONENT_ALREADY_ATTACHED);
+    Entity(Entity entity) {
+        this.flags = entity.flags;
+        this.registry = entity.registry;
+        this.onComponentAdd = entity.onComponentAdd;
+        this.onComponentRemove = entity.onComponentRemove;
+        this.components = entity.components;
+        this.componentMap = entity.componentMap;
+        this.enabled = entity.enabled;
+    }
+
+    public final Entity add(final Component component) {
+        if (component == null) throw new KronosError(KronosErrorLibrary.NULL_COMPONENT);
+        if (enabled || registry != null) throw new KronosError(KronosErrorLibrary.COMPONENT_MODIFICATION_WHILE_ENABLED);
+        if (component.getParent() != null) throw new KronosError(KronosErrorLibrary.COMPONENT_ALREADY_ATTACHED);
         
-        components.add(c);
-        c.setParent(this);
+        components.add(component);
+        component.setParent(this);
         onComponentAdd();
 
-        if (enabled && !c.isEnabled()) c.enable();
+        if (enabled && !component.isEnabled()) component.enable();
 
         return this;
     }
 
-    public final Entity addAll(final Component... c) {
-        for (Component comp : c) add(comp);
+    public final Entity addAll(final Component... components) {
+        for (var c : components) add(c);
         return this;
     }
 
-    public final boolean has(final Class<?> clazz) {
-        if (componentMap.containsKey(clazz)) return true;
+    public final Entity addAll(final Entity entity) {
+        for (var c : entity.components) add(c);
+        return this;
+    }
 
-        for (Component c : components) if (clazz.isInstance(c)) {
+    public final boolean has(final Class<?> componentClass) {
+        if (componentMap.containsKey(componentClass)) return true;
+
+        for (var component : components) if (componentClass.isInstance(component)) {
             return true;
         }
 
         return false;
     }
 
-    public final <T extends Component> T get(final Class<T> clazz) {
-        Component com = componentMap.get(clazz);
-        if (com != null) return clazz.cast(com);
+    public final boolean has(final Class<?>... componentClasses) {
+        for (var c : componentClasses) if (!has(c)) return false;
+        return true;
+    }
+
+    public final <T extends Component> boolean has(final T component) {
+        if (component == null) throw new KronosError(KronosErrorLibrary.NULL_COMPONENT);
+        if (componentMap.containsKey(component.getClass())) return true;
+
+        for (var c : components) if (component.equals(c)) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public final <T extends Component> T get(final Class<T> componentClass) {
+        Component com = componentMap.get(componentClass);
+        if (com != null) return componentClass.cast(com);
         
-        for (Component c : components) {
-            if (clazz.isInstance(c)) {
-                componentMap.put(clazz, c);
-                return clazz.cast(c);
+        for (var component : components) {
+            if (componentClass.isInstance(component)) {
+                componentMap.put(componentClass, component);
+                return componentClass.cast(component);
             }
         }
 
@@ -80,58 +109,55 @@ public final class Entity {
     }
 
     @SafeVarargs
-    public final <T extends Component> List<T> get(final Class<T>... clazz) {
-        return get(Family.define(clazz));
+    public final <T extends Component> List<T> get(final Class<T>... componentClasses) {
+        return get(Family.define(componentClasses));
     }
 
     @SuppressWarnings("unchecked")
     public final <T extends Component> List<T> get(final Family family) {
         List<T> result = new ArrayList<T>();
 
-        for (Class<?> clazz : family.getTypes()) {
-            T com = get((Class<T>) clazz);
+        for (var componentClass : family.getTypes()) {
+            T com = get((Class<T>) componentClass);
             if (com != null) result.add(com);
         }
 
         return result;
     }
 
-    @SuppressWarnings("unchecked")
-    public final <T extends Component> T replace(final Class<T> clazz, T c) {
-        if (c.getParent() != null) throw new KronosError(KronosErrorLibrary.COMPONENT_ALREADY_ATTACHED);
-        
-        Component old = componentMap.get(clazz);
-        if (old != null) {
-            components.remove(old);
-            onComponentRemove();
-        }
+    public final <T extends Component> T remove(final Class<T> componentClass) {
+        if (enabled || registry != null) throw new KronosError(KronosErrorLibrary.COMPONENT_MODIFICATION_WHILE_ENABLED);
+        T component = get(componentClass);
 
-        components.add(c);
-        c.setParent(this);
-        onComponentAdd();
-
-        if (enabled && !c.isEnabled()) c.enable();
-
-        return (T) old;
-    }
-
-    public final <T extends Component> T remove(final Class<T> clazz) {
-        T c = get(clazz);
-
-        components.remove(c);
-        c.setParent(null);
+        components.remove(component);
+        component.setParent(null);
         onComponentRemove();
 
-        if (enabled && c.isEnabled()) c.disable();
+        if (enabled && component.isEnabled()) component.disable();
 
-        return clazz.cast(c);
+        return componentClass.cast(component);
+    }
+
+    public final <T extends Component> T remove(final T component) {
+        if (component == null) throw new KronosError(KronosErrorLibrary.NULL_COMPONENT);
+        if (enabled || registry != null) throw new KronosError(KronosErrorLibrary.COMPONENT_MODIFICATION_WHILE_ENABLED);
+        if (component.getParent() != this || !components.contains(component)) throw new KronosError(KronosErrorLibrary.COMPONENT_NOT_ATTACHED);
+
+        components.remove(component);
+        component.setParent(null);
+        onComponentRemove();
+
+        if (enabled && component.isEnabled()) component.disable();
+
+        return component;
     }
 
     void flush() {
-        for (Component c : components) {
-            c.setParent(null);
-            c.disable();
+        for (Component component : components) {
+            component.setParent(null);
+            component.disable();
         }
+        
         components.clear();
         componentMap.clear();
     }
@@ -144,22 +170,18 @@ public final class Entity {
         onComponentRemove.dispatch(this);
     }
 
-    public Registry getEngine() {
+    public Registry getRegistry() {
         return registry;
     }
 
-    public Entity setEngine(Registry registry) {
+    public Entity setRegistry(Registry registry) {
         this.registry = registry;
         return this;
     }
 
-    public Entity removeEngine() {
+    public Entity removeRegistry() {
         this.registry = null;
         return this;
-    }
-
-    public UUID getUUID() {
-        return uuid;
     }
 
     public boolean isEnabled() {
@@ -168,14 +190,14 @@ public final class Entity {
 
     public Entity enable() {
         if (enabled) return this;
-        for (Component c : components) if (!c.isEnabled()) c.enable();
+        for (Component component : components) if (!component.isEnabled()) component.enable();
         enabled = true;
         return this;
     }
 
     public Entity disable() {
         if (!enabled) return this;
-        for (Component c : components) if (c.isEnabled()) c.disable();
+        for (Component component : components) if (component.isEnabled()) component.disable();
         enabled = false;
         return this;
     }
@@ -186,16 +208,14 @@ public final class Entity {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
         int result = 1;
-        result = prime * result + ((componentMap == null) ? 0 : componentMap.hashCode());
-        result = prime * result + ((components == null) ? 0 : components.hashCode());
-        result = prime * result + (enabled ? 1231 : 1237);
-        result = prime * result + flags;
-        result = prime * result + ((onComponentAdd == null) ? 0 : onComponentAdd.hashCode());
-        result = prime * result + ((onComponentRemove == null) ? 0 : onComponentRemove.hashCode());
-        result = prime * result + ((registry == null) ? 0 : registry.hashCode());
-        result = prime * result + ((uuid == null) ? 0 : uuid.hashCode());
+        result = ((result << 5) - result) + ((componentMap == null) ? 0 : componentMap.hashCode());
+        result = ((result << 5) - result) + ((components == null) ? 0 : components.hashCode());
+        result = ((result << 5) - result) + (enabled ? 1231 : 1237);
+        result = ((result << 5) - result) + flags;
+        result = ((result << 5) - result) + ((onComponentAdd == null) ? 0 : onComponentAdd.hashCode());
+        result = ((result << 5) - result) + ((onComponentRemove == null) ? 0 : onComponentRemove.hashCode());
+        result = ((result << 5) - result) + ((registry == null) ? 0 : registry.hashCode());
         return result;
     }
 
@@ -221,12 +241,19 @@ public final class Entity {
         if (registry == null) {
             if (other.registry != null) return false;
         } else if (!registry.equals(other.registry)) return false;
-        if (uuid == null) {
-            if (other.uuid != null) return false;
-        } else if (!uuid.equals(other.uuid)) return false;
         return true;
     }
 
-    
+    @Override
+    public String toString() {
+        return new StringBuilder()
+        .append("Entity [components=")
+        .append(components)
+        .append(", flags=")
+        .append(flags)
+        .append(", enabled=")
+        .append(enabled)
+        .toString();
+    }
 
 }

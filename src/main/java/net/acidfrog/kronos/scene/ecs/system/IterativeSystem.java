@@ -7,13 +7,18 @@ import net.acidfrog.kronos.scene.ecs.Entity;
 import net.acidfrog.kronos.scene.ecs.Family;
 import net.acidfrog.kronos.scene.ecs.Registry;
 
-public abstract class IteratingSystem extends AbstractEntitySystem {
+public abstract class IterativeSystem extends AbstractEntitySystem {
 
     private Family family;
 
     private List<Entity> entities;
 
-    public IteratingSystem(Family family) {
+    public IterativeSystem(Family family) {
+        this(family, 0);
+    }
+
+    public IterativeSystem(Family family, int priority) {
+        super(priority);
         this.family = family;
         this.entities = new ArrayList<Entity>();
     }

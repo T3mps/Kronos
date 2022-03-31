@@ -2,7 +2,7 @@ package net.acidfrog.kronos.core.datastructure;
 
 import java.util.Comparator;
 
-import net.acidfrog.kronos.core.datastructure.sort.QuickSort;
+import net.acidfrog.kronos.core.datastructure.sort.Sort;
 import net.acidfrog.kronos.mathk.Mathk;
 
 public class Array<T> {
@@ -175,12 +175,8 @@ public class Array<T> {
         return -1;
     }
 
-    public void sort() {
-        // TODO: implement
-    }
-
     public void sort(Comparator<T> comparator) {
-
+        Sort.tim(array, comparator);
     }
 
     public void reverse() {

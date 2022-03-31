@@ -155,7 +155,7 @@ public class Testbed extends Canvas implements Runnable {
 	Transform transform2 = new Transform(300, 300, 0);
 	RaycastResult result2 = new RaycastResult();
 
-	Ray ray = new Ray(new Vector2k(0, 500), new Vector2k(1, Mathk.randomRadians()));
+	Ray ray = new Ray(new Vector2k(0, 500), new Vector2k(1, -1));
 	Separation separation = new Separation();
 
 	boolean bounce = false, br = false;

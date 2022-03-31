@@ -3,6 +3,9 @@ package net.acidfrog.kronos.core;
 import java.io.PrintStream;
 import java.util.Locale;
 
+// import NativeLibrary.java
+
+
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.mathk.Mathk;
@@ -18,7 +21,7 @@ public final class Config {
 
     // system vars
 
-    public static final String OPERATING_SYSTEM = OSArbiter.getOperatingSystemType();
+    public static final String OPERATING_SYSTEM = OSArbiter.getOperatingSystemName();
     // private static final String CONFIG_PATH = "data/.config";
     public static final String JAVA_VERSION = System.getProperty("java.version");
     public static final String JAVA_VENDOR = System.getProperty("java.vendor");
@@ -140,13 +143,15 @@ public final class Config {
 
         /** Cached OS. */
         private static String os;
+
+        private static int arch = -1;
         
         /**
          * Determines the current operating system, and caches it.
          * 
          * @return The current operating system.
          */
-        public static String getOperatingSystemType() {
+        public static String getOperatingSystemName() {
             if (os == null) {
                 String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
             
@@ -158,6 +163,13 @@ public final class Config {
 
             return os + " " + System.getProperty("os.arch");
         }
+
+        /**
+         * Determines the current operating system architecture.
+         * 
+         * @return The current operating system architecture.
+         */
+        public static native int getOperatingSystemArchitecture();
 
     }
 }

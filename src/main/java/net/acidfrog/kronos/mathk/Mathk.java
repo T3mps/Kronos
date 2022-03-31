@@ -1144,7 +1144,7 @@ public class Mathk {
 		return log(2, value);
 	}
 
-    public static final strictfp class Precision {
+    public static final class Precision {
 
         public static final double MACHINE_EPSILON;
     

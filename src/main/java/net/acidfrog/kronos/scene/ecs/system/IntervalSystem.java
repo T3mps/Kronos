@@ -2,8 +2,8 @@ package net.acidfrog.kronos.scene.ecs.system;
 
 public abstract class IntervalSystem extends AbstractEntitySystem {
 
-    private float interval;
-    private float accumulator;
+    protected float interval;
+    protected float accumulator;
 
     public IntervalSystem(float interval) {
         this(interval, 0);

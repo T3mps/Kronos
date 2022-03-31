@@ -4,12 +4,12 @@ import net.acidfrog.kronos.scene.ecs.Registry;
 
 public class AbstractEntitySystem implements EntitySystem {
     
-    private int priority;
+    protected int priority;
 
-    private Registry registry;
+    protected Registry registry;
 
-    private boolean processing;
-    private boolean enabled;
+    protected boolean processing;
+    protected boolean enabled;
 
     public AbstractEntitySystem() {
         this(0);

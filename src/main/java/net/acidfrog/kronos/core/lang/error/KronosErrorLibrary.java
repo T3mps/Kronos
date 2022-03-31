@@ -24,19 +24,23 @@ public final class KronosErrorLibrary {
 
     // ECS
     public static final KronosErrorMessage INVALID_COMPONENT = new KronosErrorMessage("Invalid component");
+    public static final KronosErrorMessage NULL_COMPONENT = new KronosErrorMessage("Null component");
     public static final KronosErrorMessage COMPONENT_NOT_FOUND = new KronosErrorMessage("Component not found");
-    public static final KronosErrorMessage ADD_COMPONENT_WHILE_ENABLED = new KronosErrorMessage("Cannot add component while entity is enabled");
+    public static final KronosErrorMessage COMPONENT_MODIFICATION_WHILE_ENABLED = new KronosErrorMessage("Cannot add/remove/replace component while entity is enabled");
     public static final KronosErrorMessage COMPONENT_NOT_ATTACHED = new KronosErrorMessage("Component is not attached to an entity");
     public static final KronosErrorMessage COMPONENT_ALREADY_ATTACHED = new KronosErrorMessage("Component already attached to an entity");
     public static final KronosErrorMessage COMPONENT_ALREADY_ENABLED = new KronosErrorMessage("Component already enabled");
     public static final KronosErrorMessage COMPONENT_ALREADY_DISABLED = new KronosErrorMessage("Component already disabled");
     public static final KronosErrorMessage ENTITY_ALREADY_ENABLED = new KronosErrorMessage("Entity already enabled");
     public static final KronosErrorMessage ENTITY_NOT_ENABLED = new KronosErrorMessage("Entity is not enabled");
-    public static final KronosErrorMessage ENTITY_NOT_ADDED_TO_THIS_ENGINE = new KronosErrorMessage("Entity is not added to this engine");
-    public static final KronosErrorMessage ENTITY_ALREADY_ADDED_TO_ENGINE = new KronosErrorMessage("Entity already added to engine");
-    public static final KronosErrorMessage ENTITY_NOT_BOUND_TO_ENGINE = new KronosErrorMessage("Entity is not bound to this engine");
+    public static final KronosErrorMessage ENTITY_NOT_ADDED_TO_THIS_ENGINE = new KronosErrorMessage("Entity is not added to this registry");
+    public static final KronosErrorMessage ENTITY_ALREADY_ADDED_TO_ENGINE = new KronosErrorMessage("Entity already added to registry");
+    public static final KronosErrorMessage ENTITY_NOT_BOUND_TO_ENGINE = new KronosErrorMessage("Entity is not bound to this registry");
     public static final KronosErrorMessage COMPONENT_COUNT_MISMATCH = new KronosErrorMessage("Uneven compairison attempted, component count does not match");
     public static final KronosErrorMessage UNKNOWN_ENTITY_SYSTEM = new KronosErrorMessage("Operation with unknown entity system attempted");
+    public static final KronosErrorMessage ATTEMPTED_SYSTEM_BIND_DURING_UPDATE = new KronosErrorMessage("Attempted to bind system during registry update");
+    public static final KronosErrorMessage ATTEMPTED_SYSTEM_UNBIND_DURING_UPDATE = new KronosErrorMessage("Attempted to unbind system during registry update");
+    public static final KronosErrorMessage SYSTEM_NOT_BOUND = new KronosErrorMessage("System is not bound to this SYSTEM_NOT_BOUND");
 
     // COLLECTIONS ERRORS
     public static final KronosErrorMessage COLLECTION_IS_EMPTY = new KronosErrorMessage("Collection is empty");

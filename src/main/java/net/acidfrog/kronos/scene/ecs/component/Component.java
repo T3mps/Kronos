@@ -2,39 +2,20 @@ package net.acidfrog.kronos.scene.ecs.component;
 
 import net.acidfrog.kronos.scene.ecs.Entity;
 
-public abstract class Component implements Comparable<Component> {
+public interface Component {
 
-    private Entity parent;
-    private boolean enabled;
+    public abstract Entity getParent();
 
-    public Component() {}
+    public abstract void setParent(Entity parent);
+
+    public abstract boolean isEnabled();
+
+    public abstract void enable();
+
+    public abstract void onEnable();
+
+    public abstract void disable();
+
+    public abstract void onDisable();
     
-    public final Entity getParent() {
-        return parent;
-    }
-    
-    public final void setParent(Entity parent) {
-        this.parent = parent;
-    }
-
-    public final boolean isEnabled() {
-        return enabled;
-    }
-
-    public void enable() {
-        if (enabled) return;
-        enabled = true;
-        onEnable();
-    }
-
-    protected void onEnable() {}
-    
-    public void disable() {
-        if (!enabled) return;
-        enabled = false;
-        onDisable();
-    }
-
-    protected void onDisable() {}
-
 }

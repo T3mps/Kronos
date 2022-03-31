@@ -2,6 +2,7 @@ package net.acidfrog.kronos.core.datastructure;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import net.acidfrog.kronos.mathk.Mathk;
 
@@ -16,7 +17,7 @@ public class Bag<E> implements Collection<E> {
 
     private static final int DEFAULT_INITIAL_CAPACITY = 64;
 
-    private E[] data;
+    public E[] data;
     private int size;
 
     public Bag() {
@@ -134,28 +135,39 @@ public class Bag<E> implements Collection<E> {
 
     private class BagIterator implements Iterator<E> {
 
-        private int index;
+        /** Current position. */
+         private int pointer;
 
-        public BagIterator() {
-            index = 0;
-        }
+         /** True if the current position is within bounds. */
+         private boolean next;
+ 
+ 
+         @Override
+         public boolean hasNext() {
+             return (pointer < size);
+         }
+ 
+ 
+         @Override
+         public E next() {
+             if (pointer == size) throw new NoSuchElementException("No more elements");
+ 
+             E e = data[pointer++];
+             next = true;
 
-        @Override
-        public boolean hasNext() {
-            return index < size;
-        }
-
-        @Override
-        public E next() {
-            return data[index++];
-        }
-
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-    }
+             return e;
+         }
+ 
+ 
+         @Override
+         public void remove() {
+             if (!next) throw new IllegalStateException("Attempting to remove an item from an empty bag");
+ 
+             next = false;
+             Bag.this.remove(--pointer);
+         }
+     
+     }
 
     @Override
     public Object[] toArray() {

@@ -3,7 +3,7 @@ package net.acidfrog.kronos.mathk.random;
 import java.util.Random;
 
 /** https://cs.gmu.edu/~sean/research/mersenne/MT19937.java */
-public final strictfp class MT19937 extends Random implements Cloneable {
+public final class MT19937 extends Random implements Cloneable {
     private static final long serialVersionUID = 1L;
 
     // Period parameters

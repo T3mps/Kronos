@@ -31,9 +31,7 @@ public abstract class IterativeIntervalSystem extends IntervalSystem {
     protected void intervalUpdate() {
         push();
 
-        for (int i = 0; i < entities.size(); i++) {
-            processEntity(entities.get(i));
-        }
+        for (int i = 0; i < entities.size(); i++) processEntity(entities.get(i));
 
         pop();
     }

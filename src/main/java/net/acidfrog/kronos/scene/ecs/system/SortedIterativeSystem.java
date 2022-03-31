@@ -1,31 +1,33 @@
 package net.acidfrog.kronos.scene.ecs.system;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import net.acidfrog.kronos.core.datastructure.Array;
 import net.acidfrog.kronos.scene.ecs.Entity;
 import net.acidfrog.kronos.scene.ecs.EntityListener;
 import net.acidfrog.kronos.scene.ecs.Family;
 import net.acidfrog.kronos.scene.ecs.Registry;
 
-public abstract class SortedIteratingSystem extends AbstractEntitySystem implements EntityListener {
+public abstract class SortedIterativeSystem extends AbstractEntitySystem implements EntityListener {
 
     private Family family;
-    private final List<Entity> entities;
-    private List<Entity> sortedEntities;
-    private boolean sort = false;
-    private Comparator<Entity> entityComparator;
 
-    public SortedIteratingSystem(Family family, Comparator<Entity> entityComparator) {
+    private final Array<Entity> entities;
+    private Array<Entity> sortedEntities;
+    private Comparator<Entity> entityComparator;
+    
+    private boolean sort = false;
+
+    public SortedIterativeSystem(Family family, Comparator<Entity> entityComparator) {
         this(family, entityComparator, 0);
     }
 
-    public SortedIteratingSystem(Family family, Comparator<Entity> entityComparator, int priority) {
+    public SortedIterativeSystem(Family family, Comparator<Entity> entityComparator, int priority) {
         super(priority);
         this.family = family;
-        this.entities = new ArrayList<Entity>();
-        this.sortedEntities = new ArrayList<Entity>(16);
+        this.entities = new Array<Entity>();
+        this.sortedEntities = new Array<Entity>(16);
         this.sort = false;
         this.entityComparator = entityComparator;
     }
@@ -97,7 +99,7 @@ public abstract class SortedIteratingSystem extends AbstractEntitySystem impleme
         return family;
     }
     
-    public List<Entity> getEntities() {
+    public Array<Entity> getEntities() {
         return entities;
     }
 

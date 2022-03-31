@@ -32,8 +32,6 @@ import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 //#endif
 
-import net.acidfrog.kronos.core.Config;
-
 /**
  * Represents a 2D vector with single-precision.
  *

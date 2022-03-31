@@ -12,7 +12,7 @@ import net.acidfrog.kronos.mathk.Vector2k;
  * 
  * <p>
  * NOTE: Do not use this class as a component directly. This class extends
- * {@link Component} becuase of the way java handles abstract class inheritance.
+ * {@link AbstractComponent} becuase of the way java handles abstract class inheritance.
  * 
  * @author Ethan Temprovich
  * @see TransformComponent

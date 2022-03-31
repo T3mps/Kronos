@@ -59,7 +59,7 @@ public final class Bitset {
 		}
 	}
 
-    public boolean convergence(long[] otherBits) {
+    public boolean intersects(long[] otherBits) {
 		long[] bits = this.bits;
 		
         for (int i = Math.min(bits.length, otherBits.length) - 1; i >= 0; i--) if ((bits[i] & otherBits[i]) != 0) {
@@ -69,8 +69,8 @@ public final class Bitset {
         return false;
 	}
 
-    public boolean convergence(Bitset other) {
-        return convergence(other.bits);
+    public boolean intersects(Bitset other) {
+        return intersects(other.bits);
     }
 
     public boolean containsAll(Bitset other) {
@@ -97,19 +97,19 @@ public final class Bitset {
     public boolean get(int index) {
         final int word = index >>> 6;
 		if (word >= bits.length) return false;
-        return (bits[word] & (1L << index & 0x3f)) != 0;
+        return (bits[word] & (1L << index)) != 0;
     }
 
     public void set(int index) {
 		final int word = index >>> 6;
 		checkCapacity(word);
-		bits[word] |= 1L << (index & 0x3F);
+		bits[word] |= 1L << (index);
 	}
 
     public void flip(int index) {
 		final int word = index >>> 6;
 		checkCapacity(word);
-		bits[word] ^= 1L << (index & 0x3F);
+		bits[word] ^= 1L << (index);
 	}
 
 	private void checkCapacity(int len) {
@@ -120,6 +120,13 @@ public final class Bitset {
 		}
 	}
 
+	public int cardinality() {
+		int count = 0;
+		for (int i = 0; i < bits.length; i++) count += Long.bitCount(bits[i]);
+
+		return count;
+	}
+
     public void clear() {
 		for (int i = 0; i < bits.length; i++) bits[i] = 0L;
 	}
@@ -127,7 +134,7 @@ public final class Bitset {
     public void clear (int index) {
 		final int word = index >>> 6;
 		if (word >= bits.length) return;
-		bits[word] &= ~(1L << (index & 0x3F));
+		bits[word] &= ~(1L << (index));
 	}
 
     public int size() {
@@ -140,9 +147,11 @@ public final class Bitset {
         for (int word = bits.length - 1; word >= 0; --word) {
 			long bitsAtWord = bits[word];
             
-			if (bitsAtWord != 0) for (int bit = 63; bit >= 0; --bit) if ((bitsAtWord & (1L << (bit & 0x3F))) != 0L) {
-                return (word << 6) + bit + 1;
-            }
+			if (bitsAtWord != 0) {
+				for (int bit = 63; bit >= 0; --bit) if ((bitsAtWord & (1L << (bit))) != 0L) {
+					return (word << 6) + bit + 1;
+				}
+			}
 		}
 		
         return 0;
@@ -161,7 +170,7 @@ public final class Bitset {
 
     @Override
     public int hashCode() {
-        final int prime = 31;
+        final int prime = 127;
         int result = 1;
         result = prime * result + Arrays.hashCode(bits);
         return result;
