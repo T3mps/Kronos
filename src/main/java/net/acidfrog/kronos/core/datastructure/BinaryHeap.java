@@ -2,11 +2,11 @@ package net.acidfrog.kronos.core.datastructure;
 
 import java.util.Arrays;
 
-public final class BinaryHeap<T extends BinaryHeap.Node> {
+public final class BinaryHeap<T extends Heap.Node> implements Heap<T> {
 
     public int size;
 
-	private Node[] nodes;
+	private Heap.Node[] nodes;
 	private final boolean isMaxHeap;
 
 	public BinaryHeap() {
@@ -15,13 +15,13 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 
 	public BinaryHeap(int capacity, boolean isMaxHeap) {
 		this.isMaxHeap = isMaxHeap;
-		nodes = new Node[capacity];
+		nodes = new Heap.Node[capacity];
 	}
 
-	public T add(T node) {
+	public T push(T node) {
 		// Expand if necessary.
 		if (size == nodes.length) {
-			Node[] newNodes = new Node[size << 1];
+			Heap.Node[] newNodes = new Heap.Node[size << 1];
 			System.arraycopy(nodes, 0, newNodes, 0, size);
 			nodes = newNodes;
 		}
@@ -32,17 +32,17 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 		return node;
 	}
 
-	public T add(T node, float value) {
+	public T push(T node, float value) {
 		node.value = value;
-		return add(node);
+		return push(node);
 	}
 
 	public boolean contains(T node, boolean identity) {
 		if (node == null) throw new IllegalArgumentException("node cannot be null.");
 
-		if (identity) for(Node n : nodes) if (n == node) {
+		if (identity) for(Heap.Node n : nodes) if (n == node) {
 			return true;
-		} else for(Node other : nodes) if (other.equals(node)) {
+		} else for(Heap.Node other : nodes) if (other.equals(node)) {
 			return true;
 		}
 
@@ -57,7 +57,7 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 
 	@SuppressWarnings("unchecked")
 	public T pop() {
-		Node removed = nodes[0];
+		Heap.Node removed = nodes[0];
 
 		if (--size > 0) {
 			nodes[0] = nodes[size];
@@ -70,7 +70,7 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 
 	public T remove(T node) {
 		if (--size > 0) {
-			Node moved = nodes[size];
+			Heap.Node moved = nodes[size];
 			nodes[size] = null;
 			nodes[node.index] = moved;
 			
@@ -91,7 +91,7 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 		size = 0;
 	}
 
-	public void setValue(T node, float value) {
+	public void set(T node, float value) {
 		float oldValue = node.value;
 		node.value = value;
 
@@ -100,13 +100,13 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 	}
 
 	private void acsend(int index) {
-		Node[] nodes = this.nodes;
-		Node node = nodes[index];
+		Heap.Node[] nodes = this.nodes;
+		Heap.Node node = nodes[index];
 		float value = node.value;
 
 		while(index > 0) {
 			int parentIndex = (index - 1) >> 1;
-			Node parent = nodes[parentIndex];
+			Heap.Node parent = nodes[parentIndex];
 
 			if (value < parent.value ^ isMaxHeap) {
 				nodes[index] = parent;
@@ -120,10 +120,10 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 	}
 
 	private void descend(int index) {
-		Node[] nodes = this.nodes;
+		Heap.Node[] nodes = this.nodes;
 		int size = this.size;
 
-		Node node = nodes[index];
+		Heap.Node node = nodes[index];
 		float value = node.value;
 
 		while(true) {
@@ -132,11 +132,11 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 			int rightIndex = leftIndex + 1;
 
 			// Always has a left child.
-			Node leftNode = nodes[leftIndex];
+			Heap.Node leftNode = nodes[leftIndex];
 			float leftValue = leftNode.value;
 
 			// May have a right child.
-			Node rightNode;
+			Heap.Node rightNode;
 			float rightValue;
 			if (rightIndex >= size) {
 				rightNode = null;
@@ -164,13 +164,18 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 		node.index = index;
 	}
 
+	public int size() {
+		return size;
+	}
+
+	@Override
 	@SuppressWarnings("unchecked")
 	public boolean equals(Object obj) {
 		if (!(obj instanceof BinaryHeap)) return false;
 		BinaryHeap<T> other = (BinaryHeap<T>) obj;
 		if (other.size != size) return false;
 
-		Node[] nodes1 = this.nodes, nodes2 = other.nodes;
+		Heap.Node[] nodes1 = this.nodes, nodes2 = other.nodes;
 
 		for(int i = 0, n = size; i < n; i++) if (nodes1[i].value != nodes2[i].value) {
 			return false;
@@ -179,10 +184,11 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 		return true;
 	}
 
+	@Override
 	public String toString() {
 		if (size == 0) return "[]";
 
-		Node[] nodes = this.nodes;
+		Heap.Node[] nodes = this.nodes;
 		StringBuilder buffer = new StringBuilder(32);
 
 		buffer.append('[');
@@ -195,24 +201,6 @@ public final class BinaryHeap<T extends BinaryHeap.Node> {
 
 		buffer.append(']');
 		return buffer.toString();
-	}
-
-	public static class Node {
-
-		float value;
-		int index;
-
-		public Node(float value) {
-			this.value = value;
-		}
-
-		public float getValue() {
-			return value;
-		}
-
-		public String toString() {
-			return Float.toString(value);
-		}
 	}
     
 }

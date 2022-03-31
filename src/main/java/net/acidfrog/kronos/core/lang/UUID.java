@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.util;
+package net.acidfrog.kronos.core.lang;
 
 import java.io.Serializable;
 import java.security.MessageDigest;

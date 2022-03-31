@@ -3,7 +3,7 @@ package net.acidfrog.kronos.core.util.pool;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.acidfrog.kronos.core.datastructure.Array;
+import net.acidfrog.kronos.core.datastructure.DynamicArray;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 
 public final @Internal class Pools {
@@ -41,11 +41,11 @@ public final @Internal class Pools {
         pool.free(object);
     }
     
-    static public void freeAll (Array<?> objects) {
+    static public void freeAll (DynamicArray<?> objects) {
 		freeAll(objects, false);
 	}
 
-	static public void freeAll (Array<?> objects, boolean samePool) {
+	static public void freeAll (DynamicArray<?> objects, boolean samePool) {
 		if (objects == null) throw new IllegalArgumentException("objects cannot be null.");
 		Pool<?> pool = null;
 

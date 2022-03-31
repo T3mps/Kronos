@@ -5,7 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import net.acidfrog.kronos.core.datastructure.Bag;
+import net.acidfrog.kronos.core.datastructure.multiset.Bag;
+import net.acidfrog.kronos.core.datastructure.multiset.MultiSet;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.scene.ecs.component.Component;
@@ -19,7 +20,7 @@ public final class Entity {
     public final Signal<Entity> onComponentAdd;
     public final Signal<Entity> onComponentRemove;
     
-    private Bag<Component> components;
+    private MultiSet<Component> components;
     private Map<Class<?>, Component> componentMap;
 
     private boolean enabled;
@@ -35,13 +36,17 @@ public final class Entity {
     }
 
     Entity(Entity entity) {
-        this.flags = entity.flags;
+        this.flags = 0;
         this.registry = entity.registry;
         this.onComponentAdd = entity.onComponentAdd;
         this.onComponentRemove = entity.onComponentRemove;
         this.components = entity.components;
         this.componentMap = entity.componentMap;
         this.enabled = entity.enabled;
+    }
+
+    public static Entity create() {
+        return new Entity();
     }
 
     public final Entity add(final Component component) {
@@ -202,7 +207,7 @@ public final class Entity {
         return this;
     }
 
-    Bag<Component> getComponents() {
+    MultiSet<Component> getComponents() {
         return components;
     }
 

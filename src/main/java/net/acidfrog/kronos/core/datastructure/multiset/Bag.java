@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.datastructure;
+package net.acidfrog.kronos.core.datastructure.multiset;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -13,9 +13,7 @@ import net.acidfrog.kronos.mathk.Mathk;
  * 
  * @author Ethan Temprovich
  */
-public class Bag<E> implements Collection<E> {
-
-    private static final int DEFAULT_INITIAL_CAPACITY = 64;
+public final class Bag<E> implements MultiSet<E> {
 
     public E[] data;
     private int size;
@@ -29,6 +27,7 @@ public class Bag<E> implements Collection<E> {
         data = (E[]) new Object[capacity];
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public boolean add(Object e) {
 		if (size == data.length) grow();
@@ -47,12 +46,14 @@ public class Bag<E> implements Collection<E> {
         return changed;
     }
 
+    @Override
     public void set(int index, E e) {
 		if (index >= data.length) grow(index * 2);
 		size = Mathk.max(size, index + 1);
 		data[index] = e;
 	}
 
+    @Override
     public E get(int index) {
         return data[index];
     }
@@ -65,6 +66,7 @@ public class Bag<E> implements Collection<E> {
         return false;
     }
 
+    @Override
     public E remove(int index) {
         E e = data[index];
         data[index] = data[--size];
@@ -87,7 +89,8 @@ public class Bag<E> implements Collection<E> {
 		return false; 
     }
 
-    public E removeLast() {
+    @Override
+    public E pop() {
         if (size == 0) return null;
 
         E e = data[--size];
@@ -106,7 +109,7 @@ public class Bag<E> implements Collection<E> {
     public int size() {
         return size;
     }
-
+    
     public int capacity() {
         return data.length;
     }
@@ -127,6 +130,29 @@ public class Bag<E> implements Collection<E> {
 		data = (E[])new Object[newCapacity];
 		System.arraycopy(oldData, 0, data, 0, oldData.length);
 	}
+
+    @Override
+    public <T> T[] toArray(T[] a) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+        for (Object o : c) if (!contains(o)) return false;
+        return true;
+    }
+
+    @Override
+    public boolean removeAll(Collection<?> c) {
+        boolean changed = false;
+        for (Object o : c) changed |= remove(o);
+        return changed;
+    }
+
+    @Override
+    public boolean retainAll(Collection<?> c) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     @Override
     public Iterator<E> iterator() {
@@ -174,29 +200,6 @@ public class Bag<E> implements Collection<E> {
         Object[] array = new Object[size];
         System.arraycopy(data, 0, array, 0, size);
         return array;
-    }
-
-    @Override
-    public <T> T[] toArray(T[] a) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        for (Object o : c) if (!contains(o)) return false;
-        return true;
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        boolean changed = false;
-        for (Object o : c) changed |= remove(o);
-        return changed;
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException("Not supported yet.");
     }
     
 }

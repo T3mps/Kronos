@@ -3,7 +3,7 @@ package net.acidfrog.kronos.scene.ecs.system;
 import java.util.Comparator;
 import java.util.List;
 
-import net.acidfrog.kronos.core.datastructure.Array;
+import net.acidfrog.kronos.core.datastructure.DynamicArray;
 import net.acidfrog.kronos.scene.ecs.Entity;
 import net.acidfrog.kronos.scene.ecs.EntityListener;
 import net.acidfrog.kronos.scene.ecs.Family;
@@ -13,8 +13,8 @@ public abstract class SortedIterativeSystem extends AbstractEntitySystem impleme
 
     private Family family;
 
-    private final Array<Entity> entities;
-    private Array<Entity> sortedEntities;
+    private final DynamicArray<Entity> entities;
+    private DynamicArray<Entity> sortedEntities;
     private Comparator<Entity> entityComparator;
     
     private boolean sort = false;
@@ -26,8 +26,8 @@ public abstract class SortedIterativeSystem extends AbstractEntitySystem impleme
     public SortedIterativeSystem(Family family, Comparator<Entity> entityComparator, int priority) {
         super(priority);
         this.family = family;
-        this.entities = new Array<Entity>();
-        this.sortedEntities = new Array<Entity>(16);
+        this.entities = new DynamicArray<Entity>();
+        this.sortedEntities = new DynamicArray<Entity>(16);
         this.sort = false;
         this.entityComparator = entityComparator;
     }
@@ -99,7 +99,7 @@ public abstract class SortedIterativeSystem extends AbstractEntitySystem impleme
         return family;
     }
     
-    public Array<Entity> getEntities() {
+    public DynamicArray<Entity> getEntities() {
         return entities;
     }
 

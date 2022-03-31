@@ -2,7 +2,7 @@ package net.acidfrog.kronos.core.datastructure.sort;
 
 import java.util.Comparator;
 
-import net.acidfrog.kronos.core.datastructure.Bag;
+import net.acidfrog.kronos.core.datastructure.multiset.Bag;
 
 public final class Sort {
 

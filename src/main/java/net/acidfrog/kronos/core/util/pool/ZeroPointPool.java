@@ -4,11 +4,11 @@ import java.lang.reflect.Constructor;
 
 import javax.management.ReflectionException;
 
+import net.acidfrog.kronos.core.lang.Reflection;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.core.lang.annotations.Null;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
-import net.acidfrog.kronos.core.util.Reflection;
 
 public final @Internal class ZeroPointPool<T> extends Pool<T> {
 

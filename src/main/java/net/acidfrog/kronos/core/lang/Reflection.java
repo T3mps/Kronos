@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.core.util;
+package net.acidfrog.kronos.core.lang;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Array;
@@ -10,7 +10,6 @@ import java.lang.reflect.Modifier;
 
 import javax.management.ReflectionException;
 
-import net.acidfrog.kronos.core.lang.Std;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 
 public final class Reflection {
@@ -82,7 +81,15 @@ public final class Reflection {
             throw new ReflectionException(e, "Failed to create new instance of class: " + clazz.getName());
         }
 	}
-
+	
+	public static <T> T instsantiate(Constructor<T> constructor) {
+		try {
+			return constructor.newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			Logger.instance.logFatal("Failed to create instance of class: " + constructor.getClass().getSimpleName());
+			return null;
+		}
+	}
 
 	public static Class<?> getComponentType(Class<?> clazz) {
 		return clazz.getComponentType();

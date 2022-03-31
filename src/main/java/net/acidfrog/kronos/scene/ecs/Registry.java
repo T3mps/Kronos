@@ -7,6 +7,7 @@ import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingDeque;
 
 import net.acidfrog.kronos.core.lang.error.KronosError;
@@ -38,7 +39,7 @@ public final class Registry {
         this.views = new HashMap<Family, List<Entity>>(initialCapacity);
         this.tasks = new LinkedBlockingDeque<Task>();
         this.systems = new ArrayList<EntitySystem>();
-        this.listeners = new ArrayList<EntityListener>();
+        this.listeners = new CopyOnWriteArrayList<EntityListener>();
         this.filteredListeners = new HashMap<Family, List<EntityListener>>();
         this.updating = false;
     }
@@ -267,7 +268,7 @@ public final class Registry {
         List<EntityListener> listeners = filteredListeners.get(family);
 
         if (listeners == null) {
-            listeners = new ArrayList<EntityListener>();
+            listeners = new CopyOnWriteArrayList<EntityListener>();
             filteredListeners.put(family, listeners);
         }
 

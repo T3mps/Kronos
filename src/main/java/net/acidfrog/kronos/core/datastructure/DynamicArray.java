@@ -5,26 +5,26 @@ import java.util.Comparator;
 import net.acidfrog.kronos.core.datastructure.sort.Sort;
 import net.acidfrog.kronos.mathk.Mathk;
 
-public class Array<T> {
+public class DynamicArray<T> {
 
     private T[] array;
     private int size;
 
-    public Array() {
+    public DynamicArray() {
         this(16);
     }
 
     @SuppressWarnings("unchecked")
-    public Array(int initialCapacity) {
+    public DynamicArray(int initialCapacity) {
         this.array = (T[]) new Object[initialCapacity];
     }
 
-    public Array(T[] array) {
+    public DynamicArray(T[] array) {
         this.array = array;
         this.size = array.length;
     }
 
-    public Array(Array<T> array) {
+    public DynamicArray(DynamicArray<T> array) {
         this.array = array.array;
         this.size = array.size;
     }
@@ -45,7 +45,7 @@ public class Array<T> {
         size++;
     }
 
-    public void addAll(Array<T> array) {
+    public void addAll(DynamicArray<T> array) {
         if (size + array.size > array.array.length) {
             resize(size + array.size);
         }
@@ -61,7 +61,7 @@ public class Array<T> {
         size += array.length;
     }
 
-    public void addAll(int index, Array<T> array) {
+    public void addAll(int index, DynamicArray<T> array) {
         if (size + array.size > array.array.length) {
             resize(size + array.size);
         }
@@ -85,7 +85,7 @@ public class Array<T> {
         return array[index];
     }
 
-    public Array<T> push(T value) {
+    public DynamicArray<T> push(T value) {
         add(value);
         return this;
     }
@@ -144,8 +144,8 @@ public class Array<T> {
         return array;
     }
 
-    public Array<T> clone() {
-        return new Array<T>(array);
+    public DynamicArray<T> clone() {
+        return new DynamicArray<T>(array);
     }
 
     public boolean contains(T value) {

@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.core.util.pool;
 
-import net.acidfrog.kronos.core.datastructure.Array;
+import net.acidfrog.kronos.core.datastructure.DynamicArray;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.mathk.Mathk;
 
@@ -17,7 +17,7 @@ public abstract @Internal class Pool<T> {
 
     public int peak;
 
-    private final Array<T> pool;
+    private final DynamicArray<T> pool;
 
     public Pool() {
         this(DEFAULT_INITIAL_CAPACITY, Integer.MAX_VALUE);
@@ -28,11 +28,11 @@ public abstract @Internal class Pool<T> {
     }
 
     public Pool(int initialCapacity, int maxCapacity) {
-        this.pool = new Array<T>(initialCapacity);
+        this.pool = new DynamicArray<T>(initialCapacity);
         this.capacity = maxCapacity;
     }
 
-    public Pool(Array<T> pool) {
+    public Pool(DynamicArray<T> pool) {
         this.pool = pool;
         this.capacity = Integer.MAX_VALUE;
     }
@@ -79,9 +79,9 @@ public abstract @Internal class Pool<T> {
 		reset(object);
 	}
 
-    public void freeAll(Array<T> objects) {
+    public void freeAll(DynamicArray<T> objects) {
         if (objects == null) throw new NullPointerException();
-		Array<T> freeObjects = this.pool;
+		DynamicArray<T> freeObjects = this.pool;
 		int max = this.capacity;
 
 		for (int i = 0, n = objects.size(); i < n; i++) {
@@ -97,7 +97,7 @@ public abstract @Internal class Pool<T> {
     }
 
     public void clear() {
-		Array<T> pool = this.pool;
+		DynamicArray<T> pool = this.pool;
 		for (int i = 0, n = pool.size(); i < n; i++) discard(pool.get(i));
 		pool.clear();
 	}

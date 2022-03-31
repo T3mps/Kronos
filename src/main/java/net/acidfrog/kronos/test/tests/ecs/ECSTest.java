@@ -7,7 +7,6 @@ import net.acidfrog.kronos.scene.ecs.EntityListener;
 import net.acidfrog.kronos.scene.ecs.Family;
 import net.acidfrog.kronos.scene.ecs.component.AbstractComponent;
 import net.acidfrog.kronos.scene.ecs.signal.SignalListener;
-import net.acidfrog.kronos.scene.ecs.system.EntitySystem;
 import net.acidfrog.kronos.scene.ecs.system.IterativeIntervalSystem;
 import net.acidfrog.kronos.scene.ecs.system.IterativeSystem;
 
