@@ -3,7 +3,9 @@ namespace Kronos {
 
     public class Physics {
 
-        private Physics() {}
+        private  Physics() {}
+
+        private ~Physics() {}
 
         public static boolean Collision(Entity a, Entity b) {}
 
