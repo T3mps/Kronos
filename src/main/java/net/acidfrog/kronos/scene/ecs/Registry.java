@@ -12,7 +12,7 @@ import java.util.concurrent.LinkedBlockingDeque;
 
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
-import net.acidfrog.kronos.job.tasks.Task;
+import net.acidfrog.kronos.core.util.job.tasks.Task;
 import net.acidfrog.kronos.scene.ecs.component.Component;
 import net.acidfrog.kronos.scene.ecs.system.EntitySystem;
 

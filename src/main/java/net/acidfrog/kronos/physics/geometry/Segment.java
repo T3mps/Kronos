@@ -11,7 +11,7 @@ public final class Segment extends AbstractShape implements Collider, Wound {
 	
 	private final Vector2k[] normals = new Vector2k[2];
 	
-	private float length;
+	float length;
 
     public Segment(Vector2k v1, Vector2k v2) {
         super(v1.add(v2).div(2), v1.distance(v2) * 0.5f);

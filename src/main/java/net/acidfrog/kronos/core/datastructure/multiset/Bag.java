@@ -27,6 +27,9 @@ public final class Bag<E> implements MultiSet<E> {
         data = (E[]) new Object[capacity];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     @SuppressWarnings("unchecked")
     public boolean add(Object e) {
@@ -39,6 +42,9 @@ public final class Bag<E> implements MultiSet<E> {
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean addAll(Collection<? extends E> c) {
         boolean changed = false;
@@ -46,6 +52,7 @@ public final class Bag<E> implements MultiSet<E> {
         return changed;
     }
 
+    
     @Override
     public void set(int index, E e) {
 		if (index >= data.length) grow(index * 2);
@@ -53,11 +60,17 @@ public final class Bag<E> implements MultiSet<E> {
 		data[index] = e;
 	}
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public E get(int index) {
         return data[index];
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean contains(Object e) {
         for (int i = 0; i < size; i++) if (data[i].equals(e)) {
@@ -74,6 +87,9 @@ public final class Bag<E> implements MultiSet<E> {
         return e;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean remove(Object e) {
         for (int i = 0; i < size; i++) {
@@ -98,6 +114,9 @@ public final class Bag<E> implements MultiSet<E> {
         return e;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void clear() {
 		for (int i = 0; i < size; i++) data[i] = null;
@@ -105,6 +124,9 @@ public final class Bag<E> implements MultiSet<E> {
 		size = 0;
 	}
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int size() {
         return size;
@@ -114,6 +136,9 @@ public final class Bag<E> implements MultiSet<E> {
         return data.length;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isEmpty() {
         return size == 0;
@@ -131,17 +156,26 @@ public final class Bag<E> implements MultiSet<E> {
 		System.arraycopy(oldData, 0, data, 0, oldData.length);
 	}
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public <T> T[] toArray(T[] a) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean containsAll(Collection<?> c) {
         for (Object o : c) if (!contains(o)) return false;
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean removeAll(Collection<?> c) {
         boolean changed = false;
@@ -149,14 +183,30 @@ public final class Bag<E> implements MultiSet<E> {
         return changed;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean retainAll(Collection<?> c) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<E> iterator() {
         return new BagIterator();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Object[] toArray() {
+        Object[] array = new Object[size];
+        System.arraycopy(data, 0, array, 0, size);
+        return array;
     }
 
     private class BagIterator implements Iterator<E> {
@@ -167,13 +217,17 @@ public final class Bag<E> implements MultiSet<E> {
          /** True if the current position is within bounds. */
          private boolean next;
  
- 
+        /**
+          * {@inheritDoc}
+          */
          @Override
          public boolean hasNext() {
              return (pointer < size);
          }
  
- 
+         /**
+          * {@inheritDoc}
+          */
          @Override
          public E next() {
              if (pointer == size) throw new NoSuchElementException("No more elements");
@@ -183,23 +237,18 @@ public final class Bag<E> implements MultiSet<E> {
 
              return e;
          }
- 
- 
+
+         /**
+          * {@inheritDoc}
+          */
          @Override
          public void remove() {
-             if (!next) throw new IllegalStateException("Attempting to remove an item from an empty bag");
- 
+             if (!next) throw new IllegalStateException("No more elements");
+
              next = false;
              Bag.this.remove(--pointer);
          }
      
      }
-
-    @Override
-    public Object[] toArray() {
-        Object[] array = new Object[size];
-        System.arraycopy(data, 0, array, 0, size);
-        return array;
-    }
     
 }

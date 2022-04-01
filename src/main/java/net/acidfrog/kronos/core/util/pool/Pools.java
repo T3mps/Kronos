@@ -3,7 +3,7 @@ package net.acidfrog.kronos.core.util.pool;
 import java.util.HashMap;
 import java.util.Map;
 
-import net.acidfrog.kronos.core.datastructure.DynamicArray;
+import net.acidfrog.kronos.core.datastructure.array.DynamicArray;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 
 public final @Internal class Pools {

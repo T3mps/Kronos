@@ -4,13 +4,13 @@ import java.awt.Graphics2D;
 import java.awt.Color;
 
 import net.acidfrog.kronos.core.lang.annotations.Debug;
-import net.acidfrog.kronos.g2drendering.G2DRenderer;
 import net.acidfrog.kronos.mathk.Mathk;
 import net.acidfrog.kronos.mathk.Vector2k;
 import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Collider;
 import net.acidfrog.kronos.physics.geometry.Mass;
 import net.acidfrog.kronos.physics.geometry.Transform;
+import test.util.G2DRenderer;
 
 public non-sealed class Rigidbody implements Body {
 

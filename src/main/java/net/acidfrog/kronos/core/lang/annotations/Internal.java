@@ -7,5 +7,6 @@ import java.lang.annotation.*;
  * 
  * @author Ethan Temprovich
  */
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Internal { }
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.CLASS)
+public @interface Internal {}

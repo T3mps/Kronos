@@ -1,6 +1,5 @@
 package net.acidfrog.kronos.core.lang;
 
-import java.io.Serializable;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -27,8 +26,7 @@ import net.acidfrog.kronos.mathk.random.MT19937;
  * 
  * @author Ethan Temprovich
  */
-public final class UUID implements Serializable, Comparable<UUID> {
-    private static final long serialVersionUID = -4856846361193249489L;
+public final class UUID implements Comparable<UUID> {
 
     /** The most significant 64 bits of this UUID. */
     private final long mostSigBits;

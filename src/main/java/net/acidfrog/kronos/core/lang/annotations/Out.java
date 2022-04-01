@@ -12,4 +12,4 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.CLASS)
-public @interface Out { }
+public @interface Out {}

@@ -9,5 +9,6 @@ import net.acidfrog.kronos.core.Config;
  * 
  * @author Ethan Temprovich
  */
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.FIELD, ElementType.PARAMETER, ElementType.LOCAL_VARIABLE})
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Debug {   }
+public @interface Debug {}

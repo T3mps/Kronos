@@ -3,7 +3,7 @@ package net.acidfrog.kronos.scene.ecs.system;
 import java.util.Comparator;
 import java.util.List;
 
-import net.acidfrog.kronos.core.datastructure.DynamicArray;
+import net.acidfrog.kronos.core.datastructure.array.DynamicArray;
 import net.acidfrog.kronos.scene.ecs.Entity;
 import net.acidfrog.kronos.scene.ecs.EntityListener;
 import net.acidfrog.kronos.scene.ecs.Family;

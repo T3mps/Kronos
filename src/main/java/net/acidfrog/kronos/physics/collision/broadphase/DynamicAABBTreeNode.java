@@ -4,8 +4,8 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import net.acidfrog.kronos.core.lang.annotations.Debug;
-import net.acidfrog.kronos.g2drendering.G2DRenderer;
 import net.acidfrog.kronos.physics.geometry.AABB;
+import test.util.G2DRenderer;
 
 /**
  * Represents a node in a {@link DynamicAABBTree Dynamic AABB Tree}.

@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.core.util.pool;
 
-import net.acidfrog.kronos.core.datastructure.DynamicArray;
+import net.acidfrog.kronos.core.datastructure.array.DynamicArray;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.mathk.Mathk;
 
