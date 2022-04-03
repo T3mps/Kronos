@@ -1,5 +1,6 @@
 package net.acidfrog.kronos.scene;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -15,16 +16,19 @@ import net.acidfrog.kronos.scene.ecs.component.internal.TransformComponent;
 
 public class Scene {
 
-    private Registry registry;
-    private Map<String, Entity> entities;
-
-    private int index;
-    private String name;
-    private boolean loaded;
-
+    protected int index;
+    protected String name;
+    
+    protected Registry registry;
+    protected Map<String, Entity> entities;
+    protected List<Entity> disabledEntities;
+    
+    protected boolean loaded;
+    
     public Scene(String name, int index) {
         this.registry = new Registry();
         this.entities = new HashMap<String, Entity>();
+        this.disabledEntities = new ArrayList<Entity>();
         this.name = name;
         this.index = index;
         this.loaded = false;
@@ -51,14 +55,14 @@ public class Scene {
               .add(new TransformComponent())
               .addAll(components);
         entities.put(name, entity);
-        registry.add(entity);
+        disabledEntities.add(entity);
         return entity;
     }
 
     public void addEntity(Entity entity) {
         validate(entity);
         entities.put(entity.get(TagComponent.class).getName(), entity);
-        registry.add(entity);
+        disabledEntities.add(entity);
     }
 
     void validate(Entity entity) {
@@ -71,6 +75,8 @@ public class Scene {
     }
 
     public void removeEntity(Entity entity) {
+        entities.remove(entity.get(TagComponent.class).getName());
+        disabledEntities.remove(entity);
         registry.destroy(entity);
     }
 
@@ -103,15 +109,20 @@ public class Scene {
     }
 
     public List<Entity> getEntities() {
-        List<Entity> list = registry.getEntities();
-        return Collections.unmodifiableList(list);
+        return Collections.unmodifiableList(disabledEntities);
     }
     
     private class RuntimeScene extends Scene {
 
         RuntimeScene(Scene scene) {
             super(scene.getName(), scene.getIndex());
-            for (var e : scene.getEntities()) addEntity(e);
+            this.registry = scene.registry;
+            this.entities = scene.entities;
+            this.disabledEntities = scene.disabledEntities;
+
+            registry.add(disabledEntities);
+
+            this.loaded = true;
         }
         
     }

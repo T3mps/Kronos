@@ -2,29 +2,28 @@ package net.acidfrog.kronos.core.architecture;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.core.util.Chrono;
+import net.acidfrog.kronos.scene.SceneManager;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.glfw.GLFW.*;
 
 public class Application extends AbstractApplication {
 
-    protected static int fps = 60;
-	protected static int ups = 60;
+	private SceneManager sceneManager;
 
-    public Application() {
-        super();
-    }
-
-    @Override
-    protected void initialize() {
+    public Application(String windowTitle, int... args) {
+        super(windowTitle, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
     }
 
     public void start() {
         super.start();
+		run();
     }
 
     @Override
     public void run() {
         super.run();
 
-        // this.requestFocus();
 		boolean render = false;
 		long lastTime = Chrono.now();
 		double amountOfTicks = 60.0;
@@ -34,7 +33,7 @@ public class Application extends AbstractApplication {
 		int ticks = 0;
 		int frames = 0;
 
-		while (running) {
+		while (running = !glfwWindowShouldClose(window.pointer())) {
 			render = true;
 			long now = Chrono.now();
 			deltaTime += (now - lastTime) / ns;
@@ -74,7 +73,6 @@ public class Application extends AbstractApplication {
 
     @Override
     public synchronized void update(float dt) {
-
     }
 
     @Override
@@ -84,16 +82,29 @@ public class Application extends AbstractApplication {
 
     @Override
     public synchronized void render() {
+		glfwPollEvents();
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		glfwSwapBuffers(window.pointer());
+	}
 
-    }
+	@Override
+	public void stop() {
+		super.stop();
 
-    public void stop() {
-        super.stop();
-        close();
-    }
+		glfwDestroyWindow(window.pointer());
+		glfwTerminate();
+		glfwSetErrorCallback(null).free();
 
-    public void close() {
-        super.close();
-    }
+		close();
+	}
+
+	@Override
+	public void close() {
+		super.close();
+		
+		Logger.instance.close(0);
+		
+		state = state.next();
+	}
 
 }

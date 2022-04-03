@@ -54,9 +54,7 @@ public class KeyCode {
         KR_LEFT_BRACKET  = 91,
         KR_BACKSLASH     = 92,
         KR_RIGHT_BRACKET = 93,
-        KR_GRAVE_ACCENT  = 96,
-        KR_WORLD_1       = 161,
-        KR_WORLD_2       = 162;
+        KR_GRAVE_ACCENT  = 96;
 
     /** Function keys. */
     public static final int

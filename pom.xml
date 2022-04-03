@@ -2,7 +2,7 @@
 <modelVersion>4.0.0</modelVersion>
 <groupId>net.acidfrog</groupId>
 <artifactId>kronos-engine</artifactId>
-<version>0.0.1-SNAPSHOT</version>
+<version>0.0.2-SNAPSHOT</version>
 
 <properties>
 	<maven.compiler.source>1.17</maven.compiler.source>
@@ -79,11 +79,6 @@
 		<groupId>org.lwjgl</groupId>
 		<artifactId>lwjgl-stb</artifactId>
 		<classifier>${lwjgl.natives}</classifier>
-	</dependency>
-		<dependency>
-		<groupId>org.joml</groupId>
-		<artifactId>joml</artifactId>
-		<version>${joml.version}</version>
 	</dependency>
 </dependencies>
 </project>

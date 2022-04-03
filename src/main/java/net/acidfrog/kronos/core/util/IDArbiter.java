@@ -22,8 +22,8 @@ public final class IDArbiter {
     public static final int MAX_ID_COUNT = 1 << 24 ;
      
     /** The cached ids. */
-    private static final int[] cache = new int[MAX_ID_COUNT];
-    static { for (int i = 0; i < MAX_ID_COUNT; i++) cache[i] = i; }
+    private final int[] cache = new int[MAX_ID_COUNT];
+    
 
     /**
      * The atomic pointer, which holds the current index. Starts at -1
@@ -34,15 +34,17 @@ public final class IDArbiter {
     private static volatile AtomicInteger pointer = new AtomicInteger(-1);
 
     /** Hidden constructor. */
-    private IDArbiter() {}
+    public IDArbiter() {
+        for (int i = 0; i < MAX_ID_COUNT; i++) cache[i] = i;
+    }
 
     /**
      * Moves the {@link #pointer} to the next availible id and returns it.
      * 
      * @return the next availible id.
      */
-    public static int next() {
-        synchronized (IDArbiter.class) {
+    public int next() {
+        synchronized (this) {
             if (pointer.intValue() + 1 < MAX_ID_COUNT) {
                 return cache[pointer.incrementAndGet()];
             } throw new KronosError(KronosErrorLibrary.INDEX_OUT_OF_BOUNDS);

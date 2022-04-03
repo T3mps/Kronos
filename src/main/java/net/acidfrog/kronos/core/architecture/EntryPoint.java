@@ -10,7 +10,7 @@ public final class EntryPoint {
 
     public static void main(String[] args) {
         Chrono.Clock clock = new Chrono.Clock(true);
-        AbstractApplication app = new Application();
+        AbstractApplication app = new Application(AbstractApplication.DEFAULT_WINDOW_TITLE);
         app.start();
         clock.stop();
         System.out.println("Application ran for " + clock.durationSeconds() + " seconds.");

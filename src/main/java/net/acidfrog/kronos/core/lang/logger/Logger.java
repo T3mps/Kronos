@@ -28,6 +28,7 @@ public final class Logger implements LoggerI {
      * Corresponding levels:
      * 
      * <ul>
+     * <li>{@link LogLevel#ALL}</li>
      * <li>{@link LogLevel#TRACE}</li>
      * <li>{@link LogLevel#DEBUG}</li>
      * <li>{@link LogLevel#INFO}</li>
@@ -197,6 +198,14 @@ public final class Logger implements LoggerI {
         }
         
         if (logToFile) logToFile(LogLevel.INFO, "Logger(" + instanceID + ") { " + n + " } closed @ " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")));
+    }
+
+    public PrintStream getOutputStream() {
+        return log;
+    }
+
+    public PrintStream getErrorStream() {
+        return error;
     }
 
 }

@@ -1,21 +1,42 @@
 package net.acidfrog.kronos.core.architecture;
 
+import net.acidfrog.kronos.core.util.InputHandler;
+import net.acidfrog.kronos.math.Vector4f;
+
+/**
+ * 
+ * @apiNote When overriding non-abstract methods inherited from this class, it 
+ *         is crucial to call super.method() to ensure that the default behavior
+ *         is executed. Otherwise, you will have to write your own code to handle
+ *         backend bindings, such as GLFW.
+ */
 public abstract class AbstractApplication implements Runnable {
 
+    public static final int DEFAULT_WINDOW_WIDTH = 1280;
+    public static final int DEFAULT_WINDOW_HEIGHT = 720;
+    public static final String DEFAULT_WINDOW_TITLE = "Kronos";
+
+    protected static int fps = 60;
+	protected static int ups = 60;
+
     protected KronosState state;
+    protected Window window;
     protected volatile boolean running = false;
 
-    public AbstractApplication() {
+    public AbstractApplication(String windowTitle, int... args) {
         this.state = KronosState.INITIALIZING;
+        this.window = (args.length >= 2) ? new Window(args[0], args[1], windowTitle) : new Window();
         initialize();
     }
 
-    protected abstract void initialize();
+    protected void initialize() {
+        window.initialize().setClearColor(new Vector4f(0f, 0f, 0f, 0f));
+        InputHandler.initialize(window.pointer());
+    }
 
     public void start() {
         if (state != KronosState.INITIALIZING) throw new IllegalStateException("Cannot start application in state " + state);
         state = state.next();
-        this.running = true;
         
         // implementation
     }

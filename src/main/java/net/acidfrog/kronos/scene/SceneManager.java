@@ -5,25 +5,30 @@ import java.util.Map;
 
 public final class SceneManager {
 
-    private static int nextIndex = -1;
-    private static int currentScene = -1;
+    private int nextIndex = -1;
+    private int currentScene = -1;
 
-    private static Map<Integer, Scene> sceneByIndex = new HashMap<Integer, Scene>();
-    private static Map<String, Scene> sceneByName = new HashMap<String, Scene>();
+    private Map<Integer, Scene> sceneByIndex = new HashMap<Integer, Scene>();
+    private Map<String, Scene> sceneByName = new HashMap<String, Scene>();
 
-    private SceneManager() {}
+    public SceneManager(Scene... scenes) {
+        for (Scene scene : scenes) {
+            sceneByIndex.put(nextIndex, scene);
+            sceneByName.put(scene.getName(), scene);
+            nextIndex++;
+        }
 
-    public static Scene addScene(String name) {
-        Scene scene = new Scene(name, ++nextIndex);
-        sceneByIndex.put(nextIndex, scene);
-        sceneByName.put(name, scene);
+        if (scenes.length > 0) currentScene = 0;
+    }
 
+    public Scene addScene(Scene scene) {
+        sceneByIndex.put(++nextIndex, scene);
+        sceneByName.put(scene.getName(), scene);
         if (currentScene == -1) currentScene = nextIndex;
-
         return scene;
     }
 
-    public static Scene nextScene() {
+    public Scene nextScene() {
         if (currentScene == -1) return null;
 
         sceneByIndex.get(currentScene).close();
@@ -34,7 +39,7 @@ public final class SceneManager {
         return sceneByIndex.get(currentScene);
     }
 
-    public static Scene previousScene() {
+    public Scene previousScene() {
         if (currentScene == -1) return null;
 
         sceneByIndex.get(currentScene).close();
@@ -45,31 +50,31 @@ public final class SceneManager {
         return sceneByIndex.get(currentScene);
     }
 
-    public static Scene getScene(int index) {
+    public Scene getScene(int index) {
         return sceneByIndex.get(index);
     }
 
-    public static Scene getScene(String name) {
+    public Scene getScene(String name) {
         return sceneByName.get(name);
     }
 
-    public static Scene getCurrentScene() {
+    public Scene getCurrentScene() {
         return currentScene == -1 ? null : sceneByIndex.get(currentScene);
     }
 
-    public static Scene removeScene(int index) {
+    public Scene removeScene(int index) {
         Scene scene = sceneByIndex.remove(index);
         sceneByName.remove(scene.getName());
         return scene;
     }
 
-    public static Scene removeScene(String name) {
+    public Scene removeScene(String name) {
         Scene scene = sceneByName.remove(name);
         sceneByIndex.remove(scene.getIndex());
         return scene;
     }
 
-    public static void clear() {
+    public void clear() {
         sceneByIndex.clear();
         sceneByName.clear();
         nextIndex = -1;

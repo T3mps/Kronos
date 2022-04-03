@@ -10,6 +10,7 @@ public final class KronosErrorLibrary {
     public final record KronosErrorMessage(String message) {   }
 
     // GENERAL ERRORS
+    public static final KronosErrorMessage INTERNAL_APPLICATION_STATE_ERROR = new KronosErrorMessage("Internal application state error");
     public static final KronosErrorMessage NOT_IMPLEMENTED = new KronosErrorMessage("Function not implemented");
     public static final KronosErrorMessage INVALID_OFFSET = new KronosErrorMessage("Invalid offset");
     public static final KronosErrorMessage OFFSET_OUT_OF_BOUNDS = new KronosErrorMessage("Offset out of bounds");
@@ -70,5 +71,16 @@ public final class KronosErrorLibrary {
     public static final KronosErrorMessage INVALID_INTERVAL = new KronosErrorMessage("Invalid interval: minimum must be less than maximum");
     public static final KronosErrorMessage RAY_ZERO_DIRECTION = new KronosErrorMessage("Invalid ray: direction must be non-zero");
     public static final KronosErrorMessage NULL_BODY = new KronosErrorMessage("Invalid body: body must not be null");
+
+    // RENDERING ERRORS
+    public static final KronosErrorMessage GLFW_INIT_FAILED = new KronosErrorMessage("Unable to initialize GLFW");
+    public static final KronosErrorMessage GLFW_WINDOW_CREATION_FAILED = new KronosErrorMessage("Unable to create GLFW window");
+    public static final KronosErrorMessage SHADER_FILE_NOT_FOUND = new KronosErrorMessage("Shader file not found");
+    public static final KronosErrorMessage SHADER_HEADER_NOT_PRESENT = new KronosErrorMessage("Shader header not present; a shader must define its type");
+    public static final KronosErrorMessage VERTEX_OR_FRAGMENT_SHADER_NOT_FOUND = new KronosErrorMessage("Vertex or fragment shader not found");
+    public static final KronosErrorMessage UNSUPPORTED_SHADER_TYPE = new KronosErrorMessage("Unsupported shader type detected");
+    public static final KronosErrorMessage VERTEX_SHADER_COMPILATION_FAILED = new KronosErrorMessage("Shader compilation failed");
+    public static final KronosErrorMessage FRAGMENT_SHADER_COMPILATION_FAILED = new KronosErrorMessage("Shader compilation failed");
+    public static final KronosErrorMessage SHADER_LINKING_FAILED = new KronosErrorMessage("Shader linking failed");
 
 }

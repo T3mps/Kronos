@@ -1,11 +1,15 @@
 package net.acidfrog.kronos.core.architecture;
 
+import net.acidfrog.kronos.core.lang.error.KronosError;
+import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
+
 public enum KronosState {
 
     INITIALIZING {
 
         @Override
         public KronosState next() {
+            System.out.println("Initializing...");
             return STARTING;
         }
     },
@@ -13,12 +17,14 @@ public enum KronosState {
 
         @Override
         public KronosState next() {
+            System.out.println("Starting application...");
             return RUNNING;
         }
     },
     RUNNING {
         @Override
         public KronosState next() {
+            System.out.println("Stopping application...");
             return STOPPING;
         }
     },
@@ -26,6 +32,7 @@ public enum KronosState {
 
         @Override
         public KronosState next() {
+            System.out.println("Closing application...");
             return TERMINATED;
         }
     },
@@ -33,14 +40,14 @@ public enum KronosState {
 
         @Override
         public KronosState next() {
-            return this;
+            return ERROR;
         }
     },
     ERROR {
 
         @Override
         public KronosState next() {
-            return this;
+            throw new KronosError(KronosErrorLibrary.INTERNAL_APPLICATION_STATE_ERROR);
         }
     };
     

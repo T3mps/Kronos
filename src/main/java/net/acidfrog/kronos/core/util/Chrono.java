@@ -6,29 +6,20 @@ import net.acidfrog.kronos.core.lang.logger.Logger;
 
 public final class Chrono {
 
-    private static final int NANOS_PER_MICRO     =   0b00001111_01000010_01000001;
-    
-    private static final int NANOS_PER_MILLI     =   0b00001111_01000010_01000000;
+    private static final int NANOS_PER_MICRO     =   1000;
 
-    private static final int NANOS_PER_SECOND    =   0b00001111_01000010_01000001;
+    private static final int NANOS_PER_MILLI     =   1_000_000;
 
-    private static final int NANOS_PER_MINUTE    =   0b00001111_01000010_01000010;
+    private static final int NANOS_PER_SECOND    =   1_000_000_000;
 
-    private static final int NANOS_PER_HOUR      =   0b00001111_01000010_01000011;
-    
-    private static final int MICRO_PER_MILLI     =   0b00001111_01000010_01000100;
+    private static final long NANOS_PER_MINUTE    =   60_000_000_000L;
 
-    private static final int MICRO_PER_SECOND    =   0b00001111_01000010_01000101;
+    private static final long NANOS_PER_HOUR      =   3_600_000_000_000L;
 
-    private static final int MICRO_PER_MINUTE    =   0b00001111_01000010_01000110;
+    private static final int MILLIS_PER_MINUTE  =   60_000;
 
-    private static final int MICRO_PER_HOUR      =   0b00001111_01000010_01000111;
+    private static final int MILLIS_PER_HOUR    =   3_600_000;
 
-    private static final int MILLIS_PER_SECOND   =   0b00001111_01000010_01000100;
-
-    private static final int MILLIS_PER_MINUTE   =   0b00001111_01000010_01000101;
-
-    private static final int MILLIS_PER_HOUR     =   0b00001111_01000010_01000110;
 
     private Chrono() {}
 
@@ -89,11 +80,11 @@ public final class Chrono {
     }
 
     public static final long microToMilli(long micro) {
-        return micro * MILLIS_PER_SECOND;
+        return micro * NANOS_PER_MICRO;
     }
 
     public static final long microToSecond(long micro) {
-        return micro * MILLIS_PER_SECOND;
+        return micro * NANOS_PER_MICRO;
     }
 
     public static final long microToMinute(long micro) {
@@ -109,19 +100,19 @@ public final class Chrono {
     }
 
     public static final long milliToMicro(long milli) {
-        return milli * MICRO_PER_MILLI;
+        return milli * NANOS_PER_MICRO;
     }
 
     public static final long milliToSecond(long milli) {
-        return milli * MICRO_PER_SECOND;
+        return milli * NANOS_PER_MILLI;
     }
 
     public static final long milliToMinute(long milli) {
-        return milli * MICRO_PER_MINUTE;
+        return milli * MILLIS_PER_MINUTE;
     }
 
     public static final long milliToHour(long milli) {
-        return milli * MICRO_PER_HOUR;
+        return milli *  MILLIS_PER_HOUR;
     }
 
     public static final long secondToNano(long second) {
@@ -129,11 +120,11 @@ public final class Chrono {
     }
 
     public static final long secondToMicro(long second) {
-        return second * MICRO_PER_SECOND;
+        return second * NANOS_PER_SECOND;
     }
 
     public static final long secondToMilli(long second) {
-        return second * MILLIS_PER_SECOND;
+        return second * NANOS_PER_SECOND;
     }
 
     public static final long secondToMinute(long second) {
@@ -149,7 +140,7 @@ public final class Chrono {
     }
 
     public static final long minuteToMicro(long minute) {
-        return minute * MICRO_PER_MINUTE;
+        return minute * MILLIS_PER_MINUTE;
     }
 
     public static final long minuteToMilli(long minute) {
@@ -169,7 +160,7 @@ public final class Chrono {
     }
 
     public static final long hourToMicro(long hour) {
-        return hour * MICRO_PER_HOUR;
+        return hour * MILLIS_PER_HOUR;
     }
 
     public static final long hourToMilli(long hour) {

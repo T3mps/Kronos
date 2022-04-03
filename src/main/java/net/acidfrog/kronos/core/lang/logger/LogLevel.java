@@ -11,7 +11,7 @@ import net.acidfrog.kronos.core.Config;
  */
 public enum LogLevel {
 
-    ALL("[ALL]", Ansi.TEXT_GRAY, Ansi.TEXT_VOID, true),
+    ALL("[ALL]   ", Ansi.TEXT_GRAY, Ansi.TEXT_VOID, true),
 
     /**
      * The trace level is used for diagnostic messages. These messages are

@@ -14,4 +14,8 @@ public sealed class KronosError extends Error permits KronosGeometryError {
 		super(error.message());
 	}
 
+	public KronosError(KronosErrorMessage error, String string) {
+		super(error.message() + ": " + string);
+	}
+
 }
