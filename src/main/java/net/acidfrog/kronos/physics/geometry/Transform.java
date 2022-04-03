@@ -2,6 +2,7 @@ package net.acidfrog.kronos.physics.geometry;
 
 import net.acidfrog.kronos.mathk.Mathk;
 import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.scene.ecs.component.internal.TransformComponent;
 
 /**
  * Represents a 2D transform object. This is used to represent the position and
@@ -9,10 +10,6 @@ import net.acidfrog.kronos.mathk.Vector2k;
  * and the rotation is held in its own {@link Rotation} object. tl;dr: the rotation
  * object holds the rotation in radians, and the rotation matrix. The matrix is used
  * to rotate a {@link Vector2k vector}.
- * 
- * <p>
- * NOTE: Do not use this class as a component directly. This class extends
- * {@link AbstractComponent} becuase of the way java handles abstract class inheritance.
  * 
  * @author Ethan Temprovich
  * @see TransformComponent

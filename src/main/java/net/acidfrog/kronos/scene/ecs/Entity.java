@@ -1,8 +1,6 @@
 package net.acidfrog.kronos.scene.ecs;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import net.acidfrog.kronos.core.datastructure.multiset.Bag;
@@ -12,20 +10,41 @@ import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.scene.ecs.component.Component;
 import net.acidfrog.kronos.scene.ecs.signal.Signal;
 
+/**
+ * An entity is unambiguously a collection of {@link Component components}.
+ *  
+ * @since 0.0.2
+ * @version 0.0.2
+ * @author Ethan Temprovich
+ */
+
 public final class Entity {
 
+    /** Can be used to bitmask an Entity; not used internally */
     public int flags;
     
+    /** Reference to the {@link Registry} this entity belongs to */
     private Registry registry;
+
+    /** The {@link Signal} that is dispatched when a component is added to this entity */
     public final Signal<Entity> onComponentAdd;
+
+    /** The {@link Signal} that is dispatched when a component is removed to this entity */
     public final Signal<Entity> onComponentRemove;
     
+    /** A {@link MultiSet multiset} which holds the {@link Component components} attached to this entity */
     private MultiSet<Component> components;
+    
+    /** Internal lookup table mapping {@link Class classes} to {@link Component components} */
     private Map<Class<?>, Component> componentMap;
 
+    /** Indicates if this entity is to be processed */
     private boolean enabled;
     
-    Entity() {
+    /**
+     * Default constructor.
+     */
+    public Entity() {
         this.flags = 0;
         this.registry = null;
         this.onComponentAdd = new Signal<Entity>();
@@ -35,7 +54,12 @@ public final class Entity {
         this.enabled = false;
     }
 
-    Entity(Entity entity) {
+    /**
+     * Copy constructor.
+     * 
+     * @param entity
+     */
+    public Entity(final Entity entity) {
         this.flags = 0;
         this.registry = entity.registry;
         this.onComponentAdd = entity.onComponentAdd;
@@ -45,10 +69,16 @@ public final class Entity {
         this.enabled = entity.enabled;
     }
 
-    public static Entity create() {
-        return new Entity();
-    }
-
+    /**
+     * Adds a component to this entity.
+     * 
+     * <p>
+     * A {@link Component} may not be added to an entity whilst it is already attached
+     * to an entity, or the entity is currently {@link #enabled}.
+     * 
+     * @param component
+     * @return this
+     */
     public final Entity add(final Component component) {
         if (component == null) throw new KronosError(KronosErrorLibrary.NULL_COMPONENT);
         if (enabled || registry != null) throw new KronosError(KronosErrorLibrary.COMPONENT_MODIFICATION_WHILE_ENABLED);
@@ -56,23 +86,45 @@ public final class Entity {
         
         components.add(component);
         component.setParent(this);
-        onComponentAdd();
+        onComponentAdd.dispatch(this);
 
         if (enabled && !component.isEnabled()) component.enable();
 
         return this;
     }
 
+    /**
+     * Adds all specified {@link Component components} to this entity.
+     * 
+     * <p>
+     * A {@link Component} may not be added to an entity whilst it is already attached
+     * to an entity, or the entity is currently {@link #enabled}.
+     * 
+     * @param components
+     * @return this
+     */
     public final Entity addAll(final Component... components) {
         for (var c : components) add(c);
         return this;
     }
 
+    /**
+     * Adds all of the specified entities' {@link Component components} to this entity.
+     * 
+     * @param entity
+     * @return this
+     */
     public final Entity addAll(final Entity entity) {
         for (var c : entity.components) add(c);
         return this;
     }
 
+    /**
+     * Queries whether this entity contains the specified {@link Component component}.
+     * 
+     * @param componentClass
+     * @return true if this entity contains the specified component
+     */
     public final boolean has(final Class<?> componentClass) {
         if (componentMap.containsKey(componentClass)) return true;
 
@@ -83,11 +135,24 @@ public final class Entity {
         return false;
     }
 
+    /**
+     * Queries whether this entity contains all of the specified {@link Component components}.
+     * 
+     * @param componentClasses
+     * @return true if this entity contains all of the specified components
+     */
     public final boolean has(final Class<?>... componentClasses) {
         for (var c : componentClasses) if (!has(c)) return false;
         return true;
     }
 
+    /**
+     * Queries whether this entity contains an instance of a {@link Component component}.
+     * 
+     * @param <T> the subclass of component
+     * @param component
+     * @return true if this entity contains the instance
+     */
     public final <T extends Component> boolean has(final T component) {
         if (component == null) throw new KronosError(KronosErrorLibrary.NULL_COMPONENT);
         if (componentMap.containsKey(component.getClass())) return true;
@@ -99,50 +164,52 @@ public final class Entity {
         return false;
     }
 
+    /**
+     * Returns the {@link Component component} of the specified type if present; null otherwise.
+     * 
+     * @param <T> the class of the component
+     * @param componentClass
+     * @return the component of the specified class if it exists, null otherwise
+     */
     public final <T extends Component> T get(final Class<T> componentClass) {
         Component com = componentMap.get(componentClass);
         if (com != null) return componentClass.cast(com);
         
-        for (var component : components) {
-            if (componentClass.isInstance(component)) {
-                componentMap.put(componentClass, component);
-                return componentClass.cast(component);
-            }
+        for (var component : components) if (componentClass.isInstance(component)) {
+            componentMap.put(componentClass, component);
+            return componentClass.cast(component);
         }
 
         return null;
     }
 
-    @SafeVarargs
-    public final <T extends Component> List<T> get(final Class<T>... componentClasses) {
-        return get(Family.define(componentClasses));
-    }
-
-    @SuppressWarnings("unchecked")
-    public final <T extends Component> List<T> get(final Family family) {
-        List<T> result = new ArrayList<T>();
-
-        for (var componentClass : family.getTypes()) {
-            T com = get((Class<T>) componentClass);
-            if (com != null) result.add(com);
-        }
-
-        return result;
-    }
-
+    /**
+     * Removes the and returns specified {@link Component component} from this entity, if present.
+     * 
+     * @param <T> the class of the component
+     * @param componentClass
+     * @return the removed component
+     */
     public final <T extends Component> T remove(final Class<T> componentClass) {
         if (enabled || registry != null) throw new KronosError(KronosErrorLibrary.COMPONENT_MODIFICATION_WHILE_ENABLED);
         T component = get(componentClass);
 
         components.remove(component);
         component.setParent(null);
-        onComponentRemove();
+        onComponentRemove.dispatch(this);
 
         if (enabled && component.isEnabled()) component.disable();
 
         return componentClass.cast(component);
     }
 
+    /**
+     * Removes an instance of a {@link Component component} from this entity, if present.
+     * 
+     * @param <T> the subclass of component
+     * @param component
+     * @return the removed component
+     */
     public final <T extends Component> T remove(final T component) {
         if (component == null) throw new KronosError(KronosErrorLibrary.NULL_COMPONENT);
         if (enabled || registry != null) throw new KronosError(KronosErrorLibrary.COMPONENT_MODIFICATION_WHILE_ENABLED);
@@ -150,13 +217,16 @@ public final class Entity {
 
         components.remove(component);
         component.setParent(null);
-        onComponentRemove();
+        onComponentRemove.dispatch(this);
 
         if (enabled && component.isEnabled()) component.disable();
 
         return component;
     }
 
+    /**
+     * Removes all of the specified {@link Component components} from this entity.
+     */
     void flush() {
         for (Component component : components) {
             component.setParent(null);
@@ -167,32 +237,46 @@ public final class Entity {
         componentMap.clear();
     }
 
-    void onComponentAdd() {
-        onComponentAdd.dispatch(this);
-    }
-
-    void onComponentRemove() {
-        onComponentRemove.dispatch(this);
-    }
-
+    /**
+     * @return the {@link Registry} this entity belongs to.
+     */
     public Registry getRegistry() {
         return registry;
     }
 
+    /**
+     * Sets this entity's {@link Registry}.
+     * 
+     * @param registry
+     * @return this
+     */
     public Entity setRegistry(Registry registry) {
         this.registry = registry;
         return this;
     }
 
+    /**
+     * Removes this entity's {@link Registry}.
+     * 
+     * @return this
+     */
     public Entity removeRegistry() {
         this.registry = null;
         return this;
     }
 
+    /**
+     * @return whether this entity is enabled or not.
+     */
     public boolean isEnabled() {
         return enabled;
     }
 
+    /**
+     * Enables this entity and its {@link Component components}.
+     * 
+     * @return this
+     */
     public Entity enable() {
         if (enabled) return this;
         for (Component component : components) if (!component.isEnabled()) component.enable();
@@ -200,6 +284,11 @@ public final class Entity {
         return this;
     }
 
+    /**
+     * Disables this entity and its {@link Component components}.
+     * 
+     * @return this
+     */
     public Entity disable() {
         if (!enabled) return this;
         for (Component component : components) if (component.isEnabled()) component.disable();
@@ -207,10 +296,16 @@ public final class Entity {
         return this;
     }
 
+    /**
+     * @return the {@link Component}s attached to this entity.
+     */
     MultiSet<Component> getComponents() {
         return components;
     }
 
+    /**
+     * @inheritDoc java.lang.Object#hashCode()
+     */
     @Override
     public int hashCode() {
         int result = 1;
@@ -224,6 +319,9 @@ public final class Entity {
         return result;
     }
 
+    /**
+     * @inheritDoc java.lang.Object#equals(java.lang.Object)
+     */
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
@@ -249,6 +347,9 @@ public final class Entity {
         return true;
     }
 
+    /**
+     * @inheritDoc java.lang.Object#toString()
+     */
     @Override
     public String toString() {
         return new StringBuilder()

@@ -1,10 +1,10 @@
 package test.tests.ecs;
 
 import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.scene.ecs.Registry;
 import net.acidfrog.kronos.scene.ecs.Entity;
 import net.acidfrog.kronos.scene.ecs.EntityListener;
 import net.acidfrog.kronos.scene.ecs.Family;
+import net.acidfrog.kronos.scene.ecs.Registry;
 import net.acidfrog.kronos.scene.ecs.component.AbstractComponent;
 import net.acidfrog.kronos.scene.ecs.signal.SignalListener;
 import net.acidfrog.kronos.scene.ecs.system.IterativeIntervalSystem;
@@ -85,7 +85,7 @@ public class ECSTest {
         }
 
         @Override
-        protected void processEntity(Entity entity) {
+        protected void process(Entity entity) {
             transform = entity.get(TransformComponent.class);
             rigidbody = entity.get(RigidbodyComponent.class);
 

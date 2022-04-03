@@ -23,7 +23,7 @@ import net.acidfrog.kronos.core.lang.Std;
 public final class Version {
 
     /** Holds the version numbers, 3 parts. */
-    private static final byte[] VERSION = { 0x00, 0x00, 0x02 };
+    private static final byte[] VERSION = { 0x00, 0x00, 0x03 };
 
     /** The build name. */
     private static final String BUILD = "neon dynasty";
