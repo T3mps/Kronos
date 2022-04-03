@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 
 /**
  * The 'Standard Library' for Kronos. Contains inner$classes

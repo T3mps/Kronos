@@ -2,7 +2,7 @@ package test.util;
 
 import java.awt.event.KeyEvent;
 
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Vector2k;
 
 public class Camera {
 

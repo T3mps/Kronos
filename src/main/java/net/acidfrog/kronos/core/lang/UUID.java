@@ -4,7 +4,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import net.acidfrog.kronos.core.lang.assertions.Asserts;
-import net.acidfrog.kronos.mathk.random.MT19937;
+import net.acidfrog.kronos.math.random.MT19937;
 
 /**
  * This class stores two {@link Long 64 bit integers} that represent a greater

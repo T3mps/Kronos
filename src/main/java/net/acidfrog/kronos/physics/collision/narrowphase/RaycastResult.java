@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.physics.collision.narrowphase;
 
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * Holds the result of a raycast.

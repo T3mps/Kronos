@@ -4,8 +4,8 @@ import java.awt.Graphics2D;
 import java.awt.Color;
 
 import net.acidfrog.kronos.core.lang.annotations.Debug;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Collider;
 import net.acidfrog.kronos.physics.geometry.Mass;

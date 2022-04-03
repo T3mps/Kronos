@@ -8,9 +8,9 @@ import java.awt.geom.Path2D;
 import java.awt.BasicStroke;
 
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
-import net.acidfrog.kronos.mathk.Vector3f;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
+import net.acidfrog.kronos.math.Vector3f;
 import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Circle;
 import net.acidfrog.kronos.physics.geometry.Polygon;

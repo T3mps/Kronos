@@ -1,7 +1,7 @@
 package net.acidfrog.kronos.physics.geometry;
 
 import net.acidfrog.kronos.core.util.Validatable;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * Represents a {@link Shape} that can be used for inputs to methods present in

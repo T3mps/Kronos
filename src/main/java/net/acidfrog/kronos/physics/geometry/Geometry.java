@@ -7,8 +7,8 @@ import java.util.List;
 
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.core.lang.error.KronosGeometryError;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * Static geometry functions and variables.

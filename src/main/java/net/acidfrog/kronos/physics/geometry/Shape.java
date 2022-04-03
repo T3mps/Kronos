@@ -1,7 +1,7 @@
 package net.acidfrog.kronos.physics.geometry;
 
-import net.acidfrog.kronos.mathk.Intervalf;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Intervalf;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * A 2D, geometric representation for regular forms of different objects.

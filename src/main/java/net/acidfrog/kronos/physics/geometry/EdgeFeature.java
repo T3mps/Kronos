@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.physics.geometry;
 
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * Represents an indexed edge of a {@link Collider}.

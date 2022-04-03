@@ -2,7 +2,7 @@ package net.acidfrog.kronos.core.datastructure.algorithm.search;
 
 import java.util.Random;
 
-import net.acidfrog.kronos.mathk.random.MT19937;
+import net.acidfrog.kronos.math.random.MT19937;
 
 public final class QuickSelect {
 

@@ -1,8 +1,8 @@
 package net.acidfrog.kronos.physics.collision.narrowphase;
 
-import net.acidfrog.kronos.mathk.Intervalf;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Intervalf;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.geometry.Circle;
 import net.acidfrog.kronos.physics.geometry.Collider;
 import net.acidfrog.kronos.physics.geometry.Transform;

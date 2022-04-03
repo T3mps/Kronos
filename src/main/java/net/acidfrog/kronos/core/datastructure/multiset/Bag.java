@@ -4,7 +4,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 
 /**
  * A bag is a collection of items that can be added to and removed from.

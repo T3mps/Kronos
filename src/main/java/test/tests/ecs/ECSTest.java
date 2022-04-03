@@ -1,6 +1,6 @@
 package test.tests.ecs;
 
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 import net.acidfrog.kronos.scene.ecs.Entity;
 import net.acidfrog.kronos.scene.ecs.EntityListener;
 import net.acidfrog.kronos.scene.ecs.Family;

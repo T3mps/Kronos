@@ -1,10 +1,10 @@
 package net.acidfrog.kronos.physics.geometry;
 
 import net.acidfrog.kronos.core.util.Validatable;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.core.lang.error.KronosGeometryError;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
 
 /**
  * Represents an axis-aligned bounding box. Common {@link AABB}

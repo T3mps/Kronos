@@ -6,9 +6,9 @@ import java.util.List;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.core.lang.error.KronosGeometryError;
-import net.acidfrog.kronos.mathk.Intervalf;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Intervalf;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * Represents a 2D polygon. A polygon is defined by a set of vertices,

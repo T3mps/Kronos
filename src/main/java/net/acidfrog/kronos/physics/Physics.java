@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.physics;
 
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 import net.acidfrog.kronos.physics.collision.narrowphase.DistanceDetector;
 import net.acidfrog.kronos.physics.collision.narrowphase.NarrowphaseDetector;
 import net.acidfrog.kronos.physics.collision.narrowphase.RaycastDetector;

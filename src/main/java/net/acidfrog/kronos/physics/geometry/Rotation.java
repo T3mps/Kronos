@@ -1,9 +1,9 @@
 package net.acidfrog.kronos.physics.geometry;
 
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Matrix2k;
-import net.acidfrog.kronos.mathk.RoundingMode;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Matrix2k;
+import net.acidfrog.kronos.math.RoundingMode;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * Stores the rotation properties of an object. The rotation value

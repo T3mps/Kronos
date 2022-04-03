@@ -3,7 +3,7 @@ package net.acidfrog.kronos.physics.collision.broadphase;
 import java.util.Iterator;
 import java.util.List;
 
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.collision.CollisionPair;
 import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Ray;

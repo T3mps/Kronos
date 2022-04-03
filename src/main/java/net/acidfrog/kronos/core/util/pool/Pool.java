@@ -2,7 +2,7 @@ package net.acidfrog.kronos.core.util.pool;
 
 import net.acidfrog.kronos.core.datastructure.array.DynamicArray;
 import net.acidfrog.kronos.core.lang.annotations.Internal;
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 
 /**
  * A pool of objects that can be reused to avoid allocation.

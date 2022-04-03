@@ -16,8 +16,8 @@ import javax.swing.JFrame;
 
 import net.acidfrog.kronos.core.Config;
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.collision.broadphase.BroadphaseDetector;
 import net.acidfrog.kronos.physics.collision.narrowphase.DistanceDetector;
 import net.acidfrog.kronos.physics.collision.narrowphase.GJK;

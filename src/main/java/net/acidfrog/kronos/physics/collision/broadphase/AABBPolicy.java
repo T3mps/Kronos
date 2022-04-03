@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.physics.collision.broadphase;
 
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 
 public abstract non-sealed class AABBPolicy implements BroadphasePolicy {
 

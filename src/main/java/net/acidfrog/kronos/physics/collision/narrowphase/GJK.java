@@ -1,8 +1,8 @@
 package net.acidfrog.kronos.physics.collision.narrowphase;
 
 import net.acidfrog.kronos.core.lang.annotations.Out;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.Physics;
 import net.acidfrog.kronos.physics.geometry.Circle;
 import net.acidfrog.kronos.physics.geometry.Collider;

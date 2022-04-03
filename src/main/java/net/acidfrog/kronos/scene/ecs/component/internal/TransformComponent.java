@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.scene.ecs.component.internal;
 
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.geometry.Transform;
 import net.acidfrog.kronos.scene.ecs.component.AbstractComponent;
 

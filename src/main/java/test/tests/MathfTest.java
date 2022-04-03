@@ -1,8 +1,8 @@
 package test.tests;
 
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Matrix2k;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Matrix2k;
+import net.acidfrog.kronos.math.Vector2k;
 
 public class MathfTest {
     

@@ -3,7 +3,7 @@ package net.acidfrog.kronos.core.datastructure.array;
 import java.util.Comparator;
 
 import net.acidfrog.kronos.core.datastructure.algorithm.sort.Sort;
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 
 public sealed class DynamicArray<E> implements Array<E> permits ImmutableDynamicArray<E> {
 

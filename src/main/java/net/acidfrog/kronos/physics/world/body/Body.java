@@ -1,6 +1,6 @@
 package net.acidfrog.kronos.physics.world.body;
 
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.collision.broadphase.BroadphaseMember;
 
 public sealed interface Body extends BroadphaseMember permits Rigidbody {

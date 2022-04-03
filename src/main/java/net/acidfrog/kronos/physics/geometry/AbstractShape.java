@@ -1,7 +1,7 @@
 package net.acidfrog.kronos.physics.geometry;
 
-import net.acidfrog.kronos.mathk.Intervalf;
-import net.acidfrog.kronos.mathk.Vector2k;
+import net.acidfrog.kronos.math.Intervalf;
+import net.acidfrog.kronos.math.Vector2k;
 
 /**
  * An base implementation of a {@link Shape}. It is recommended

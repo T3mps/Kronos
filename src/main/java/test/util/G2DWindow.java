@@ -13,8 +13,8 @@ import java.awt.Shape;
 import java.awt.BasicStroke;
 import java.awt.FontMetrics;
 
-import net.acidfrog.kronos.mathk.Vector2k;
-import net.acidfrog.kronos.mathk.Vector3f;
+import net.acidfrog.kronos.math.Vector2k;
+import net.acidfrog.kronos.math.Vector3f;
 import net.acidfrog.kronos.physics.geometry.AABB;
 
 public class G2DWindow {

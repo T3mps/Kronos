@@ -8,8 +8,8 @@ import java.util.Locale;
 
 import net.acidfrog.kronos.core.lang.annotations.Internal;
 import net.acidfrog.kronos.core.lang.logger.Logger;
-import net.acidfrog.kronos.mathk.Mathk;
-import net.acidfrog.kronos.mathk.Options;
+import net.acidfrog.kronos.math.Mathk;
+import net.acidfrog.kronos.math.Options;
 
 /**
  * Configuration options for Kronos.

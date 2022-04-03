@@ -2,7 +2,7 @@ package net.acidfrog.kronos.core.datastructure;
 
 import java.util.LinkedList;
 
-import net.acidfrog.kronos.mathk.Mathk;
+import net.acidfrog.kronos.math.Mathk;
 
 public final class CyclicList<E> implements Cloneable {
     
