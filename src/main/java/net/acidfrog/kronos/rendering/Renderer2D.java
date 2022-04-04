@@ -1,8 +1,8 @@
 package net.acidfrog.kronos.rendering;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Deque;
 
+import net.acidfrog.kronos.core.datastructure.Deck;
 import net.acidfrog.kronos.rendering.component.SpriteRendererComponent;
 import net.acidfrog.kronos.scene.component.TransformComponent;
 import net.acidfrog.kronos.scene.ecs.Entity;
@@ -13,10 +13,10 @@ public class Renderer2D {
     static final Family REQUIRED = Family.define(SpriteRendererComponent.class, TransformComponent.class);
     static final int MAX_BATCH_SIZE = 1000;
 
-    private List<Batch> batches;
+    private Deque<Batch> batches;
 
     public Renderer2D() {
-        this.batches = new ArrayList<Batch>();
+        this.batches = new Deck<Batch>();
     }
     
     public void add(Entity entity) {
@@ -26,18 +26,17 @@ public class Renderer2D {
 
         for (Batch batch : batches) {
             if (batch.isFull()) continue;
-            else {
-                batch.add(entity);
-                added = true;
-                break;
-            }
+            
+            batch.add(entity);
+            added = true;
+            break;
         }
 
         if (!added) {
             Batch batch = new Batch();
             batch.add(entity);
+            batches.push(batch);
             batch.begin();
-            batches.add(batch);
         }
     }
 

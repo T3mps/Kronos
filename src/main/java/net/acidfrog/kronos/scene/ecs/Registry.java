@@ -383,6 +383,17 @@ public final class Registry {
         updating = false;
     }
 
+    public void uncappedUpdate() {
+        if (updating) return;
+        updating = true;
+        
+        for (var s : systems) if (s.isEnabled()) {
+            s.update();
+        }
+        
+        updating = false;
+    }
+
     /**
      * Destroys the registry alongside its {@link Entity entities} and {@link System systems}.
      * 

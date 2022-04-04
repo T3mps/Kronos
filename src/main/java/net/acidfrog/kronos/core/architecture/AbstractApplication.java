@@ -24,13 +24,19 @@ public abstract class AbstractApplication implements Runnable {
     protected volatile boolean running = false;
 
     public AbstractApplication(String windowTitle, int... args) {
-        this.state = KronosState.INITIALIZING;
+        this.state = KronosState.ENTRY;
         this.window = (args.length >= 2) ? new Window(args[0], args[1], windowTitle) : new Window();
         initialize();
     }
-
+    
     protected void initialize() {
-        window.initialize().setClearColor(new Vector4f(0f, 0f, 0f, 0f));
+        if (state != KronosState.ENTRY) throw new IllegalStateException("Cannot initialize application in state " + state);
+        state = state.next();
+        
+        window.initialize()
+              .vsync(false)
+              .setClearColor(new Vector4f(0f, 0f, 0f, 0f));
+              
         InputHandler.initialize(window.pointer());
     }
 

@@ -25,6 +25,12 @@ public interface EntitySystem {
     public abstract void update(float dt);
 
     /**
+     * Update not bound to delta time. Useful for rendering systems.
+     */
+    public default void update() {
+    }
+
+    /**
      * Binds the system to the specified {@link Registry}.
      * 
      * @param registry

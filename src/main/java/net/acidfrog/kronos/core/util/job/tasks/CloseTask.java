@@ -7,7 +7,7 @@ public @Internal interface CloseTask extends Task {
 
     @Override
     public default void execute() {
-        Logger.instance.logInfo("Job system closed.");
+        Logger.logInfo("Job system closed.");
     }
 
 }

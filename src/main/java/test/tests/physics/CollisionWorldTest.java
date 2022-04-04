@@ -69,15 +69,15 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 
 		if (thread != null && n != 0) {
 			try {
-				Logger.instance.logWarn("Attempting to join main thread...");
+				Logger.logWarn("Attempting to join main thread...");
 				thread.join();
 			} catch (InterruptedException e) {
-				Logger.instance.logError("Thread join failed: " + e.getMessage());
+				Logger.logError("Thread join failed: " + e.getMessage());
 				n++;
 			}
 		}
 
-		Logger.instance.close(n);
+		Logger.close(n);
 
 		System.exit(n);
 	}
@@ -123,7 +123,7 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 				timer += 1000;
 				fps = frames;
 				ups = ticks;
-				Logger.instance.logInfo("FPS: " + fps + " UPS: " + ups);
+				Logger.logInfo("FPS: " + fps + " UPS: " + ups);
 				frames = 0;
 				ticks = 0;
 			}

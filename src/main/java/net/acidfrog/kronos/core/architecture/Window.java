@@ -45,7 +45,7 @@ public final class Window {
     }
 
     public Window initialize() {
-        GLFWErrorCallback.createPrint(Logger.instance.getErrorStream()).set();
+        GLFWErrorCallback.createPrint(Logger.getErrorStream()).set();
 
         if (!glfwInit()) throw new KronosError(KronosErrorLibrary.GLFW_INIT_FAILED);
 
@@ -68,12 +68,10 @@ public final class Window {
         }
 
         glfwMakeContextCurrent(pointer);
-
+        glfwSwapInterval(1);
         glfwShowWindow(pointer);
 
-        
         GL.createCapabilities();
-
         return this;
     }
 

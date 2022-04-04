@@ -53,11 +53,11 @@ public class G2DRenderer {
 
     public static void render(Graphics2D g2d, Shape shape, Transform transform, Color color) {
         if (shape == null) {
-            Logger.instance.logWarn("Attempted render target is null.");
+            Logger.logWarn("Attempted render target is null.");
             return;
         }
         if (transform == null) {
-            Logger.instance.logWarn("Attempted render transform is null.");
+            Logger.logWarn("Attempted render transform is null.");
             return;
         }
 

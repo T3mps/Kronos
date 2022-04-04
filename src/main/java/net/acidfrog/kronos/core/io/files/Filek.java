@@ -74,7 +74,7 @@ public class Filek {
 			try {
 				reader.close();
 			} catch (Throwable ignored) {
-                Logger.instance.logWarn("Failed to close file reader.");
+                Logger.logWarn("Failed to close file reader.");
 			}
 		}
 		return output.toString();
@@ -95,7 +95,7 @@ public class Filek {
 				try {
                     input.close();
                 } catch (Throwable ignored) {
-                    Logger.instance.logWarn("Failed to close input stream.");
+                    Logger.logWarn("Failed to close input stream.");
                 }
 			}
 			return 0;
@@ -143,7 +143,7 @@ public class Filek {
 			try {
 				stream.close();
 			} catch (Throwable ignored) {
-                Logger.instance.logWarn("Failed to close stream after unsupported encoding exception: " + e.getMessage());
+                Logger.logWarn("Failed to close stream after unsupported encoding exception: " + e.getMessage());
 			}
 		}
 		throw new KronosError(KronosErrorLibrary.FILE_READ_ERROR);

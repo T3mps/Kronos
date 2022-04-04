@@ -30,7 +30,7 @@ public class JobScheduler {
 
                     priorityJobPoolExecutor.execute(job);
                 } catch (InterruptedException e) {
-                    Logger.instance.logFatal("JobScheduler interrupted");
+                    Logger.logFatal("JobScheduler interrupted");
                     break;
                 }
             }

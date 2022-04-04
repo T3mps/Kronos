@@ -692,7 +692,7 @@ public final class Std {
 		
 		public static String truncate(String str, final int maxWidth) {
 			if (maxWidth < 0) {
-				Logger.instance.logError("maxWidth must be greater than or equal to 0");
+				Logger.logError("maxWidth must be greater than or equal to 0");
 				return str;
 			}
 
@@ -718,7 +718,7 @@ public final class Std {
 
 		public static boolean nullCheck(String str) {
 			if (str == null) {
-				Logger.instance.logWarn("null string detected, replaced with empty string");
+				Logger.logWarn("null string detected, replaced with empty string");
 				str = EMPTY;
 				return false;
 			}
@@ -1584,11 +1584,11 @@ public final class Std {
 
 		public static boolean getCyclic(int index, final boolean[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, boolean[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, boolean[]): array is null");
 				return false;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, boolean[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, boolean[]): array.length == 0");
 				return false;
 			}
 
@@ -1597,11 +1597,11 @@ public final class Std {
 
 		public static byte getCyclic(int index, final byte[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
 				return 0;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
 				return 0;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1609,11 +1609,11 @@ public final class Std {
 
 		public static char getCyclic(int index, final char[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
 				return 0;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
 				return 0;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1621,11 +1621,11 @@ public final class Std {
 
 		public static short getCyclic(int index, final short[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
 				return 0;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
 				return 0;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1633,11 +1633,11 @@ public final class Std {
 
 		public static int getCyclic(int index, final int[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
 				return 0;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
 				return 0;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1645,11 +1645,11 @@ public final class Std {
 
 		public static long getCyclic(int index, final long[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
 				return 0;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
 				return 0;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1657,11 +1657,11 @@ public final class Std {
 
 		public static float getCyclic(int index, final float[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
 				return 0;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
 				return 0;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1669,11 +1669,11 @@ public final class Std {
 
 		public static double getCyclic(int index, final double[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array is null");
 				return 0;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, byte[]): array.length == 0");
 				return 0;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1681,11 +1681,11 @@ public final class Std {
 
 		public static <T> T getCyclic(int index, final T[] array) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, T[]): array is null");
+				Logger.logError("ArrayUtils.getCyclic(int, T[]): array is null");
 				return null;
 			}
 			if (array.length == 0) {
-				Logger.instance.logError("ArrayUtils.getCyclic(int, T[]): array.length == 0");
+				Logger.logError("ArrayUtils.getCyclic(int, T[]): array.length == 0");
 				return null;
 			}
 			return (index >= array.length) ? array[index % array.length] : (index < 0) ? array[array.length + index] : array[index];
@@ -1693,7 +1693,7 @@ public final class Std {
 
 		public static boolean contains(final boolean[] array, boolean value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(boolean[], boolean): array is null");
+				Logger.logError("ArrayUtils.contains(boolean[], boolean): array is null");
 				return false;
 			}
 
@@ -1704,7 +1704,7 @@ public final class Std {
 
 		public static boolean contains(final byte[] array, byte value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(byte[], byte): array is null");
+				Logger.logError("ArrayUtils.contains(byte[], byte): array is null");
 				return false;
 			}
 
@@ -1715,7 +1715,7 @@ public final class Std {
 
 		public static boolean contains(final char[] array, char value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(char[], char): array is null");
+				Logger.logError("ArrayUtils.contains(char[], char): array is null");
 				return false;
 			}
 
@@ -1726,7 +1726,7 @@ public final class Std {
 
 		public static boolean contains(final short[] array, short value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(short[], short): array is null");
+				Logger.logError("ArrayUtils.contains(short[], short): array is null");
 				return false;
 			}
 
@@ -1737,7 +1737,7 @@ public final class Std {
 
 		public static boolean contains(final int[] array, int value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(int[], int): array is null");
+				Logger.logError("ArrayUtils.contains(int[], int): array is null");
 				return false;
 			}
 
@@ -1748,7 +1748,7 @@ public final class Std {
 
 		public static boolean contains(final long[] array, long value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(long[], long): array is null");
+				Logger.logError("ArrayUtils.contains(long[], long): array is null");
 				return false;
 			}
 
@@ -1759,7 +1759,7 @@ public final class Std {
 
 		public static boolean contains(final float[] array, float value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(float[], float): array is null");
+				Logger.logError("ArrayUtils.contains(float[], float): array is null");
 				return false;
 			}
 
@@ -1770,7 +1770,7 @@ public final class Std {
 
 		public static boolean contains(final double[] array, double value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(double[], double): array is null");
+				Logger.logError("ArrayUtils.contains(double[], double): array is null");
 				return false;
 			}
 
@@ -1781,7 +1781,7 @@ public final class Std {
 
 		public static <T> boolean contains(final T[] array, T value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(T[], T): array is null");
+				Logger.logError("ArrayUtils.contains(T[], T): array is null");
 				return false;
 			}
 
@@ -1791,7 +1791,7 @@ public final class Std {
 
 		public static <T> boolean contains(final T[] array, T value, T result) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.contains(T[], T): array is null");
+				Logger.logError("ArrayUtils.contains(T[], T): array is null");
 				return false;
 			}
 
@@ -1806,7 +1806,7 @@ public final class Std {
 
 		public static <T, J> boolean containsType(final T[] array,  Class<J> value) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.containsType(T[], T): array is null");
+				Logger.logError("ArrayUtils.containsType(T[], T): array is null");
 				return false;
 			}
 
@@ -1816,7 +1816,7 @@ public final class Std {
 
 		public static <T, J> boolean containsType(final T[] array,  Class<J> value, T result) {
 			if (array == null) {
-				Logger.instance.logError("ArrayUtils.containsType(T[], T): array is null");
+				Logger.logError("ArrayUtils.containsType(T[], T): array is null");
 				return false;
 			}
 
@@ -1837,7 +1837,7 @@ public final class Std {
 
 		public static List<Boolean> toArrayList(final boolean[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1848,7 +1848,7 @@ public final class Std {
 
 		public static List<Byte> toArrayList(final byte[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1859,7 +1859,7 @@ public final class Std {
 
 		public static List<Character> toArrayList(final char[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1870,7 +1870,7 @@ public final class Std {
 
 		public static List<Short> toArrayList(final short[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1881,7 +1881,7 @@ public final class Std {
 
 		public static List<Integer> toArrayList(final int[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1892,7 +1892,7 @@ public final class Std {
 
 		public static List<Long> toArrayList(final long[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1903,7 +1903,7 @@ public final class Std {
 
 		public static List<Float> toArrayList(final float[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1914,7 +1914,7 @@ public final class Std {
 
 		public static List<Double> toArrayList(final double[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1925,7 +1925,7 @@ public final class Std {
 
 		public static List<String> toArrayList(final String[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 
@@ -1936,7 +1936,7 @@ public final class Std {
 
 		public static <T> List<T> toArrayList(final T[] array) {
 			if (array == null) {
-				Logger.instance.logError("Array is null");
+				Logger.logError("Array is null");
 				return null;
 			}
 

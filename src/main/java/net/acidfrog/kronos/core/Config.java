@@ -52,9 +52,6 @@ public final class Config {
     /** Save path for {@link Scene scenes}. */
     public static String SCENE_SAVE_PATH = "data/scenes/";
 
-    /** The default {@link PrintStream output stream} for the {@link Logger}.*/
-    public static final PrintStream LOG_STREAM = System.out;
-
     /** The @link PrintStream error stream} for the {@link Logger}.*/
     public static final PrintStream ERROR_STREAM = System.err;
 
@@ -107,19 +104,19 @@ public final class Config {
      * Logs the current configuration state.
      */
     public static void logEntries() {
-        Logger.instance.logInfo("Operating system: " + Config.OPERATING_SYSTEM);
-		Logger.instance.logInfo("Java version: Java SE " + Config.JAVA_VERSION);
-		Logger.instance.logInfo("Java vendor: " + Config.JAVA_VENDOR);
+        Logger.logInfo("Operating system: " + Config.OPERATING_SYSTEM);
+		Logger.logInfo("Java version: Java SE " + Config.JAVA_VERSION);
+		Logger.logInfo("Java vendor: " + Config.JAVA_VENDOR);
         
-        Logger.instance.logInfo("Kronos version: " + Version.get());
-        Logger.instance.logInfo("Debug mode: " + Config.DEBUG);
-        Logger.instance.logInfo("Release mode: " + Config.RELEASE);
-        Logger.instance.logInfo("Regular update rate: " + Config.REGULAR_UPDATE_RATE);
-        Logger.instance.logInfo("Physics update rate: " + Config.PHYSICS_UPDATE_RATE);
-        Logger.instance.logInfo("Gravity: " + Config.GRAVITY);
-        Logger.instance.logInfo("Fast math: " + Config.FASTMATH);
-        Logger.instance.logInfo("Imprecise math: " + Config.IMPRECISE_MATH);
-        Logger.instance.logInfo("Sin lookup bits: " + Config.SIN_LOOKUP_BITS);
+        Logger.logInfo("Kronos version: " + Version.get());
+        Logger.logInfo("Debug mode: " + Config.DEBUG);
+        Logger.logInfo("Release mode: " + Config.RELEASE);
+        Logger.logInfo("Regular update rate: " + Config.REGULAR_UPDATE_RATE);
+        Logger.logInfo("Physics update rate: " + Config.PHYSICS_UPDATE_RATE);
+        Logger.logInfo("Gravity: " + Config.GRAVITY);
+        Logger.logInfo("Fast math: " + Config.FASTMATH);
+        Logger.logInfo("Imprecise math: " + Config.IMPRECISE_MATH);
+        Logger.logInfo("Sin lookup bits: " + Config.SIN_LOOKUP_BITS);
     }
 
     /**

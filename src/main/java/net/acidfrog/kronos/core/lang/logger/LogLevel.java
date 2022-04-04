@@ -11,7 +11,9 @@ import net.acidfrog.kronos.core.Config;
  */
 public enum LogLevel {
 
-    ALL("[ALL]   ", Ansi.TEXT_GRAY, Ansi.TEXT_VOID, true),
+    INTERNAL("[INTERNAL] ", Ansi.TEXT_BLUE,  Ansi.TEXT_VOID, true),
+
+    ALL("[ALL]      ",  Ansi.TEXT_GRAY, Ansi.TEXT_VOID, true),
 
     /**
      * The trace level is used for diagnostic messages. These messages are
@@ -20,42 +22,42 @@ public enum LogLevel {
      * 
      * @see {@link Config#DEBUG Config}
      */
-    TRACE("[TRACE] ", Ansi.TEXT_CYAN,   Ansi.TEXT_VOID,           Config.DEBUG),
+    TRACE("[TRACE]    ", Ansi.TEXT_CYAN, Ansi.TEXT_VOID,  Config.DEBUG),
 
     /**
      * The debug level is used to log information. These messages are typically
      * very verbose and informative. This level is only enabled if the
      * {@link Config#RELEASE} flag is set to false.
      */
-    DEBUG("[DEBUG] ", Ansi.TEXT_GREEN,  Ansi.TEXT_VOID,           !Config.RELEASE),
+    DEBUG("[DEBUG]    ", Ansi.TEXT_GREEN, Ansi.TEXT_VOID, !Config.RELEASE),
     
     /**
      * The info level is used to log expected application behavior. These messages
      * are nothing for a user to worry about. This level is enabled by
      * default.
      */
-    INFO ("[INFO]  ", Ansi.TEXT_WHITE,  Ansi.TEXT_VOID,           true),
+    INFO ("[INFO]     ", Ansi.TEXT_WHITE, Ansi.TEXT_VOID, true),
     
     /**
      * The warn level is used to log unexpected/undefined behavior. These messages
      * used to inform a user that a problem has occurred, but the application will
      * continue to run. This level is enabled by default.
      */
-    WARN ("[WARN]  ", Ansi.TEXT_YELLOW, Ansi.TEXT_VOID,           true),
+    WARN ("[WARN]     ", Ansi.TEXT_YELLOW, Ansi.TEXT_VOID, true),
     
     /**
      * The error level is used to log behavior that is accessing an unavaiable
      * service or resource. The application may continue to run, but will be in
      * a highly unstable state. This level is enabled by default.
      */
-    ERROR("[ERROR] ", Ansi.TEXT_RED,    Ansi.TEXT_VOID,           true),
+    ERROR("[ERROR]    ", Ansi.TEXT_RED, Ansi.TEXT_VOID, true),
     
     /**
      * The fatal level is used to notify the user that a catastrophic error has
      * occurred that casued the application to hault. This level is enabled by
      * default.
      */
-    FATAL("[FATAL] ", Ansi.TEXT_BLACK,  Ansi.TEXT_RED_BACKGROUND, true);
+    FATAL("[FATAL]    ", Ansi.TEXT_BLACK, Ansi.TEXT_RED_BACKGROUND, true);
     
     /** The tag appended to the front of the message */
     private final String prepend;

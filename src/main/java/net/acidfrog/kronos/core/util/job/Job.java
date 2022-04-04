@@ -20,7 +20,7 @@ public class Job implements Runnable {
         try {
             task.execute();
         } catch (Exception e) {
-            Logger.instance.logWarn("Task not performed: " + name);
+            Logger.logWarn("Task not performed: " + name);
         }
     }
 

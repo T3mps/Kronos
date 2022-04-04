@@ -213,7 +213,7 @@ public final class Chrono {
                 return clock;
             }
 
-            Logger.instance.logWarn("Clock cannot be reset while it is running.");
+            Logger.logWarn("Clock cannot be reset while it is running.");
             return this;
         }
 

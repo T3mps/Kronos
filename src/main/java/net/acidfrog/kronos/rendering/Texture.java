@@ -60,7 +60,7 @@ public class Texture {
         ByteBuffer data = stbi_load(path, width, height, channels, 4);
 
         if (data == null) {
-            Logger.instance.logError("Failed to load texture: " + path);
+            Logger.logError("Failed to load texture: " + path);
             return null;
         }
 
@@ -70,7 +70,7 @@ public class Texture {
         if (channels.get(0) == 3) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width.get(0), height.get(0), 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         else if (channels.get(0) == 4) glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width.get(0), height.get(0), 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
         else {
-            Logger.instance.logError("Failed to load texture: " + path);
+            Logger.logError("Failed to load texture: " + path);
             return null;
         }
 

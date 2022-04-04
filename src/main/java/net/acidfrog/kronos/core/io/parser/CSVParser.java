@@ -27,7 +27,7 @@ public class CSVParser {
             }
             csvReader.close();
         } catch(IOException e) {
-            Logger.instance.logError("Error parsing CSV data: " + csv);
+            Logger.logError("Error parsing CSV data: " + csv);
         }
 
         return result;

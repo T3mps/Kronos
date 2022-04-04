@@ -7,18 +7,25 @@ import net.acidfrog.kronos.scene.Scene;
 import net.acidfrog.kronos.scene.SceneManager;
 
 import static org.lwjgl.opengl.GL11.*;
+
 import static org.lwjgl.glfw.GLFW.*;
 
 public class Application extends AbstractApplication {
 
     public Application(String windowTitle, int... args) {
         super(windowTitle, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
-		
+	}
+
+	@Override
+	public void initialize() {
+		super.initialize();
+
 		@Test
 		Scene scene = new Scene(0);
 		SceneManager.getInstance().addScene(scene);
 	}
 
+	@Override
     public void start() {
         super.start();
 		run();
@@ -66,7 +73,7 @@ public class Application extends AbstractApplication {
 				timer += 1000;
 				fps = frames;
 				ups = ticks;
-				Logger.instance.logInfo("FPS: " + fps + " UPS: " + ups);
+				Logger.logInfo("FPS: " + fps + " UPS: " + ups);
 				frames = 0;
 				ticks = 0;
 			}
@@ -109,7 +116,7 @@ public class Application extends AbstractApplication {
 	public void close() {
 		super.close();
 		
-		Logger.instance.close(0);
+		Logger.close(0);
 		
 		state = state.next();
 	}

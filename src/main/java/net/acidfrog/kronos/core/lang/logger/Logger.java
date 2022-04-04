@@ -16,10 +16,7 @@ import net.acidfrog.kronos.core.Config;
  * 
  * @author Ethan Temprovich
  */
-public final class Logger implements LoggerI {
-
-     /** Singleton. */
-     public static Logger instance = new Logger(Config.LOG_STREAM, Config.ERROR_STREAM, Config.LOG_TO_FILE, Config.ESCALATION_COLORS);
+public final class Logger {
 
     /**
      * Determines which {@link LogLevel}s are enabled.
@@ -54,42 +51,27 @@ public final class Logger implements LoggerI {
     private static final String EXTENSION = ".log";
 
     /** Name of this instance. */
-    private final String instanceName;
+    private static String instanceName = LocalDate.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy"));
 
     /** ID of this instance. */
-    private final long instanceID;
+    private static long instanceID = System.currentTimeMillis();
 
     /** {@link PrintStream output stream} for messages. */
-    private final PrintStream log;
+    private static PrintStream log = System.out;
 
     /** {@link PrintStream output stream} for error messages. */
-    private final PrintStream error;
+    private static PrintStream error = System.err;
 
     /** Enables file output. */
-    private final boolean logToFile;
+    private static boolean logToFile = Config.LOG_TO_FILE;
 
     /** Enables escalation colors. */
-    private final boolean escalationColors;
-
-    /**
-     * Hidden constructor.
-     */
-    private Logger(final PrintStream log, final PrintStream error, final boolean logToFile, final boolean escalationColors) {
-        this.instanceName = LocalDate.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy"));
-        this.instanceID = System.currentTimeMillis();
-        this.log = log;
-        this.error = error;
-        this.logToFile = logToFile;
-        this.escalationColors = escalationColors;
-
-        if (!initialize()) logError("Failed to initialize logger.");
-    }
+    private static boolean escalationColors = Config.ESCALATION_COLORS;
 
     /**
      * @see LoggerI#initialize()
      */
-    @Override
-    public boolean initialize() {
+    public static boolean initialize() {
         logToFile(LogLevel.INFO, "Logger(" + instanceID + ") initialized @ " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")));
         return true;
     }
@@ -97,7 +79,7 @@ public final class Logger implements LoggerI {
     /**
      *  Internal method for file output.
      */
-    private boolean logToFile(final LogLevel level, final String message) {
+    private static boolean logToFile(final LogLevel level, final String message) {
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss");
         String fileName = instanceName + EXTENSION;
 
@@ -112,11 +94,7 @@ public final class Logger implements LoggerI {
         return true;
     }
 
-    /**
-     * @see LoggerI#log(LogLevel, String)
-     */
-    @Override
-    public void log(final LogLevel level, final String message) {
+    public static void log(final LogLevel level, final String message) {
         boolean isError = level.ordinal() >= 4;
         String output = level.getPrepend() + message;
         output = escalationColors ? Ansi.colorize(output, level.getForegroundColor(), level.getBackgroundColor()) : output;
@@ -124,12 +102,16 @@ public final class Logger implements LoggerI {
         (isError ? error : log).println(output);
     }
 
+    public static void logInternal(final String message) {
+        if (LogLevel.INTERNAL.isEnabled()) log(LogLevel.INTERNAL, message);
+    }
+
     /**
      * Logs a message with level {@link LogLevel#ALL ALL}.
      * 
      * @param message the {@link String} to log.
      */
-    public void logAll(final String message) {
+    public static void logAll(final String message) {
         if (LogLevel.ALL.isEnabled()) log(LogLevel.ALL, message);
     }
 
@@ -138,7 +120,7 @@ public final class Logger implements LoggerI {
      * 
      * @param message the {@link String} to log.
      */
-    public void logTrace(final String message) {
+    public static void logTrace(final String message) {
         if (LogLevel.TRACE.isEnabled()) log(LogLevel.TRACE, message);
     }
 
@@ -147,7 +129,7 @@ public final class Logger implements LoggerI {
      * 
      * @param message the {@link String} to log.
      */
-    public void logDebug(final String message) {
+    public static void logDebug(final String message) {
         if (LogLevel.DEBUG.isEnabled()) log(LogLevel.DEBUG, message);
     }
 
@@ -156,7 +138,7 @@ public final class Logger implements LoggerI {
      * 
      * @param message the {@link String} to log.
      */
-    public void logInfo(final String message) {
+    public static void logInfo(final String message) {
         log(LogLevel.INFO, message);
     }
 
@@ -165,7 +147,7 @@ public final class Logger implements LoggerI {
      * 
      * @param message the {@link String} to log.
      */
-    public void logWarn(final String message) {
+    public static void logWarn(final String message) {
         log(LogLevel.WARN, message);
     }
 
@@ -174,7 +156,7 @@ public final class Logger implements LoggerI {
      * 
      * @param message the {@link String} to log.
      */
-    public void logError(final String message) {
+    public static void logError(final String message) {
         log(LogLevel.ERROR, message);
     }
 
@@ -183,16 +165,12 @@ public final class Logger implements LoggerI {
      * 
      * @param message the {@link String} to log.
      */
-    public void logFatal(final String message) {
+    public static void logFatal(final String message) {
         log(LogLevel.FATAL, message);
     }
 
-    /**
-     * @see LoggerI#close(int)
-     */
-    @Override
-    public void close(int n) {
-        synchronized(this) {
+    public static void close(int n) {
+        synchronized(Logger.class) {
             log.close();
             error.close();
         }
@@ -200,11 +178,11 @@ public final class Logger implements LoggerI {
         if (logToFile) logToFile(LogLevel.INFO, "Logger(" + instanceID + ") { " + n + " } closed @ " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("MM-dd-yyyy HH:mm:ss")));
     }
 
-    public PrintStream getOutputStream() {
+    public static PrintStream getOutputStream() {
         return log;
     }
 
-    public PrintStream getErrorStream() {
+    public static PrintStream getErrorStream() {
         return error;
     }
 

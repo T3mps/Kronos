@@ -77,7 +77,7 @@ public final class Reflection {
             return constructor.newInstance();
         } catch (NoSuchMethodException  | SecurityException        | InstantiationException    |
                  IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-            Logger.instance.logFatal("Failed to create instance of class: " + clazz.getName());
+            Logger.logFatal("Failed to create instance of class: " + clazz.getName());
             throw new ReflectionException(e, "Failed to create new instance of class: " + clazz.getName());
         }
 	}
@@ -86,7 +86,7 @@ public final class Reflection {
 		try {
 			return constructor.newInstance();
 		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			Logger.instance.logFatal("Failed to create instance of class: " + constructor.getClass().getSimpleName());
+			Logger.logFatal("Failed to create instance of class: " + constructor.getClass().getSimpleName());
 			return null;
 		}
 	}
