@@ -79,8 +79,9 @@ public final class KronosErrorLibrary {
     public static final KronosErrorMessage SHADER_HEADER_NOT_PRESENT = new KronosErrorMessage("Shader header not present; a shader must define its type");
     public static final KronosErrorMessage VERTEX_OR_FRAGMENT_SHADER_NOT_FOUND = new KronosErrorMessage("Vertex or fragment shader not found");
     public static final KronosErrorMessage UNSUPPORTED_SHADER_TYPE = new KronosErrorMessage("Unsupported shader type detected");
-    public static final KronosErrorMessage VERTEX_SHADER_COMPILATION_FAILED = new KronosErrorMessage("Shader compilation failed");
-    public static final KronosErrorMessage FRAGMENT_SHADER_COMPILATION_FAILED = new KronosErrorMessage("Shader compilation failed");
+    public static final KronosErrorMessage VERTEX_SHADER_COMPILATION_FAILED = new KronosErrorMessage("Vertex shader compilation failed");
+    public static final KronosErrorMessage FRAGMENT_SHADER_COMPILATION_FAILED = new KronosErrorMessage("Fragment shader compilation failed");
     public static final KronosErrorMessage SHADER_LINKING_FAILED = new KronosErrorMessage("Shader linking failed");
+    public static final KronosErrorMessage ATTEMPTED_DRAW_CALL_LACKING_DATA = new KronosErrorMessage("Attempted a draw call without appropriate data");
 
 }

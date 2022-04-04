@@ -1,7 +1,9 @@
 package net.acidfrog.kronos.core.architecture;
 
+import net.acidfrog.kronos.core.lang.annotations.Test;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.core.util.Chrono;
+import net.acidfrog.kronos.scene.Scene;
 import net.acidfrog.kronos.scene.SceneManager;
 
 import static org.lwjgl.opengl.GL11.*;
@@ -9,11 +11,13 @@ import static org.lwjgl.glfw.GLFW.*;
 
 public class Application extends AbstractApplication {
 
-	private SceneManager sceneManager;
-
     public Application(String windowTitle, int... args) {
         super(windowTitle, DEFAULT_WINDOW_WIDTH, DEFAULT_WINDOW_HEIGHT);
-    }
+		
+		@Test
+		Scene scene = new Scene(0);
+		SceneManager.getInstance().addScene(scene);
+	}
 
     public void start() {
         super.start();
@@ -73,17 +77,20 @@ public class Application extends AbstractApplication {
 
     @Override
     public synchronized void update(float dt) {
+		SceneManager.getInstance().update(dt);
     }
 
     @Override
     public synchronized void physicsUpdate(float dt) {
-
     }
 
     @Override
     public synchronized void render() {
 		glfwPollEvents();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		SceneManager.getInstance().render();
+
 		glfwSwapBuffers(window.pointer());
 	}
 

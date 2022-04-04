@@ -23,20 +23,22 @@ public class InputHandler {
             mouseX = xpos;
             mouseY = ypos;
         });
+        
         glfwSetScrollCallback(windowPointer, (window, xoffset, yoffset) -> {
             mouseScrollX = xoffset;
             mouseScrollY = yoffset;
         });
+
         glfwSetMouseButtonCallback(windowPointer, (window, button, action, mods) -> {
             mouseButtons[button] = action == GLFW_PRESS;
         });
+
         glfwSetKeyCallback(windowPointer, (window, key, scancode, action, mods) -> {
             keys[key] = action == GLFW_PRESS;
         });
     }
 
     public static void initialize(long ptr) {
-        System.out.println(ptr);
         instance = new InputHandler(ptr);
     }
 

@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.scene.ecs.component.internal;
+package net.acidfrog.kronos.scene.component;
 
 import net.acidfrog.kronos.core.lang.UUID;
 import net.acidfrog.kronos.scene.ecs.component.AbstractComponent;

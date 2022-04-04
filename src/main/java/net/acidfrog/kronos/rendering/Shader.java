@@ -1,14 +1,12 @@
 package net.acidfrog.kronos.rendering;
 
 import java.io.IOException;
-import java.nio.FloatBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-import org.lwjgl.BufferUtils;
-
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
+import net.acidfrog.kronos.math.Matrix2f;
 import net.acidfrog.kronos.math.Matrix3f;
 import net.acidfrog.kronos.math.Matrix4f;
 import net.acidfrog.kronos.math.Vector2f;
@@ -23,6 +21,10 @@ public final class Shader {
 
     private static final String HEADER = "#type";
     private static final int HEADER_OFFSET = new String(HEADER + " ").length();
+
+    private static final String VERTEX_SHADER = "vertex";
+    private static final String FRAGMENT_SHADER = "fragment";
+    private static final String GEOMETRY_SHADER = "geometry";
 
     private String path;
     private String vertexShaderSource;
@@ -60,9 +62,9 @@ public final class Shader {
             shaderType[count - 1] = source.substring(start, end).trim();
 
             switch (shaderType[count - 1]) {
-                case "vertex":   this.vertexShaderSource = splitString[count];   break;
-                case "fragment": this.fragmentShaderSource = splitString[count]; break;
-                case "geometry": throw new UnsupportedOperationException("Geometry shader not *yet* supported.");
+                case VERTEX_SHADER  : this.vertexShaderSource = splitString[count];   break;
+                case FRAGMENT_SHADER: this.fragmentShaderSource = splitString[count]; break;
+                case GEOMETRY_SHADER: throw new UnsupportedOperationException("Geometry shader not *yet* supported.");
                 default: throw new KronosError(KronosErrorLibrary.UNSUPPORTED_SHADER_TYPE);
             }
 
@@ -159,18 +161,19 @@ public final class Shader {
         glUniform4f(glGetUniformLocation(shaderProgram, name), vector.x, vector.y, vector.z, vector.w);
     }
 
+    public void uploadMatrix2(String name, Matrix2f matrix) {
+        bind();
+        glUniformMatrix2fv(glGetUniformLocation(shaderProgram, name), false, matrix.get(new float[4]));
+    }
+
     public void uploadMatrix3(String name, Matrix3f matrix) {
         bind();
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(9); // 9 floats = 3x3 matrix
-        matrix.get(buffer);
-        glUniformMatrix3fv(glGetUniformLocation(shaderProgram, name), false, buffer);
+        glUniformMatrix3fv(glGetUniformLocation(shaderProgram, name), false, matrix.get(new float[9]));
     }
 
     public void uploadMatrix4(String name, Matrix4f matrix) {
         bind();
-        FloatBuffer buffer = BufferUtils.createFloatBuffer(16); // 16 floats = 4x4 matrix
-        matrix.get(buffer);
-        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name), false, buffer);
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, name), false, matrix.get(new float[16]));
     }
 
     public void uploadTexture(String name, int slot) {

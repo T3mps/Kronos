@@ -7,7 +7,7 @@ import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary.KronosErrorMessage
  * 
  * @author Ethan Temprovich
  */
-public sealed class KronosError extends Error permits KronosGeometryError {
+public sealed class KronosError extends Error permits KronosGeometryError, KronosRenderError {
 	private static final long serialVersionUID = 1L;
 
 	public KronosError(KronosErrorMessage error) {

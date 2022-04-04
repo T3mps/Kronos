@@ -5,13 +5,15 @@ import java.util.Map;
 
 public final class SceneManager {
 
+    private static SceneManager instance;
+
     private int nextIndex = -1;
     private int currentScene = -1;
 
     private Map<Integer, Scene> sceneByIndex = new HashMap<Integer, Scene>();
     private Map<String, Scene> sceneByName = new HashMap<String, Scene>();
 
-    public SceneManager(Scene... scenes) {
+    private SceneManager(Scene... scenes) {
         for (Scene scene : scenes) {
             sceneByIndex.put(nextIndex, scene);
             sceneByName.put(scene.getName(), scene);
@@ -19,6 +21,25 @@ public final class SceneManager {
         }
 
         if (scenes.length > 0) currentScene = 0;
+    }
+
+    public static SceneManager getInstance() {
+        if (instance == null) instance = new SceneManager();
+        return instance;
+    }
+
+    private Scene cache = null;
+
+    public void update(float dt) {
+        if (currentScene == -1) return;
+        if (cache == null) cache = sceneByIndex.get(currentScene);
+        cache.update(dt);
+    }
+
+    public void render() {
+        if (currentScene == -1) return;
+        if (cache == null) cache = sceneByIndex.get(currentScene);
+        cache.render();
     }
 
     public Scene addScene(Scene scene) {

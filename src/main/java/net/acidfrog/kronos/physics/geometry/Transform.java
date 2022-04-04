@@ -2,7 +2,7 @@ package net.acidfrog.kronos.physics.geometry;
 
 import net.acidfrog.kronos.math.Mathk;
 import net.acidfrog.kronos.math.Vector2k;
-import net.acidfrog.kronos.scene.ecs.component.internal.TransformComponent;
+import net.acidfrog.kronos.scene.component.TransformComponent;
 
 /**
  * Represents a 2D transform object. This is used to represent the position and

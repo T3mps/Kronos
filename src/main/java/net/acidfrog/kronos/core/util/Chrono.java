@@ -20,10 +20,9 @@ public final class Chrono {
 
     private static final int MILLIS_PER_HOUR    =   3_600_000;
 
-
     private Chrono() {}
 
-    public final static long now() {
+    public static final long now() {
         return System.nanoTime();
     }
 
@@ -31,27 +30,27 @@ public final class Chrono {
         return System.currentTimeMillis();
     }
 
-    public final static long nanoseconds() {
+    public static final long nanoseconds() {
         return System.nanoTime();
     }
 
-    public final static long microseconds() {
+    public static final long microseconds() {
         return System.nanoTime() / NANOS_PER_MICRO;
     }
 
-    public final static long milliseconds() {
+    public static final long milliseconds() {
         return System.nanoTime() / NANOS_PER_MILLI;
     }
 
-    public final static long seconds() {
+    public static final long seconds() {
         return System.nanoTime() / NANOS_PER_SECOND;
     }
 
-    public final static long minutes() {
+    public static final long minutes() {
         return System.nanoTime() / NANOS_PER_MINUTE;
     }
 
-    public final static long hours() {
+    public static final long hours() {
         return System.nanoTime() / NANOS_PER_HOUR;
     }
 

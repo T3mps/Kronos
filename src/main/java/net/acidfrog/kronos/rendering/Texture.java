@@ -114,10 +114,10 @@ public class Texture {
         if (!(o instanceof Texture)) return false;
 
         Texture t = (Texture) o;
-        return t.width == this.width     &&
-               t.height == this.height   &&
-                t.path.equals(this.path) &&
-                t.id == this.id;
+        return t.width == this.width    &&
+               t.height == this.height  &&
+               t.path.equals(this.path) &&
+               t.id == this.id;
     }
     
 }
