@@ -14,7 +14,7 @@ public final class EntryPoint {
         AbstractApplication app = new Application(AbstractApplication.DEFAULT_WINDOW_TITLE);
         app.start();
         clock.stop();
-       Logger.logInternal("Application ran for " + clock.durationSeconds() + " seconds.");
+        Logger.logInternal("Application ran for " + clock.durationSeconds() + " seconds.");
     }
 
     

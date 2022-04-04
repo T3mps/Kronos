@@ -1,4 +1,3 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic",
-    "vmArguments": "-Xmx1G -XstartOnFirstThread",
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

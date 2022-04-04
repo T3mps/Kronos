@@ -1,6 +1,10 @@
 package net.acidfrog.kronos.core.architecture;
 
+import net.acidfrog.kronos.core.Config;
+
 public class Kronos {
+
+    public static final String NEW_LINE = Config.OPERATING_SYSTEM == Config.OSArbiter.WINDOWS ? "\r\n" : "\n";
 
     public static final int KR_PRESSED  = 1;
     public static final int KR_RELEASED = 0;

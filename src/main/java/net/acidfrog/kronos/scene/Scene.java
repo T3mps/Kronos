@@ -49,7 +49,7 @@ public class Scene {
 
     public void testInit() {
         Entity e = new Entity();
-        e.add(new TransformComponent(new Vector2f(600, 100), 0f, new Vector2f(256, 256)));
+        e.add(new TransformComponent(new Vector2f(600, 100), 0f, new Vector2f(128, 128)));
         e.add(new SpriteRendererComponent(AssetManager.getTexture("assets/textures/default.png")));
         addEntity(e);
 

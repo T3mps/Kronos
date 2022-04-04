@@ -124,7 +124,7 @@ public final class Config {
      * 
      * @author Ethan Temprovich
      */
-    private final class OSArbiter {
+    public final class OSArbiter {
 
         /** Name of 'win'. */
         public static final String WINDOWS         =   "Windows";

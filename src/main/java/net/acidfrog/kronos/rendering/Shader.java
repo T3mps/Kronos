@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import net.acidfrog.kronos.core.architecture.Kronos;
 import net.acidfrog.kronos.core.lang.error.KronosError;
 import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.math.Matrix2f;
@@ -53,11 +54,7 @@ public final class Shader {
         while (count < splitString.length) {
             start = source.indexOf(HEADER, end) + HEADER_OFFSET;
 
-            try { // windows support
-                end = source.indexOf("\r\n", start);
-            } catch (Exception e) { // linux / macOS support
-                end = source.indexOf("\n", start);
-            }
+            end = source.indexOf(Kronos.NEW_LINE, start);
 
             shaderType[count - 1] = source.substring(start, end).trim();
 

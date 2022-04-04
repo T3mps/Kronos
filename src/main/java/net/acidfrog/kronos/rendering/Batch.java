@@ -29,11 +29,12 @@ public class Batch {
     private static final int UV_OFFSET          =  COLOR_OFFSET    + (COLOR_SIZE    * Float.BYTES);
     private static final int TEXTURE_ID_OFFSET  =  UV_OFFSET       + (UV_SIZE       * Float.BYTES);
 
+    private static final int[] TEXTURE_SLOTS = { 0, 1, 2, 3, 4, 5, 6, 7 };
+
     private SpriteRendererComponent[] sprites;
     private TransformComponent[] transforms;
 
     private float[] vertices;
-    private int[] textureSlots = { 0, 1, 2, 3, 4, 5, 6, 7 };
     private int spriteCount;
     private boolean isFull;
 
@@ -111,7 +112,7 @@ public class Batch {
             textures.get(i).bind();
         }
 
-        shader.uploadIntArray("uTextures", textureSlots);
+        shader.uploadIntArray("uTextures", TEXTURE_SLOTS);
 
         glBindVertexArray(vaoID);
         glEnableVertexAttribArray(0);

@@ -10,7 +10,7 @@
 	<java.version>1.17</java.version>
 	<lwjgl.version>3.3.0</lwjgl.version>
 	<joml.version>1.10.3</joml.version>
-	<lwjgl.natives>natives-windows</lwjgl.natives>
+	<lwjgl.natives>natives-macos</lwjgl.natives>
 </properties>
 
 <dependencyManagement>
