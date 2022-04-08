@@ -786,7 +786,7 @@ public final class Std {
 			/**
 			 * Returns a randomized town name.
 			 */
-			public static String randomTownName() {
+			public static String randomSettlementName() {
 				StringBuilder sb = new StringBuilder();
 
 				sb.append(phonetics[Mathk.random(phonetics.length - 1)]);

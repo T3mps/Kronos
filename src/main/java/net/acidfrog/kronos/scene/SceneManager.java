@@ -3,21 +3,24 @@ package net.acidfrog.kronos.scene;
 import java.util.HashMap;
 import java.util.Map;
 
+import net.acidfrog.kronos.core.util.IDArbiter;
+
 public final class SceneManager {
 
     private static SceneManager instance;
 
-    private int nextIndex = -1;
+    private IDArbiter idArbiter;
     private int currentScene = -1;
 
     private Map<Integer, Scene> sceneByIndex = new HashMap<Integer, Scene>();
-    private Map<String, Scene> sceneByName = new HashMap<String, Scene>();
+    private Map<String,  Scene> sceneByName  = new HashMap<String,  Scene>();
 
     private SceneManager(Scene... scenes) {
+        this.idArbiter = new IDArbiter();
+
         for (Scene scene : scenes) {
-            sceneByIndex.put(nextIndex, scene);
+            sceneByIndex.put(idArbiter.next(), scene);
             sceneByName.put(scene.getName(), scene);
-            nextIndex++;
         }
 
         if (scenes.length > 0) currentScene = 0;
@@ -43,9 +46,10 @@ public final class SceneManager {
     }
 
     public Scene addScene(Scene scene) {
-        sceneByIndex.put(++nextIndex, scene);
+        int index = idArbiter.next();
+        sceneByIndex.put(index, scene);
         sceneByName.put(scene.getName(), scene);
-        if (currentScene == -1) currentScene = nextIndex;
+        if (currentScene == -1) currentScene = index;
         return scene;
     }
 
@@ -98,7 +102,7 @@ public final class SceneManager {
     public void clear() {
         sceneByIndex.clear();
         sceneByName.clear();
-        nextIndex = -1;
+        idArbiter.reset();
         currentScene = -1;
     }
 

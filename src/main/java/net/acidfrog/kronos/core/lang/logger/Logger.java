@@ -101,11 +101,7 @@ public final class Logger {
         if (logToFile) logToFile(level, message);
         (isError ? error : log).println(output);
     }
-
-    public static void logInternal(final String message) {
-        if (LogLevel.INTERNAL.isEnabled()) log(LogLevel.INTERNAL, message);
-    }
-
+    
     /**
      * Logs a message with level {@link LogLevel#ALL ALL}.
      * 

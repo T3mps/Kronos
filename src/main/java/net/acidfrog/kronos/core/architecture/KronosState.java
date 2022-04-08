@@ -10,7 +10,7 @@ public enum KronosState {
 
         @Override
         public KronosState next() {
-            Logger.logInternal("Initializing application...");
+            Logger.logInfo("Initializing application...");
             return INITIALIZING;
         }
     },
@@ -28,7 +28,7 @@ public enum KronosState {
 
         @Override
         public KronosState next() {
-            Logger.logInternal("Starting application...");
+            Logger.logInfo("Starting application...");
             return RUNNING;
         }
 
@@ -37,7 +37,7 @@ public enum KronosState {
     RUNNING {
         @Override
         public KronosState next() {
-            Logger.logInternal("Stopping application...");
+            Logger.logInfo("Stopping application...");
             return STOPPING;
         }
 
@@ -47,7 +47,7 @@ public enum KronosState {
 
         @Override
         public KronosState next() {
-            Logger.logInternal("Closing application...");
+            Logger.logInfo("Closing application...");
             return TERMINATED;
         }
 

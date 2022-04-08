@@ -10,9 +10,7 @@ import net.acidfrog.kronos.core.Config;
  * @see {@link Logger}
  */
 public enum LogLevel {
-
-    INTERNAL("[INTERNAL] ", Ansi.TEXT_BLUE,  Ansi.TEXT_VOID, true),
-
+    
     ALL("[ALL]      ",  Ansi.TEXT_GRAY, Ansi.TEXT_VOID, true),
 
     /**

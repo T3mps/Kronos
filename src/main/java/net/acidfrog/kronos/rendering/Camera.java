@@ -32,7 +32,7 @@ public class Camera {
 
     public void adjustProjection() {
         projectionMatrix.identity();
-        projectionMatrix.ortho(viewport.getX(), viewport.getWidth(), viewport.getY(), viewport.getHeight(), viewport.getClipping()[0], viewport.getClipping()[1]);
+        projectionMatrix.ortho(viewport.getLeft(), viewport.getRight(), viewport.getBottom(), viewport.getTop(), viewport.getZNear(), viewport.getZFar());
     }
 
     public Matrix4f getProjectionMatrix() {

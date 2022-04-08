@@ -31,7 +31,7 @@ public final class IDArbiter {
      * 
      * @see #next()
      */
-    private static volatile AtomicInteger pointer = new AtomicInteger(-1);
+    private volatile AtomicInteger pointer = new AtomicInteger(-1);
 
     /** Hidden constructor. */
     public IDArbiter() {
@@ -49,6 +49,13 @@ public final class IDArbiter {
                 return cache[pointer.incrementAndGet()];
             } throw new KronosError(KronosErrorLibrary.INDEX_OUT_OF_BOUNDS);
         }
+    }
+
+    /**
+     * Resets the state of the {@link #pointer} to {@code -1}.
+     */
+    public void reset() {
+        pointer.set(-1);
     }
 
 }

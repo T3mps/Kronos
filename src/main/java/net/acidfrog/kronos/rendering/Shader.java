@@ -21,11 +21,13 @@ import static org.lwjgl.opengl.GL20.glGetShaderInfoLog;
 public final class Shader {
 
     private static final String HEADER = "#type";
-    private static final int HEADER_OFFSET = new String(HEADER + " ").length();
+    private static final int HEADER_OFFSET = HEADER.length() + 1;
 
-    private static final String VERTEX_SHADER = "vertex";
-    private static final String FRAGMENT_SHADER = "fragment";
-    private static final String GEOMETRY_SHADER = "geometry";
+    private static final String VERTEX_SHADER_KEY = "vertex";
+    private static final String FRAGMENT_SHADER_KEY = "fragment";
+    private static final String GEOMETRY_SHADER_KEY = "geometry";
+
+    private static final int SUPPORTED_SHADER_COUNT = 2;
 
     private String path;
     private String vertexShaderSource;
@@ -35,7 +37,12 @@ public final class Shader {
 
     public Shader(String path) {
         this.path = path;
+        this.current = false;
         
+        if (!parse(path)) throw new KronosError(KronosErrorLibrary.UNSUPPORTED_SHADER_TYPE);
+    }
+
+    private boolean parse(String path) {
         String source = null;
         try {
             source = new String(Files.readAllBytes(Paths.get(path)));
@@ -44,9 +51,9 @@ public final class Shader {
         }
 
         String[] splitString = source.split("(" + HEADER + ")( )+([a-zA-Z]+)");
-        if (splitString.length < 2) throw new KronosError(KronosErrorLibrary.VERTEX_OR_FRAGMENT_SHADER_NOT_FOUND);
+        if (splitString.length < SUPPORTED_SHADER_COUNT) throw new KronosError(KronosErrorLibrary.VERTEX_OR_FRAGMENT_SHADER_NOT_FOUND);
 
-        String[] shaderType = new String[splitString.length-1];
+        String[] shaderType = new String[splitString.length - 1];
         int count = 1;
         int start = 0;
         int end = 0;
@@ -59,16 +66,16 @@ public final class Shader {
             shaderType[count - 1] = source.substring(start, end).trim();
 
             switch (shaderType[count - 1]) {
-                case VERTEX_SHADER  : this.vertexShaderSource = splitString[count];   break;
-                case FRAGMENT_SHADER: this.fragmentShaderSource = splitString[count]; break;
-                case GEOMETRY_SHADER: throw new UnsupportedOperationException("Geometry shader not *yet* supported.");
-                default: throw new KronosError(KronosErrorLibrary.UNSUPPORTED_SHADER_TYPE);
+                case   VERTEX_SHADER_KEY: this.vertexShaderSource = splitString[count];   break;
+                case FRAGMENT_SHADER_KEY: this.fragmentShaderSource = splitString[count]; break;
+                case GEOMETRY_SHADER_KEY: throw new UnsupportedOperationException("Geometry shader not *yet* supported.");
+                default: return false;
             }
 
             count++;
         }
 
-        this.current = false;
+        return true;
     }
 
     public Shader compile() {
@@ -86,7 +93,7 @@ public final class Shader {
 
         if (glGetShaderi(fragmentID, GL_COMPILE_STATUS) == GL_FALSE) throw new KronosError(KronosErrorLibrary.FRAGMENT_SHADER_COMPILATION_FAILED, glGetShaderInfoLog(fragmentID, 1024));
 
-        shaderProgram = glCreateProgram();
+        this.shaderProgram = glCreateProgram();
 
         glAttachShader(shaderProgram, vertexID);
         glAttachShader(shaderProgram, fragmentID);

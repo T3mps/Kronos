@@ -27,9 +27,13 @@ public class Renderer2D {
         for (Batch batch : batches) {
             if (batch.isFull()) continue;
             
-            batch.add(entity);
-            added = true;
-            break;
+            Texture texture = entity.get(SpriteRendererComponent.class).getTexture();
+
+            if (texture == null || batch.hasTexture(texture) || batch.hasTextureSlotsAvailable()) {
+                batch.add(entity);
+                added = true;
+                break;
+            }
         }
 
         if (!added) {

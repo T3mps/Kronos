@@ -152,13 +152,10 @@ public class Batch {
         SpriteRendererComponent sprite = sprites[index];
         TransformComponent transform = transforms[index];
 
-        int offset = index * 4 * VERTEX_SIZE;
-
         Vector4f color = sprite.getColor();
-
         Vector2f[] uvs = sprite.getUVs();
-
         int textureID = 0;
+
         if (sprite.hasTexture()) {
             for (int i = 0; i < textures.size(); i++) if (textures.get(i) == sprite.getTexture()) {
                 textureID = i + 1; // 0 is reserved for no texture
@@ -166,18 +163,13 @@ public class Batch {
             }
         }
 
+        int offset = index * 4 * VERTEX_SIZE;
+
         // Add vertices with the appropriate properties
-        float xAdd = 1f;
-        float yAdd = 1f;
-
         for (int i = 0; i < 4; i++) {
-            if (i == 1) yAdd = 0.0f;
-            if (i == 2) xAdd = 0.0f;
-            if (i == 3) yAdd = 1.0f;
-
             // Load position
-            vertices[offset + 0] = transform.getPosition().x + (xAdd * transform.getScale().x());
-            vertices[offset + 1] = transform.getPosition().y + (yAdd * transform.getScale().y());
+            vertices[offset + 0] = transform.getPosition().x + (i >= 2           ? 0f : transform.getScale().x());
+            vertices[offset + 1] = transform.getPosition().y + (i == 1 || i == 2 ? 0f : transform.getScale().y());
 
             // Load color
             vertices[offset + 2] = color.x;
@@ -189,6 +181,7 @@ public class Batch {
             vertices[offset + 6] = uvs[i].x;
             vertices[offset + 7] = uvs[i].y;
 
+            // Load texture ID
             vertices[offset + 8] = textureID;
 
             offset += VERTEX_SIZE;
@@ -197,6 +190,14 @@ public class Batch {
     
     public boolean isFull() {
         return isFull;
+    }
+
+    public boolean hasTexture(Texture texture) {
+        return textures.contains(texture);
+    }
+
+    public boolean hasTextureSlotsAvailable() {
+        return textures.size() < TEXTURE_SLOTS.length;
     }
 
 }

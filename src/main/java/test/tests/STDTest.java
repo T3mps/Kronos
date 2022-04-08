@@ -50,7 +50,7 @@ public class STDTest {
 		// tupleTest();
 		// booleansTest();
 		for (int i = 0; i < 256; i++) {
-			System.out.println(Std.Strings.Generator.randomName() + " from " + Std.Strings.Generator.randomTownName());
+			System.out.println(Std.Strings.Generator.randomName() + " from " + Std.Strings.Generator.randomSettlementName());
 		}
 		
 	}
