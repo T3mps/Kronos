@@ -159,7 +159,7 @@ public class Mathk {
     private static final int lookupTableSizeWithMargin = lookupTableSize + 1;
     private static final float pi2OverLookupSize = PI2 / lookupTableSize;
     private static final float lookupSizeOverPi2 = lookupTableSize / PI2;
-    private static final float sinTable[];
+    private static float sinTable[];
     
     static {
         if (Options.FASTMATH) {

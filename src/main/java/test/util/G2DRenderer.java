@@ -39,10 +39,10 @@ public class G2DRenderer {
         float height = aabb.getHeight();
 
         Path2D.Float path = new Path2D.Float();
-        path.moveTo(x * Camera.instance.getZoomLevel(), -y * Camera.instance.getZoomLevel());
-        path.lineTo((x + width) * Camera.instance.getZoomLevel(), -y * Camera.instance.getZoomLevel());
-        path.lineTo((x + width) * Camera.instance.getZoomLevel(), -(y + height) * Camera.instance.getZoomLevel());
-        path.lineTo(x * Camera.instance.getZoomLevel(), -(y + height) * Camera.instance.getZoomLevel());
+        path.moveTo(x * G2DCamera.instance.getZoomLevel(), -y * G2DCamera.instance.getZoomLevel());
+        path.lineTo((x + width) * G2DCamera.instance.getZoomLevel(), -y * G2DCamera.instance.getZoomLevel());
+        path.lineTo((x + width) * G2DCamera.instance.getZoomLevel(), -(y + height) * G2DCamera.instance.getZoomLevel());
+        path.lineTo(x * G2DCamera.instance.getZoomLevel(), -(y + height) * G2DCamera.instance.getZoomLevel());
         path.closePath();
 
         g2d.setStroke(dashed);
@@ -72,15 +72,15 @@ public class G2DRenderer {
         float rx = Mathk.cos(transform.getRadians()) * radius;
         float ry = Mathk.sin(transform.getRadians()) * radius;
         
-        Ellipse2D.Float elipse = new Ellipse2D.Float((center.x - radius)  * Camera.instance.getZoomLevel(),
-                                                     -(center.y + radius) * Camera.instance.getZoomLevel(),
-                                                     (diameter)           * Camera.instance.getZoomLevel(),
-                                                     (diameter)           * Camera.instance.getZoomLevel());
+        Ellipse2D.Float elipse = new Ellipse2D.Float((center.x - radius)  * G2DCamera.instance.getZoomLevel(),
+                                                     -(center.y + radius) * G2DCamera.instance.getZoomLevel(),
+                                                     (diameter)           * G2DCamera.instance.getZoomLevel(),
+                                                     (diameter)           * G2DCamera.instance.getZoomLevel());
 
-        Line2D.Float line = new Line2D.Float(center.x * Camera.instance.getZoomLevel(),
-                                            -center.y * Camera.instance.getZoomLevel(),
-                                            (center.x + rx) * Camera.instance.getZoomLevel(),
-                                            (-center.y + ry) * Camera.instance.getZoomLevel());
+        Line2D.Float line = new Line2D.Float(center.x * G2DCamera.instance.getZoomLevel(),
+                                            -center.y * G2DCamera.instance.getZoomLevel(),
+                                            (center.x + rx) * G2DCamera.instance.getZoomLevel(),
+                                            (-center.y + ry) * G2DCamera.instance.getZoomLevel());
 
         g2d.setColor(color);
         g2d.fill(elipse);
@@ -97,8 +97,8 @@ public class G2DRenderer {
         for (int i = 0; i < length; i++) vertices[i] = transform.getTransformed(polygon.getVertices()[i]);
         
         Path2D.Float path = new Path2D.Float();
-        path.moveTo(vertices[0].x * Camera.instance.getZoomLevel(), -vertices[0].y * Camera.instance.getZoomLevel());
-        for (int i = 1; i < length; i++) path.lineTo(vertices[i].x * Camera.instance.getZoomLevel(), -vertices[i].y * Camera.instance.getZoomLevel());
+        path.moveTo(vertices[0].x * G2DCamera.instance.getZoomLevel(), -vertices[0].y * G2DCamera.instance.getZoomLevel());
+        for (int i = 1; i < length; i++) path.lineTo(vertices[i].x * G2DCamera.instance.getZoomLevel(), -vertices[i].y * G2DCamera.instance.getZoomLevel());
         path.closePath();
 
         g2d.setColor(color);
@@ -107,8 +107,8 @@ public class G2DRenderer {
         g2d.draw(path);
 
         path = new Path2D.Float();
-        path.moveTo(center.x * Camera.instance.getZoomLevel(), -center.y * Camera.instance.getZoomLevel());
-        path.lineTo(vertices[0].x * Camera.instance.getZoomLevel(), -vertices[0].y * Camera.instance.getZoomLevel());
+        path.moveTo(center.x * G2DCamera.instance.getZoomLevel(), -center.y * G2DCamera.instance.getZoomLevel());
+        path.lineTo(vertices[0].x * G2DCamera.instance.getZoomLevel(), -vertices[0].y * G2DCamera.instance.getZoomLevel());
         path.closePath();
 
         g2d.draw(path);
@@ -119,8 +119,8 @@ public class G2DRenderer {
         Vector2k direction = ray.getDirectionVector();
         Vector2k end = new Vector2k(start.x + direction.x * MAX_RAYCAST, start.y + direction.y * MAX_RAYCAST);
 
-        Line2D.Float line = new Line2D.Float(start.x * Camera.instance.getZoomLevel(), -start.y * Camera.instance.getZoomLevel(),
-                                            end.x * Camera.instance.getZoomLevel(), -end.y * Camera.instance.getZoomLevel());
+        Line2D.Float line = new Line2D.Float(start.x * G2DCamera.instance.getZoomLevel(), -start.y * G2DCamera.instance.getZoomLevel(),
+                                            end.x * G2DCamera.instance.getZoomLevel(), -end.y * G2DCamera.instance.getZoomLevel());
 
         g2d.setColor(color);
         g2d.draw(line);

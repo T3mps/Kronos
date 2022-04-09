@@ -8,9 +8,9 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
-public class InputHandler implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
+public class JavaInputHandler implements KeyListener, MouseListener, MouseMotionListener, MouseWheelListener {
 
-	public static final InputHandler instance = new InputHandler();
+	public static final JavaInputHandler instance = new JavaInputHandler();
 
 	private final int NUM_KEYS = 350;
 	private final int NUM_BUTTONS = 5;
@@ -26,7 +26,7 @@ public class InputHandler implements KeyListener, MouseListener, MouseMotionList
 	public int wheel;
 	private char keyTyped;
 
-	private InputHandler() {
+	private JavaInputHandler() {
 		this.mouseX = 0;
 		this.mouseY = 0;
 		this.prevMouseX = 0;

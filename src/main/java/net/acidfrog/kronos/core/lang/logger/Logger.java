@@ -36,8 +36,8 @@ public final class Logger {
      */
     static final boolean LEVEL_PREDICATE[] = {
                                                 true,            // ALL
-                                                Config.DEBUG,    // TRACE
-                                                !Config.RELEASE, // DEBUG
+                                                Config.getInstance().getBoolean("kronos.debug"),    // TRACE
+                                                !Config.getInstance().getBoolean("kronos.release"), // DEBUG
                                                 true,            // INFO
                                                 true,            // WARN
                                                 true,            // ERROR
@@ -45,7 +45,7 @@ public final class Logger {
                                              };
 
     /** The save path for file output. */
-    private static final String SAVE_PATH = Config.LOGGER_SAVE_PATH;
+    private static final String SAVE_PATH = Config.getInstance().getString("kronos.loggerSavePath");
 
     /** File extension for log files. */
     private static final String EXTENSION = ".log";
@@ -63,10 +63,10 @@ public final class Logger {
     private static PrintStream error = System.err;
 
     /** Enables file output. */
-    private static boolean logToFile = Config.LOG_TO_FILE;
+    private static boolean logToFile = Config.getInstance().getBoolean("kronos.logToFile");
 
     /** Enables escalation colors. */
-    private static boolean escalationColors = Config.ESCALATION_COLORS;
+    private static boolean escalationColors = Config.getInstance().getBoolean("kronos.escalationColors");
 
     /**
      * @see LoggerI#initialize()
@@ -87,7 +87,7 @@ public final class Logger {
             writer.append("[" + sdf.format(new Date()) + "]" + level.getPrepend() + message + "\n");
             writer.close();
         } catch (IOException e) {
-            error.println("Failed to write to log file: " + e.getMessage());
+            error.println("Failed to write to log file: '" + e.getMessage().substring(0, e.getMessage().indexOf(" (")) + "'" + e.getMessage().substring(e.getMessage().indexOf(" (")));
             return false;
         }
 

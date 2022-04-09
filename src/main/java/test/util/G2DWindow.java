@@ -94,33 +94,33 @@ public class G2DWindow {
         if (visible) {
             setBounds();
 
-            Vector2k mouse = new Vector2k(InputHandler.instance.getMouseX(), InputHandler.instance.getMouseY());
+            Vector2k mouse = new Vector2k(JavaInputHandler.instance.getMouseX(), JavaInputHandler.instance.getMouseY());
 
             if (bounds.contains(mouse)) {
                 TitleDrag: {
                     if (titleBounds.contains(mouse) && !dragging) {
-                        if (InputHandler.instance.isButton(1)) {
+                        if (JavaInputHandler.instance.isButton(1)) {
                             dragging = true;
-                            dragOffset = new Vector2k(InputHandler.instance.getMouseX() - position.x, InputHandler.instance.getMouseY() - position.y);
+                            dragOffset = new Vector2k(JavaInputHandler.instance.getMouseX() - position.x, JavaInputHandler.instance.getMouseY() - position.y);
                         }
                     }
         
                     if (dragging) {
-                        position.x = InputHandler.instance.getMouseX() - dragOffset.x;
-                        position.y = InputHandler.instance.getMouseY() - dragOffset.y;
+                        position.x = JavaInputHandler.instance.getMouseX() - dragOffset.x;
+                        position.y = JavaInputHandler.instance.getMouseY() - dragOffset.y;
                     } else break TitleDrag;
                 }
     
                 TitleButton: {
                     if (buttonBounds[0].contains(mouse)) {
-                        if (InputHandler.instance.isButton(1) && !buttonDown) {
+                        if (JavaInputHandler.instance.isButton(1) && !buttonDown) {
                             minimized = !minimized;
                             buttonDown = true;
                         }
                         break TitleButton;
                     }
                     if (buttonBounds[1].contains(mouse)) {
-                        if (InputHandler.instance.isButton(1) && !buttonDown) {
+                        if (JavaInputHandler.instance.isButton(1) && !buttonDown) {
                             visible = false;
                             dragging = false;
                             buttonDown = true;
@@ -131,20 +131,20 @@ public class G2DWindow {
 
                 ScrollBar: {
                     if (buttonBounds[2].contains(mouse)) {
-                        if (InputHandler.instance.isButton(1) && !buttonDown) {
+                        if (JavaInputHandler.instance.isButton(1) && !buttonDown) {
                             buttonDown = true;
                             scrolling = true;
-                            scrollOffset = new Vector2k(0, InputHandler.instance.getMouseY());
+                            scrollOffset = new Vector2k(0, JavaInputHandler.instance.getMouseY());
                         }
                         if (scrolling) {
                             //
                         } else break ScrollBar;
                     }
                     if (buttonBounds[3].contains(mouse)) {
-                        if (InputHandler.instance.isButton(1) && !buttonDown) {
+                        if (JavaInputHandler.instance.isButton(1) && !buttonDown) {
                             buttonDown = true;
                             scrolling = true;
-                            scrollOffset = new Vector2k(0, InputHandler.instance.getMouseY());
+                            scrollOffset = new Vector2k(0, JavaInputHandler.instance.getMouseY());
                         }
                         if (scrolling) {
                             //
@@ -154,7 +154,7 @@ public class G2DWindow {
             }
 
             
-            if (InputHandler.instance.isButtonUp(1)) {
+            if (JavaInputHandler.instance.isButtonUp(1)) {
                 dragging = false;
                 buttonDown = false;
                 scrolling = false;
@@ -282,7 +282,7 @@ public class G2DWindow {
 
                 g2d.setClip(old);
             }
-        } else visible = InputHandler.instance.isKeyDown(KeyEvent.VK_F1);
+        } else visible = JavaInputHandler.instance.isKeyDown(KeyEvent.VK_F1);
     }
 
     public void setContentString(int index, String string) {

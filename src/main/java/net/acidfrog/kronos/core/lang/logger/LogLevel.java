@@ -20,14 +20,14 @@ public enum LogLevel {
      * 
      * @see {@link Config#DEBUG Config}
      */
-    TRACE("[TRACE]    ", Ansi.TEXT_CYAN, Ansi.TEXT_VOID,  Config.DEBUG),
+    TRACE("[TRACE]    ", Ansi.TEXT_CYAN, Ansi.TEXT_VOID,  Config.getInstance().getBoolean("kronos.debug")),
 
     /**
      * The debug level is used to log information. These messages are typically
      * very verbose and informative. This level is only enabled if the
      * {@link Config#RELEASE} flag is set to false.
      */
-    DEBUG("[DEBUG]    ", Ansi.TEXT_GREEN, Ansi.TEXT_VOID, !Config.RELEASE),
+    DEBUG("[DEBUG]    ", Ansi.TEXT_GREEN, Ansi.TEXT_VOID, !Config.getInstance().getBoolean("kronos.release")),
     
     /**
      * The info level is used to log expected application behavior. These messages

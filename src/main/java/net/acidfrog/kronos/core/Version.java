@@ -40,7 +40,7 @@ public final class Version {
      * @return the entire version string.
      */
     public static String get() {
-        return build() + " " + major() + "." + minor() + "." + revision() + (RELEASE.length > 1 ? " " : "") + Std.Strings.join(RELEASE, " | ");
+        return major() + "." + minor() + "." + revision() + (RELEASE.length > 1 ? " " : "") + Std.Strings.join(RELEASE, " | ") + " " + build();
     }
 
     /**

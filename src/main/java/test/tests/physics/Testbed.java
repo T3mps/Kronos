@@ -14,7 +14,6 @@ import java.awt.geom.Line2D;
 
 import javax.swing.JFrame;
 
-import net.acidfrog.kronos.core.Config;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.math.Mathk;
 import net.acidfrog.kronos.math.Vector2k;
@@ -32,9 +31,9 @@ import net.acidfrog.kronos.physics.geometry.Geometry;
 import net.acidfrog.kronos.physics.geometry.Polygon;
 import net.acidfrog.kronos.physics.geometry.Ray;
 import net.acidfrog.kronos.physics.geometry.Transform;
-import test.util.Camera;
+import test.util.G2DCamera;
 import test.util.G2DRenderer;
-import test.util.InputHandler;
+import test.util.JavaInputHandler;
 
 public class Testbed extends Canvas implements Runnable {
     private static final long serialVersionUID = 1L;
@@ -53,16 +52,13 @@ public class Testbed extends Canvas implements Runnable {
 
     public Testbed() {
         Dimension dimension = new Dimension(WIDTH, HEIGHT);
-
 		setMinimumSize(dimension);
 		setMaximumSize(dimension);
 		setPreferredSize(dimension);
 
-		Config.logEntries();
-
         this.frame = new JFrame(TITLE);
 
-        InputHandler.instance.initilize(this);
+        JavaInputHandler.instance.initilize(this);
     }
 
     public synchronized void start() {
@@ -140,7 +136,7 @@ public class Testbed extends Canvas implements Runnable {
     }
     
 
-	// PHYSICS VARIABLES (TODO: Move to PhysicsWorld class)
+	// PHYSICS VARIABLES
 
 	NarrowphaseDetector narrowphaseDetector = new SAT();
 	RaycastDetector raycastDetector = new GJK();
@@ -166,9 +162,9 @@ public class Testbed extends Canvas implements Runnable {
 	// END PHYSICS VARIABLES
 
     public void update(float dt) {
-		Camera.instance.update(dt);
+		G2DCamera.instance.update(dt);
 		G2DRenderer.update(dt);
-		InputHandler.instance.update();
+		JavaInputHandler.instance.update();
 
 		if (transform1.getPosition().x < WIDTH * 0.75f && !bounce) {
 			x = 1;
@@ -206,13 +202,13 @@ public class Testbed extends Canvas implements Runnable {
 		this.clear(g2d);
 		tx = g2d.getTransform();
 		g2d.transform(AffineTransform.getTranslateInstance(getWidth() / 2, getHeight() / 2));
-		g2d.translate((int) Camera.instance.getPosition().x, (int) Camera.instance.getPosition().y);
+		g2d.translate((int) G2DCamera.instance.getPosition().x, (int) G2DCamera.instance.getPosition().y);
 		
 		g2d.setColor(Color.WHITE);
 
 		// the axis extends with the cameras position
-		g2d.drawLine(   (int) Mathk.min(-WIDTH  * 2, -Camera.instance.getPosition().x * 2), 0, (int) Mathk.max(WIDTH  * 2, Camera.instance.getPosition().x * 2), 0);
-		g2d.drawLine(0, (int) Mathk.min(-HEIGHT * 2, -Camera.instance.getPosition().y * 2), 0, (int) Mathk.max(HEIGHT * 2, Camera.instance.getPosition().y * 2));
+		g2d.drawLine(   (int) Mathk.min(-WIDTH  * 2, -G2DCamera.instance.getPosition().x * 2), 0, (int) Mathk.max(WIDTH  * 2, G2DCamera.instance.getPosition().x * 2), 0);
+		g2d.drawLine(0, (int) Mathk.min(-HEIGHT * 2, -G2DCamera.instance.getPosition().y * 2), 0, (int) Mathk.max(HEIGHT * 2, G2DCamera.instance.getPosition().y * 2));
 
 		// start rendering
 
@@ -257,8 +253,8 @@ public class Testbed extends Canvas implements Runnable {
 		if (raycast1) G2DRenderer.render(g2d, new Circle(6), new Transform(result1.getPoint()), Color.MAGENTA);
 		if (raycast2) G2DRenderer.render(g2d, new Circle(6), new Transform(result2.getPoint()), Color.MAGENTA);
 
-		Line2D.Float line = new Line2D.Float(separation.getPointA().x * Camera.instance.getZoomLevel(), -separation.getPointA().y * Camera.instance.getZoomLevel(),
-											 separation.getPointB().x * Camera.instance.getZoomLevel(), -separation.getPointB().y * Camera.instance.getZoomLevel());
+		Line2D.Float line = new Line2D.Float(separation.getPointA().x * G2DCamera.instance.getZoomLevel(), -separation.getPointA().y * G2DCamera.instance.getZoomLevel(),
+											 separation.getPointB().x * G2DCamera.instance.getZoomLevel(), -separation.getPointB().y * G2DCamera.instance.getZoomLevel());
 
         g2d.setColor(sep ? Color.GREEN : Color.ORANGE);
         g2d.draw(line);
@@ -277,7 +273,7 @@ public class Testbed extends Canvas implements Runnable {
 	}
 
 	public Vector2k toWorldCoordinates(Vector2k p) {
-		return Camera.instance.toWorldCoordinates(this.getWidth(), this.getHeight(), p);
+		return G2DCamera.instance.toWorldCoordinates(this.getWidth(), this.getHeight(), p);
 	}
 
 	static GraphicsDevice device = GraphicsEnvironment

@@ -4,9 +4,9 @@ import java.awt.event.KeyEvent;
 
 import net.acidfrog.kronos.math.Vector2k;
 
-public class Camera {
+public class G2DCamera {
 
-    public static final Camera instance = new Camera();
+    public static final G2DCamera instance = new G2DCamera();
 
     private Vector2k position;
     private float zoomLevel = 1.0f;
@@ -16,7 +16,7 @@ public class Camera {
     private static final float MIN_ZOOM = 0.05f;
     private static final float PAN_SPEED = 10f;
     
-    private Camera() {
+    private G2DCamera() {
       this.position = new Vector2k(0, 0);
     }
 
@@ -24,15 +24,15 @@ public class Camera {
       float delta = (PAN_SPEED + dt) * (zoomLevel);
       if (delta <= PAN_SPEED * 0.75f) delta = PAN_SPEED * 0.75f;
 
-      if (InputHandler.instance.isKey(KeyEvent.VK_W)) position.y += delta;
-      if (InputHandler.instance.isKey(KeyEvent.VK_S)) position.y -= delta;
-      if (InputHandler.instance.isKey(KeyEvent.VK_A)) position.x += delta;
-      if (InputHandler.instance.isKey(KeyEvent.VK_D)) position.x -= delta;
+      if (JavaInputHandler.instance.isKey(KeyEvent.VK_W)) position.y += delta;
+      if (JavaInputHandler.instance.isKey(KeyEvent.VK_S)) position.y -= delta;
+      if (JavaInputHandler.instance.isKey(KeyEvent.VK_A)) position.x += delta;
+      if (JavaInputHandler.instance.isKey(KeyEvent.VK_D)) position.x -= delta;
 
-      if (InputHandler.instance.isKey(KeyEvent.VK_Q)      && zoomLevel > MIN_ZOOM) zoomOut();
-      else if (InputHandler.instance.isKey(KeyEvent.VK_E) && zoomLevel < MAX_ZOOM) zoomIn();
+      if (JavaInputHandler.instance.isKey(KeyEvent.VK_Q)      && zoomLevel > MIN_ZOOM) zoomOut();
+      else if (JavaInputHandler.instance.isKey(KeyEvent.VK_E) && zoomLevel < MAX_ZOOM) zoomIn();
 
-      if (InputHandler.instance.isKey(KeyEvent.VK_SPACE)) { originalSize(); position.zero(); }
+      if (JavaInputHandler.instance.isKey(KeyEvent.VK_SPACE)) { originalSize(); position.zero(); }
     }
 
     public final Vector2k toWorldCoordinates(float width, float height, Vector2k p) {

@@ -57,7 +57,7 @@ public class KronDatabase extends KronContainer {
 
     public void serializeToFile(String path) throws KronException {
         if (!path.contains(Kron.DOT_EXTENSION)) path += Kron.DOT_EXTENSION;
-        path = Config.KRON_SAVE_PATH + path;
+        path = Config.getInstance().getString("kronos.kronSavePath") + path;
         
 		byte[] data = new byte[size()];
 		getBytes(data, 0);

@@ -18,9 +18,9 @@ namespace Kronos {
 
         public virtual void OnDestroy();
 
-        public virtual void Update(ref Timestep timestep);
+        public virtual void Update();
 
-        public virtual void PhysicsUpdate(ref Timestep timestep);
+        public virtual void PhysicsUpdate();
 
         public virtual void OnCollisionEnter(ref Collision collision);
 

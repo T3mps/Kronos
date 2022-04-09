@@ -59,22 +59,22 @@ public final class Options {
     /**
      * Whether fast approximations of some java.lang.Math operations should be used.
      */
-    public static final boolean FASTMATH = Config.FASTMATH;
+    public static final boolean FASTMATH = Config.getInstance().getBoolean("kronos.fastmath");
 
     /**
      * Whether imprecise approximations should be used.
      */
-    public static final boolean IMPRECISE_MATH = Config.IMPRECISE_MATH;
+    public static final boolean IMPRECISE_MATH = Config.getInstance().getBoolean("kronos.impreciseMath");
 
     /**
      * When {@link #FASTMATH} is <code>true</code>, whether to use a lookup table for sin/cos.
      */
-    public static final boolean SIN_LOOKUP = Config.SIN_LOOKUP;
+    public static final boolean SIN_LOOKUP = Config.getInstance().getBoolean("kronos.sinLookup");
 
     /**
      * When {@link #SIN_LOOKUP} is <code>true</code>, this determines the table size.
      */
-    public static final int SIN_LOOKUP_BITS = Config.SIN_LOOKUP_BITS;
+    public static final int SIN_LOOKUP_BITS = Config.getInstance().getInt("kronos.sinLookupBits");
 
 //#ifndef __GWT__
     /**

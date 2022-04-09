@@ -1,6 +1,8 @@
 package net.acidfrog.kronos.core.architecture;
 
 import net.acidfrog.kronos.core.Config;
+import net.acidfrog.kronos.core.lang.error.KronosError;
+import net.acidfrog.kronos.core.lang.logger.Logger;
 
 public class Kronos {
 
@@ -151,5 +153,15 @@ public class Kronos {
             KR_KEY_RIGHT_SUPER   = 347,
             KR_KEY_MENU          = 348,
             KR_KEY_LAST          = KR_KEY_MENU;
+
+    //==============================================================================
+    //=================================== MACROS ===================================
+    //==============================================================================
+
+    public static final void FORCE_CLOSE() throws KronosError {
+        Logger.logFatal("FORCE_CLOSE");
+        Logger.close(1);
+        System.exit(1);
+    }
 
 }

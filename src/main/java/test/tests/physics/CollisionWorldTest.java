@@ -11,7 +11,6 @@ import java.awt.geom.AffineTransform;
 
 import javax.swing.JFrame;
 
-import net.acidfrog.kronos.core.Config;
 import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.core.util.Chrono;
 import net.acidfrog.kronos.math.Mathk;
@@ -23,9 +22,9 @@ import net.acidfrog.kronos.physics.world.CollisionWorld;
 import net.acidfrog.kronos.physics.world.body.Body;
 import net.acidfrog.kronos.physics.world.body.Material;
 import net.acidfrog.kronos.physics.world.body.Rigidbody;
-import test.util.Camera;
+import test.util.G2DCamera;
 import test.util.G2DRenderer;
-import test.util.InputHandler;
+import test.util.JavaInputHandler;
 
 public class CollisionWorldTest extends Canvas implements Runnable {
     private static final long serialVersionUID = 1L;
@@ -50,12 +49,10 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 		setMaximumSize(dimension);
 		setPreferredSize(dimension);
 
-		Config.logEntries();
-
         this.frame = new JFrame(TITLE);
         this.world = new CollisionWorld<Rigidbody>();
 
-        InputHandler.instance.initilize(this);
+        JavaInputHandler.instance.initilize(this);
     }
 
     public synchronized void start() {
@@ -135,8 +132,8 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 	int counter = 0;
 
     private void update(float dt) {
-		InputHandler.instance.update();
-        Camera.instance.update(dt);
+		JavaInputHandler.instance.update();
+        G2DCamera.instance.update(dt);
 		G2DRenderer.update(dt);
 
 		if (counter++ % 30 == 0) {
@@ -169,13 +166,13 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 		tx = g2d.getTransform();
 		g2d.transform(AffineTransform.getTranslateInstance(getWidth() / 2, getHeight() / 2));
-		g2d.translate((int) Camera.instance.getPosition().x, (int) Camera.instance.getPosition().y);
+		g2d.translate((int) G2DCamera.instance.getPosition().x, (int) G2DCamera.instance.getPosition().y);
 		
 		g2d.setColor(Color.WHITE);
 
 		// the axis extends with the cameras position
-		g2d.drawLine(   (int) Mathk.min(-WIDTH  * 2, -Camera.instance.getPosition().x * 2), 0, (int) Mathk.max(WIDTH  * 2, Camera.instance.getPosition().x * 2), 0);
-		g2d.drawLine(0, (int) Mathk.min(-HEIGHT * 2, -Camera.instance.getPosition().y * 2), 0, (int) Mathk.max(HEIGHT * 2, Camera.instance.getPosition().y * 2));
+		g2d.drawLine(   (int) Mathk.min(-WIDTH  * 2, -G2DCamera.instance.getPosition().x * 2), 0, (int) Mathk.max(WIDTH  * 2, G2DCamera.instance.getPosition().x * 2), 0);
+		g2d.drawLine(0, (int) Mathk.min(-HEIGHT * 2, -G2DCamera.instance.getPosition().y * 2), 0, (int) Mathk.max(HEIGHT * 2, G2DCamera.instance.getPosition().y * 2));
     
         // start rendering
 

@@ -1,5 +1,7 @@
 package net.acidfrog.kronos.core.architecture;
 
+import net.acidfrog.kronos.core.Config;
+import net.acidfrog.kronos.core.Version;
 import net.acidfrog.kronos.core.util.InputHandler;
 import net.acidfrog.kronos.math.Vector4f;
 
@@ -14,7 +16,7 @@ public abstract class AbstractApplication implements Runnable {
 
     public static final int DEFAULT_WINDOW_WIDTH = 1280;
     public static final int DEFAULT_WINDOW_HEIGHT = 720;
-    public static final String DEFAULT_WINDOW_TITLE = "Kronos";
+    public static final String DEFAULT_WINDOW_TITLE = "kronos " + Version.get() + " [" + Config.OPERATING_SYSTEM + " " + Config.OPERATING_SYSTEM_ARCHITECTURE + "]";
 
     protected static int fps = 60;
 	protected static int ups = 60;

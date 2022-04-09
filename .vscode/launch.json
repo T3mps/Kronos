@@ -3,6 +3,27 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch Config",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.core.Config",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch CollisionWorldTest",
+                "request": "launch",
+                "mainClass": "test.tests.physics.CollisionWorldTest",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Settings",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.core.Settings",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch Testbed",
                 "request": "launch",
                 "mainClass": "test.tests.physics.Testbed",
