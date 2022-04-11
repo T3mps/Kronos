@@ -12,10 +12,10 @@ import net.acidfrog.kronos.scene.ecs.Entity;
 public abstract class AbstractComponent implements Component {
 
     /** The entity this component is attached to */
-    private Entity parent;
+    protected Entity parent;
 
     /** Indicates if this component is enabled */
-    private boolean enabled;
+    protected boolean enabled;
 
     /**
      * Default constructor.

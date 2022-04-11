@@ -11,7 +11,7 @@ import net.acidfrog.kronos.scene.ecs.Family;
 public class Renderer2D {
     
     static final Family REQUIRED = Family.define(SpriteRendererComponent.class, TransformComponent.class);
-    static final int MAX_BATCH_SIZE = 1000;
+    static final int MAX_BATCH_SIZE = 10000;
 
     private Deque<Batch> batches;
 

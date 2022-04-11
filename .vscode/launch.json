@@ -3,6 +3,13 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch PhysicsWorldTest",
+                "request": "launch",
+                "mainClass": "test.tests.physics.PhysicsWorldTest",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch Config",
                 "request": "launch",
                 "mainClass": "net.acidfrog.kronos.core.Config",

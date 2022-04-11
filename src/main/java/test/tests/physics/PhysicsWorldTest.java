@@ -8,6 +8,8 @@ import java.awt.Graphics2D;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.GraphicsEnvironment;
+import java.awt.GraphicsDevice;
 
 import javax.swing.JFrame;
 
@@ -15,18 +17,16 @@ import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.core.util.Chrono;
 import net.acidfrog.kronos.math.Mathk;
 import net.acidfrog.kronos.math.Vector2k;
-import net.acidfrog.kronos.physics.geometry.Collider;
-import net.acidfrog.kronos.physics.geometry.Geometry;
+import net.acidfrog.kronos.physics.geometry.Circle;
 import net.acidfrog.kronos.physics.geometry.Transform;
-import net.acidfrog.kronos.physics.world.CollisionWorld;
-import net.acidfrog.kronos.physics.world.body.Body;
+import net.acidfrog.kronos.physics.world.PhysicsWorld;
 import net.acidfrog.kronos.physics.world.body.Material;
 import net.acidfrog.kronos.physics.world.body.Rigidbody;
 import test.util.G2DCamera;
 import test.util.G2DRenderer;
 import test.util.JavaInputHandler;
 
-public class CollisionWorldTest extends Canvas implements Runnable {
+public class PhysicsWorldTest extends Canvas implements Runnable {
     private static final long serialVersionUID = 1L;
 
     public static final int WIDTH = 800;
@@ -38,19 +38,22 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 
     private Thread thread;
     private JFrame frame;
-    private CollisionWorld<Rigidbody> world;
+	private PhysicsWorld world;
 
     private volatile boolean running = false;
 
-    public CollisionWorldTest() {
+    public PhysicsWorldTest() {
         Dimension dimension = new Dimension(WIDTH, HEIGHT);
-
 		setMinimumSize(dimension);
 		setMaximumSize(dimension);
 		setPreferredSize(dimension);
 
         this.frame = new JFrame(TITLE);
-        this.world = new CollisionWorld<Rigidbody>();
+		this.world = new PhysicsWorld();
+
+		world.add(new Rigidbody(new Transform(), new Circle(50f), Material.m_Static, Rigidbody.Type.STATIC));
+		world.add(new Rigidbody(new Transform(new Vector2k(1, 100)), new Circle(16), Material.m_ExtremeRubber, Rigidbody.Type.DYNAMIC));
+		world.add(new Rigidbody(new Transform(new Vector2k(1, 200)), new Circle(16), Material.m_Rubber, Rigidbody.Type.DYNAMIC));
 
         JavaInputHandler.instance.initilize(this);
     }
@@ -83,26 +86,34 @@ public class CollisionWorldTest extends Canvas implements Runnable {
     public void run() {
 		this.requestFocus();
 		boolean render = false;
-		long lastTime = Chrono.now();
+		long lastTime = System.nanoTime();
 		double amountOfTicks = 60.0;
 		double ns = 1_000_000_000 / amountOfTicks;
 		float deltaTime = 0;
-		long timer = Chrono.nowMillis();
+		long timer = System.currentTimeMillis();
 		int ticks = 0;
 		int frames = 0;
+		
+		double accumulator = 0;
+		float interval = 1.0f / 60.0f;
 
 		while (running) {
 			render = true;
-			long now = Chrono.now();
+			long now = System.nanoTime();
 			deltaTime += (now - lastTime) / ns;
 			lastTime = now;
 
 			while (deltaTime >= 1) {
-				render = true;
 				update(deltaTime);
-				physicsUpdate(deltaTime);
 				ticks++;
 				deltaTime--;
+			}
+
+			accumulator += interval;
+
+			if (accumulator >= 1) {
+				physicsUpdate(interval);
+				accumulator -= 1;
 			}
 
 			if (render) {
@@ -129,30 +140,19 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 		stop(1);
     }
 
-	int counter = 0;
-
-    private void update(float dt) {
-		JavaInputHandler.instance.update();
-        G2DCamera.instance.update(dt);
+    public void update(float dt) {
+		G2DCamera.instance.update(dt);
 		G2DRenderer.update(dt);
-
-		if (counter++ % 30 == 0) {
-			Vector2k position = new Vector2k(Mathk.random(-WIDTH * 2, WIDTH * 2), Mathk.random(-HEIGHT * 2, HEIGHT * 2));
-            float rotation = Mathk.randomRadians();
-            Collider collider = Geometry.generatePolygon(Mathk.random(32, 128), Mathk.random(32, 128));
-            Material material = Material.values()[Mathk.random(Material.values().length - 2)];
-            Rigidbody rb = new Rigidbody(new Transform(position, rotation), collider, material, Body.Type.DYNAMIC);
-            world.add(rb);
-		}
+		JavaInputHandler.instance.update();
+    }
+	
+    public void physicsUpdate(float pdt) {
+		world.update(pdt);
     }
 
-    private void physicsUpdate(float pdt) {
-        world.update(pdt);
-    }
+	AffineTransform tx = new AffineTransform();
 
-    AffineTransform tx = new AffineTransform();
-
-    private void render() {
+    public void render() {
         BufferStrategy bufferStrategy = getBufferStrategy();
 
 		if (bufferStrategy == null) {
@@ -162,8 +162,7 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 
 		Graphics2D g2d = (Graphics2D) getBufferStrategy().getDrawGraphics();
 
-		g2d.setColor(Color.BLACK);
-		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+		this.clear(g2d);
 		tx = g2d.getTransform();
 		g2d.transform(AffineTransform.getTranslateInstance(getWidth() / 2, getHeight() / 2));
 		g2d.translate((int) G2DCamera.instance.getPosition().x, (int) G2DCamera.instance.getPosition().y);
@@ -173,23 +172,35 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 		// the axis extends with the cameras position
 		g2d.drawLine(   (int) Mathk.min(-WIDTH  * 2, -G2DCamera.instance.getPosition().x * 2), 0, (int) Mathk.max(WIDTH  * 2, G2DCamera.instance.getPosition().x * 2), 0);
 		g2d.drawLine(0, (int) Mathk.min(-HEIGHT * 2, -G2DCamera.instance.getPosition().y * 2), 0, (int) Mathk.max(HEIGHT * 2, G2DCamera.instance.getPosition().y * 2));
-    
-        // start rendering
 
-        world.render(g2d);
+		// start rendering
 
-        // stop rendering
+		world.render(g2d);
 
-        g2d.setTransform(tx);
+		// end rendering
+
+		g2d.setTransform(tx);
 
         g2d.dispose();
 		bufferStrategy.show();
-    }
+	}
+
+	private void clear(Graphics2D g2d) {
+		g2d.setColor(Color.BLACK);
+		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
+	}
+
+	public Vector2k toWorldCoordinates(Vector2k p) {
+		return G2DCamera.instance.toWorldCoordinates(this.getWidth(), this.getHeight(), p);
+	}
+
+	static GraphicsDevice device = GraphicsEnvironment
+        .getLocalGraphicsEnvironment().getScreenDevices()[0];
 
     public static void main(String[] args) {
-        CollisionWorldTest main = new CollisionWorldTest();
+        PhysicsWorldTest main = new PhysicsWorldTest();
 
-        main.frame.setResizable(false);
+		main.frame.setResizable(false);
 		main.frame.setTitle(TITLE);
 		main.frame.add(main);
 		main.frame.pack();
@@ -202,5 +213,5 @@ public class CollisionWorldTest extends Canvas implements Runnable {
 		main.frame.setVisible(true);
 		main.start();
     }
-    
+
 }

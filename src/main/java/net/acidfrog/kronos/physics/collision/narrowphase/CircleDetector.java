@@ -58,7 +58,6 @@ public final class CircleDetector /* implements NarrowphaseDetector, RaycastDete
      * @return {@code true} if the circles are colliding, {@code false} otherwise
      */
     public static boolean detect(Circle circleA, Transform transformA, Circle circleB, Transform transformB, @Out Penetration penetration) {
-        penetration.clear();
         Vector2k centerA = transformA.getTransformed(circleA.getCenter());
         Vector2k centerB = transformB.getTransformed(circleB.getCenter());
         Vector2k to = centerB.sub(centerA);

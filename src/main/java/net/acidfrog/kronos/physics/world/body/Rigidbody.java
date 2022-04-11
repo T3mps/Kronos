@@ -10,7 +10,6 @@ import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Collider;
 import net.acidfrog.kronos.physics.geometry.Mass;
 import net.acidfrog.kronos.physics.geometry.Transform;
-import test.util.G2DRenderer;
 
 public non-sealed class Rigidbody implements Body {
 
@@ -24,10 +23,6 @@ public non-sealed class Rigidbody implements Body {
 	public float torque;
 	private final Type type;
 	
-	@Debug
-	public boolean colliding;
-	public Color color;
-
     public Rigidbody(Transform transform, Collider collider, Mass mass, Material material, Type type) {
         this.transform = transform;
 		this.velocity = new Vector2k(0f);
@@ -38,8 +33,6 @@ public non-sealed class Rigidbody implements Body {
 		this.angularVelocity = 0f;
 		this.torque = 0f;
         this.type = type;
-		
-		this.color = new Color(Mathk.random(0, 255), Mathk.random(0, 255), Mathk.random(0, 255));
 	}
 
 	public Rigidbody(Transform transform, Collider collider, Material material, Type type) {
@@ -47,32 +40,11 @@ public non-sealed class Rigidbody implements Body {
 		this.velocity = new Vector2k(0f);
 		this.force = new Vector2k(0f);
         this.collider = collider;
-        this.mass = collider.computeMass(material.density());
+        this.mass = (type == Type.STATIC) ? Mass.INFINITE : collider.computeMass(material.density());
         this.material = material;
 		this.angularVelocity = 0f;
 		this.torque = 0f;
         this.type = type;
-
-		this.color = new Color(Mathk.random(0, 255), Mathk.random(0, 255), Mathk.random(0, 255));
-    }
-
-	@Debug
-	private Vector2k direction = new Vector2k(0f, 0f);
-    private float speed = 0;
-	int counter = 0;
-
-	@Debug
-    public void update(float dt) {
-        counter++;
-        if (counter % 64 == 0) direction = getRandomDirection();
-        
-		applyImpulse(new Vector2k(speed * direction.x, speed * direction.y));
-		if (speed == 0) speed = mass.getMass() * 0.05f;
-    }
-
-	@Debug
-    private Vector2k getRandomDirection() {
-        return new Vector2k(Mathk.random(-1f, 1f), Mathk.random(-1f, 1f));
     }
 
     @Override
@@ -96,11 +68,6 @@ public non-sealed class Rigidbody implements Body {
 		return collider.computeAABB(transform);
 	}
 
-	@Debug
-	public void render(Graphics2D g2d) {
-		G2DRenderer.render(g2d, collider, transform, colliding ? Color.RED : color);
-	}
-
 	public Transform getTransform() {
 		return transform;
 	}
@@ -113,8 +80,20 @@ public non-sealed class Rigidbody implements Body {
 		return force;
 	}
 
-	public Mass getMass() {
-		return mass;
+	public float getMass() {
+		return mass.getMass();
+	}
+
+	public float getInertia() {
+		return mass.getInertia();
+	}
+
+	public float getInverseMass() {
+		return mass.getInverseMass();
+	}
+
+	public float getInverseInertia() {
+		return mass.getInverseInertia();
 	}
 
 	public Material getMaterial() {

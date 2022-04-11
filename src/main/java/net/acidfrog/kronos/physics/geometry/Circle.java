@@ -197,5 +197,10 @@ public final class Circle extends AbstractShape implements Collider {
     public float getCircumference() {
         return 2 * Mathk.PI * radius;
     }
+
+    @Override
+    public ColliderType getType() {
+        return ColliderType.CIRCLE;
+    }
     
 }

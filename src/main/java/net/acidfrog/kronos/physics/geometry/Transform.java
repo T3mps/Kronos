@@ -21,10 +21,10 @@ public class Transform implements Cloneable {
     public static final Transform IDENTITY = new Transform().identity();
     
     /** The position vector. */
-    protected final Vector2k position;
+    public final Vector2k position;
 
     /** The {@link Rotation} object. */
-    protected final Rotation rotation;
+    public final Rotation rotation;
 
     /**
      * Default constructor.

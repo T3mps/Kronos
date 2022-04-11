@@ -19,7 +19,7 @@ public interface World<T extends Body> {
 
     public boolean remove(T body);
 
-    public boolean remove(int index);
+    public T remove(int index);
     
     public void removeAll();
 

@@ -18,10 +18,10 @@ import net.acidfrog.kronos.scene.ecs.Registry;
 public abstract class IterativeSystem extends AbstractEntitySystem {
 
     /** The family this system operates on */
-    private Family family;
+    protected Family family;
 
     /** Holds all entities this system processes */
-    private List<Entity> entities;
+    protected List<Entity> entities;
 
     /**
      * Creates a new system with the specified {@link Family}.

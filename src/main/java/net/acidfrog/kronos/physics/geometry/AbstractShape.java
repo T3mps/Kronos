@@ -14,7 +14,7 @@ import net.acidfrog.kronos.math.Vector2k;
  * 
  * @author Ethan Temprovich
  */
-public sealed abstract class AbstractShape implements Shape permits Circle, Polygon, Capsule, Segment {
+public sealed abstract class AbstractShape implements Shape permits Circle, Polygon {
 
     /** The center point. */
     protected Vector2k center;

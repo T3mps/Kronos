@@ -597,6 +597,11 @@ public sealed class Polygon extends AbstractShape implements Collider, Wound per
         return normals;
     }
 
+	@Override
+    public ColliderType getType() {
+        return ColliderType.POLYGON;
+    }
+
  	// @Deprecated
 	// int getFarthestVertexIndex(Vector2k vector) {
 	// 	float bestDot = -Float.MAX_VALUE;
@@ -624,8 +629,7 @@ public sealed class Polygon extends AbstractShape implements Collider, Wound per
 	 * @param {@link Vector2k} the direction
 	 * @return {@code int} farthest vertex index
 	 */
-	@Internal
-	int getFarthestVertexIndex(Vector2k vector) {
+	@Internal int getFarthestVertexIndex(Vector2k vector) {
 		/*
 		 * The sequence a(n) = vector.dot(vertices[n]) has a maximum, a minimum and is monotonic (though not strictly monotonic) between those extrema.
 		 * All indices are considered in modular arithmetic. I choose the initial index to be 0.

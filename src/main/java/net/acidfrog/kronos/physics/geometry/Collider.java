@@ -13,7 +13,7 @@ import net.acidfrog.kronos.math.Vector2k;
  * 
  * @author Ethan Temprovich
  */
-public sealed interface Collider extends Shape, Validatable permits Circle, Polygon, Capsule, Segment {
+public sealed interface Collider extends Shape, Validatable permits Circle, Polygon {
 
     /**
      * Computes the axes of this {@link Collider}. The axes are the
@@ -70,5 +70,10 @@ public sealed interface Collider extends Shape, Validatable permits Circle, Poly
      * @return {@link Vector2k} the farthest point
      */
     public abstract Vector2k getFarthestPoint(Vector2k direction, Transform transform);
+
+    /**
+     * @return the {@link ColliderType} of this {@link Collider}
+     */
+    public abstract ColliderType getType();
 
 }

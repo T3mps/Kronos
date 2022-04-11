@@ -26,6 +26,7 @@ public abstract class AbstractApplication implements Runnable {
     protected volatile boolean running = false;
 
     public AbstractApplication(String windowTitle, int... args) {
+        Config.getInstance().load();
         this.state = KronosState.ENTRY;
         this.window = (args.length >= 2) ? new Window(args[0], args[1], windowTitle) : new Window();
         initialize();

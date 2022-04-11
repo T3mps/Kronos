@@ -11,7 +11,7 @@ import net.acidfrog.kronos.math.Vector2k;
  * 
  * @author Ethan Temprovich
  */
-public sealed interface Wound permits Polygon, Segment {
+public sealed interface Wound permits Polygon {
 
     /**
      * Returns an array of vertex indexes that define the points

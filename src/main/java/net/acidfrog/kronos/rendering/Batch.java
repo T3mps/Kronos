@@ -100,8 +100,21 @@ public class Batch {
     }
 
     public void render() {
-        glBindBuffer(GL_ARRAY_BUFFER, vboID);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+        boolean rebuffer = false;
+
+        for (int i = 0; i < spriteCount; i++) {
+            SpriteRendererComponent sprite = sprites[i];
+            if (sprite.isDirty()) {
+                loadVertexProperties(i);
+                sprite.setDirty(false);
+                rebuffer = true;
+            }
+        }
+
+        if (rebuffer) {
+            glBindBuffer(GL_ARRAY_BUFFER, vboID);
+            glBufferSubData(GL_ARRAY_BUFFER, 0, vertices);
+        }
 
         shader.bind();
         shader.uploadMatrix4("uProjection", SceneManager.getInstance().getCurrentScene().getCamera().getProjectionMatrix());

@@ -1,7 +1,8 @@
 package net.acidfrog.kronos.rendering;
 
+import java.util.Arrays;
+
 import net.acidfrog.kronos.math.Vector2f;
-import net.acidfrog.kronos.math.Vector4f;
 
 public class Sprite {
 
@@ -14,14 +15,10 @@ public class Sprite {
     private Vector2f[] uvs;
 
     public Sprite(Texture texture) {
-        this(texture, new Vector4f(1f, 1f, 1f, 1f));
+        this(texture, DEFAULT_UVs);
     }
 
-    public Sprite(Texture texture, Vector4f color) {
-        this(texture, DEFAULT_UVs, color);
-    }
-
-    public Sprite(Texture texture, Vector2f[] uvs, Vector4f color) {
+    public Sprite(Texture texture, Vector2f[] uvs) {
         this.texture = texture;
         this.uvs = uvs;
     }
@@ -37,5 +34,22 @@ public class Sprite {
     public Vector2f[] getUVs() {
         return uvs;
     }
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj)
+            return true;
+        if (!(obj instanceof Sprite))
+            return false;
+        Sprite other = (Sprite) obj;
+        if (texture == null) {
+            if (other.texture != null)
+                return false;
+        } else if (!texture.equals(other.texture))
+            return false;
+        if (!Arrays.equals(uvs, other.uvs))
+            return false;
+        return true;
+    }
+
 }

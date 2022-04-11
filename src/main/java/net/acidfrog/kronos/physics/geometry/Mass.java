@@ -13,6 +13,8 @@ import net.acidfrog.kronos.physics.world.body.Rigidbody;
  */
 public final class Mass {
     
+    public static final Mass INFINITE = new Mass(0f, 0f);
+
     /** The mass and inverse. */
     private final float mass, inverseMass;
 

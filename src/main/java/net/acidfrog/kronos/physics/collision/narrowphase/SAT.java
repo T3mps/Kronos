@@ -1,5 +1,6 @@
 package net.acidfrog.kronos.physics.collision.narrowphase;
 
+import net.acidfrog.kronos.core.lang.annotations.Out;
 import net.acidfrog.kronos.math.Intervalf;
 import net.acidfrog.kronos.math.Mathk;
 import net.acidfrog.kronos.math.Vector2k;
@@ -7,7 +8,6 @@ import net.acidfrog.kronos.physics.geometry.Circle;
 import net.acidfrog.kronos.physics.geometry.Collider;
 import net.acidfrog.kronos.physics.geometry.Transform;
 import net.acidfrog.kronos.physics.geometry.Polygon;
-import net.acidfrog.kronos.physics.geometry.Segment;
 import net.acidfrog.kronos.physics.geometry.Wound;
 import net.acidfrog.kronos.physics.geometry.Shape;
 
@@ -73,10 +73,38 @@ public final class SAT implements NarrowphaseDetector {
     }
     
     /**
+     * const c2Poly* rp,* ip;
+	c2x rx, ix;
+	int re;
+	float kRelTol = 0.95f, kAbsTol = 0.01f;
+	int flip;
+	if (sa * kRelTol > sb + kAbsTol)
+	{
+		rp = A; rx = ax;
+		ip = B; ix = bx;
+		re = ea;
+		flip = 0;
+	}
+	else
+	{
+		rp = B; rx = bx;
+		ip = A; ix = ax;
+		re = eb;
+		flip = 1;
+	}
+
+	c2v incident[2];
+	c2Incident(incident, ip, ix, c2MulrvT(ix.r, c2Mulrv(rx.r, rp->norms[re])));
+	c2h rh;
+	if (!c2SidePlanesFromPoly(incident, rx, rp, re, &rh)) return;
+	c2KeepDeep(incident, rh, m);
+	if (flip) m->n = c2Neg(m->n);
+     */
+    /**
      * @see NarrowphaseDetector#detect(Collider, Transform, Collider, Transform, Penetration)
      */
     @Override
-    public boolean detect(Collider colliderA, Transform transformA, Collider colliderB, Transform transformB, /** out */ Penetration penetration) {
+    public boolean detect(Collider colliderA, Transform transformA, Collider colliderB, Transform transformB, @Out Penetration penetration) {
         if (colliderA instanceof Circle && colliderB instanceof Circle) return CircleDetector.detect((Circle) colliderA, transformA, (Circle) colliderB, transformB, penetration);
 
         Vector2k normal = null;
@@ -186,9 +214,6 @@ public final class SAT implements NarrowphaseDetector {
     @Override
     public boolean contains(Collider colliderA, Transform transformA, Collider colliderB, Transform transformB) {
         if (colliderA instanceof Circle && colliderB instanceof Circle) return CircleDetector.contains((Circle) colliderA, transformA, (Circle) colliderB, transformB);
-        
-        // overlap is not possible
-        if (colliderA instanceof Segment && colliderB instanceof Segment) return false;
 
         Vector2k[] axesA = colliderA.getAxes(colliderA.getFoci(transformA), transformA);
         Vector2k[] axesB = colliderB.getAxes(colliderB.getFoci(transformB), transformB);

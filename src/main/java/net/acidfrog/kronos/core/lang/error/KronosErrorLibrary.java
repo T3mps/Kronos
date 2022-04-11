@@ -83,5 +83,8 @@ public final class KronosErrorLibrary {
     public static final KronosErrorMessage FRAGMENT_SHADER_COMPILATION_FAILED = new KronosErrorMessage("Fragment shader compilation failed");
     public static final KronosErrorMessage SHADER_LINKING_FAILED = new KronosErrorMessage("Shader linking failed");
     public static final KronosErrorMessage ATTEMPTED_DRAW_CALL_LACKING_DATA = new KronosErrorMessage("Attempted a draw call without appropriate data");
+    public static final KronosErrorMessage TEXTURE_NOT_FOUND = new KronosErrorMessage("Texture not found");
+    public static final KronosErrorMessage SPRITE_COUNT_MISMATCH = new KronosErrorMessage("Expected sprite count does not match actual sprite count");
+    public static final KronosErrorMessage DUPLICATE_SPRITESHEET = new KronosErrorMessage("Attempted to load a spritesheet that is already loaded");
 
 }

@@ -9,7 +9,7 @@ import net.acidfrog.kronos.scene.ecs.Registry;
  * @version 0.0.2
  * @author Ethan Temprovich
  */
-public class AbstractEntitySystem implements EntitySystem {
+public abstract class AbstractEntitySystem implements EntitySystem {
     
     /** Importance of system */
     protected int priority;

@@ -11,7 +11,8 @@ import net.acidfrog.kronos.math.Vector2f;
 import net.acidfrog.kronos.math.Vector4f;
 import net.acidfrog.kronos.rendering.Camera;
 import net.acidfrog.kronos.rendering.Renderer2D;
-import net.acidfrog.kronos.rendering.Sprite;
+import net.acidfrog.kronos.rendering.RenderingSystem;
+import net.acidfrog.kronos.rendering.Spritesheet;
 import net.acidfrog.kronos.rendering.Viewport;
 import net.acidfrog.kronos.rendering.component.SpriteRendererComponent;
 import net.acidfrog.kronos.scene.component.TagComponent;
@@ -47,15 +48,30 @@ public class Scene {
         this.camera = new Camera(Viewport.DEFAULT);
         this.loaded = false;
         
+        registry.bind(new RenderingSystem());
+
         Logger.logInfo("Scene[" + index + "] '" + name + "' initialized");
         testInit();
     }
 
+    private Entity entity;
+
     public void testInit() {
-        Entity e = new Entity();
-        e.add(new TransformComponent(new Vector2f(600, 100), 0f, new Vector2f(128, 128)));
-        e.add(new SpriteRendererComponent(new Sprite(AssetManager.getTexture("assets/textures/default.png"))));
-        addEntity(e);
+        Spritesheet spritesheet = Spritesheet.create(AssetManager.getTexture("assets/textures/default_spritesheet.png"), 32, 32, 12, 0);
+
+        entity = new Entity();
+        entity.add(new TransformComponent(new Vector2f(720, 500), 0f, new Vector2f(128,128)));
+        entity.add(new SpriteRendererComponent(spritesheet.get(9)));
+        addEntity(entity);
+
+        Entity e;
+
+        for (int i = 0; i < 12; i++) {
+            e = new Entity();
+            e.add(new TransformComponent(new Vector2f(720 + 10 + (((i < 6) ? i : i - 6) * 100), (i < 6) ? 110 : 10), 0f, new Vector2f(100, 100)));
+            e.add(new SpriteRendererComponent(spritesheet.get(i)));
+            addEntity(e);
+        }
 
         int xOff = 10;
         int yOff = 10;
@@ -73,7 +89,7 @@ public class Scene {
 
                 e = new Entity();
                 e.add(new TransformComponent(new Vector2f(xx, yy), 0f, new Vector2f(sx, sy)));
-                e.add(new SpriteRendererComponent((x % 2 != 0 || y % 2 != 0) ? new Vector4f((xx / w) / Mathk.random(0.01f, 0.5f), (yy / h) / Mathk.random(), Mathk.random(0.5f, 1f), 1) : new Vector4f(Mathk.random(), Mathk.random(), Mathk.random(), 1)));
+                e.add(new SpriteRendererComponent((new Vector4f((xx / w) / Mathk.random(0.5f, 0.99f), (yy / h) / Mathk.random(0.5f, 0.99f), Mathk.random(), 1))));
 
                 addEntity(e);
             }
