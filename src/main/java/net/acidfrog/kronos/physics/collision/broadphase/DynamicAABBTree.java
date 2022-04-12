@@ -3,18 +3,12 @@ package net.acidfrog.kronos.physics.collision.broadphase;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.awt.Graphics2D;
-
 import net.acidfrog.kronos.core.lang.annotations.Debug;
-import net.acidfrog.kronos.core.lang.error.KronosError;
-import net.acidfrog.kronos.core.lang.error.KronosErrorLibrary;
 import net.acidfrog.kronos.math.Mathk;
-import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.physics.collision.CollisionPair;
 import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Ray;
@@ -33,18 +27,13 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
     private boolean autoRebalance;
 
     private final Map<T, DynamicAABBTreeLeaf<T>> leaves;
-    private final Map<T, DynamicAABBTreeLeaf<T>> updated;
 
     public DynamicAABBTree() {
         this(new DynamicAABBPolicy(), BroadphaseDetector.DEFAULT_INITIAL_CAPACITY);
     }
 
     public DynamicAABBTree(boolean autoRebalance) {
-        this(new DynamicAABBPolicy(), BroadphaseDetector.DEFAULT_INITIAL_CAPACITY, autoRebalance, false);
-    }
-
-    public DynamicAABBTree(boolean autoRebalance, boolean updateTracking) {
-        this(new DynamicAABBPolicy(), BroadphaseDetector.DEFAULT_INITIAL_CAPACITY, autoRebalance, updateTracking);
+        this(new DynamicAABBPolicy(), BroadphaseDetector.DEFAULT_INITIAL_CAPACITY, autoRebalance);
     }
 
     public DynamicAABBTree(int initialCapacity) {
@@ -56,26 +45,24 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
     }
 
     public DynamicAABBTree(int initialCapacity, boolean autoRebalance) {
-        this(new DynamicAABBPolicy(), initialCapacity, autoRebalance, false);
+        this(new DynamicAABBPolicy(), initialCapacity, autoRebalance);
     }
 
     public DynamicAABBTree(AABBPolicy policy, boolean autoRebalance) {
-        this(policy, BroadphaseDetector.DEFAULT_INITIAL_CAPACITY, autoRebalance, false);
+        this(policy, BroadphaseDetector.DEFAULT_INITIAL_CAPACITY, autoRebalance);
     }
 
     public DynamicAABBTree(AABBPolicy policy, int initialCapacity) {
-        this(policy, initialCapacity, false, false);
+        this(policy, initialCapacity, false);
     }
 
-    public DynamicAABBTree(AABBPolicy policy, int initialCapacity, boolean autoRebalance, boolean updateTracking) {
+    public DynamicAABBTree(AABBPolicy policy, int initialCapacity, boolean autoRebalance) {
         super(policy);
         // 0.75 = 3/4, we can garuantee that the hashmap will not need to be rehashed
 		// if we take capacity / load factor
 		// the default load factor is 0.75f according to the javadocs, but lets assign it to be sure
         this.leaves  = new LinkedHashMap<T, DynamicAABBTreeLeaf<T>>(initialCapacity * 4 / 3 + 1, 0.75f);
-        this.updated = new LinkedHashMap<T, DynamicAABBTreeLeaf<T>>(initialCapacity * 4 / 3 + 1, 0.75f);
         this.autoRebalance = autoRebalance;
-        this.updateTracking = updateTracking;
     }
 
     @Debug
@@ -108,8 +95,6 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
         
         // insert the node into the tree
         insert(leaf);
-
-        if (updateTracking) updated.put(t, leaf);
     }
 
     /**
@@ -345,7 +330,6 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
         DynamicAABBTreeLeaf<T> leaf = leaves.remove(t);
 
         if (leaf != null) {
-            updated.remove(t);
             remove(leaf);
             return true;
         }
@@ -440,7 +424,6 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
         remove(node);
         node.aabb.set(aabb);
         insert(node);
-        if (updateTracking) updated.put(t, node);
     }
 
     @Override
@@ -451,7 +434,6 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
     @Override
     public void clear() {
         leaves.clear();
-        updated.clear();
         root = null;
     }
 
@@ -497,6 +479,37 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
         }
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    public List<CollisionPair<T>> detect() {
+        if (root == null) return new ArrayList<CollisionPair<T>>();
+        
+        List<CollisionPair<T>> pairs = new ArrayList<CollisionPair<T>>(BroadphaseDetector.getEstimatedCollisionPairs(leaves.size()));
+
+        // detect all pairs
+
+        DynamicAABBTreeLeaf<T>[] leaves = this.leaves.values().toArray(new DynamicAABBTreeLeaf[0]);
+
+        for (int i = 0; i < leaves.length; i++) {
+            DynamicAABBTreeLeaf<T> a = leaves[i];
+
+            for (int j = i + 1; j < leaves.length; j++) {
+                DynamicAABBTreeLeaf<T> b = leaves[j];
+
+                if (a.aabb.intersects(b.aabb)) {
+                    pairs.add(new BroadphasePair<T>(a.member, b.member));
+                }
+            }
+        }
+
+        return pairs;
+    }
+
+    @Override
+    public List<T> raycast(Ray ray, float maxDistance) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     public int height() {
         if (root == null) return 0;
         return root.height;
@@ -527,239 +540,6 @@ public final class DynamicAABBTree<T extends BroadphaseMember> extends Broadphas
         ratio += perimeterRatio(node.right);
 
         return ratio;
-    }
-    
-    @Override
-    public void shouldTrackUpdates(boolean updateTracking) {
-        if (this.updateTracking != updateTracking) {
-			if (!updateTracking)  updated.clear();
-		}
-		super.shouldTrackUpdates(updateTracking);
-    }
-
-    @Override
-    public Iterator<CollisionPair<T>> detectIterator(boolean all) {
-        if (all || !updateTracking) return new DetectPairsIterator(leaves.values().iterator());
-        else return new DetectPairsIterator(updated.values().iterator());
-    }
-
-    @Override
-    public Iterator<T> raycastIterator(Ray ray, float maxDistance) {
-        return new RaycastIterator(ray, maxDistance);
-    }
-    
-    private final class DetectPairsIterator implements Iterator<CollisionPair<T>> {
-
-        private final Iterator<DynamicAABBTreeLeaf<T>> iterator;
-
-        private final Map<T, Boolean> checked;
-
-        private DynamicAABBTreeNode currentNode;
-        private DynamicAABBTreeLeaf<T> currentLeaf;
-        
-        private final BroadphasePair<T> currentPair;
-        private final BroadphasePair<T> nextPair;
-        private boolean hasNext;
-
-        public DetectPairsIterator(Iterator<DynamicAABBTreeLeaf<T>> bodyIterator) {
-			this.iterator = bodyIterator;
-			this.checked = new HashMap<T, Boolean>();
-			this.currentPair = new BroadphasePair<T>();
-			this.nextPair = new BroadphasePair<T>();
-			this.hasNext = this.findNext();
-		}
-
-        @Override
-        public boolean hasNext() {
-            return this.hasNext;
-        }
-
-        @Override
-        public CollisionPair<T> next() {
-            if (this.hasNext) {
-				// copy over to the one we return
-				this.currentPair.a = this.nextPair.a;
-				this.currentPair.b = this.nextPair.b;
-				
-				// find the next pair
-				this.hasNext = this.findNext();
-				
-				// return the current pair
-				return this.currentPair;
-			}
-			throw new KronosError(KronosErrorLibrary.NO_SUCH_ELEMENT);
-        }
-
-        private boolean findNext() {
-			// iterate through the list of AABBs to test the entire
-			// broadphase against
-			while (this.iterator.hasNext() || this.currentLeaf != null) {
-				// if the current AABB is null, then grab a new one
-				if (this.currentLeaf == null) {
-					this.currentLeaf = this.iterator.next();
-				}
-				
-				// if the current node in the broadphase is null
-				// then we need to start at the root
-				if (this.currentNode == null) {
-					// start at the root node
-					this.currentNode = DynamicAABBTree.this.root;
-				}
-			
-				// is there another collision with the current leaf?
-				if (this.findNextForCurrentLeaf()) return true;
-			}
-			
-			return false;
-		}
-
-        private boolean findNextForCurrentLeaf() {
-            boolean found = false;
-
-            DynamicAABBTreeLeaf<T> node = currentLeaf;
-            DynamicAABBTreeNode test = currentNode;
-
-            while (test != null) {
-                if (test.aabb.intersects(node.aabb)) {
-                    if (test.left != null) {
-                        test = test.left;
-                        continue;
-                    } else {
-                        @SuppressWarnings("unchecked")
-                        DynamicAABBTreeLeaf<T> leaf = (DynamicAABBTreeLeaf<T>) test; // if left is null, right must also be null
-                        
-                        if (!(leaf.member == node.member)) { // we can add filters here
-                            boolean tested = checked.containsKey(leaf.member);
-
-                            if (!tested) {
-                                nextPair.a = node.member;
-                                nextPair.b = leaf.member;
-
-                                found = true;
-                            }
-                        }
-                    }
-                }
-
-                boolean nextNode = false;
-                while (test.parent != null) {
-                    if (test == test.parent.left) {
-                        if (test.parent.left != null) {
-                            test = test.parent.right;
-                            nextNode = true;
-                            break;
-                        }
-                    }
-
-                    // if test.parent is null we break
-                    test = test.parent;
-                }
-
-                currentNode = test;
-
-                if (!nextNode) {
-                    checked.put(currentLeaf.member, true);
-                    currentLeaf = null;
-                    currentNode = null;
-                    break;
-                }
-
-                if (found) break;
-            }
-
-            return found;
-        }
-
-    }
-
-    private final class RaycastIterator implements Iterator<T> {
-
-        private final Ray ray;
-
-        private final float maxDistance;
-
-        private final AABB rayAABB;
-
-        private DynamicAABBTreeNode current;
-
-        private T next;
-
-        public RaycastIterator(Ray ray, float maxDistance) {
-            this.ray = ray;
-            this.current = DynamicAABBTree.this.root;
-
-            Vector2k start = ray.getStart();
-            Vector2k dir = ray.getDirectionVector();
-
-            this.maxDistance = maxDistance <= 0f ? Float.MAX_VALUE : maxDistance;
-
-            this.rayAABB = new AABB();
-            rayAABB.setFromPoints(new Vector2k(start.x, start.y), new Vector2k(start.x + dir.x * this.maxDistance, start.y + dir.y * this.maxDistance));
-            
-            findNext();
-        }
-
-        @Override
-        public boolean hasNext() {
-            return next != null;
-        }
-
-        @Override
-        public T next() {
-            if (next != null) {
-				T t = next;
-				findNext();
-				return t;
-			}
-            throw new KronosError(KronosErrorLibrary.NO_SUCH_ELEMENT);
-        }
-
-        private boolean findNext() {
-			next = null;
-            boolean found = false;
-
-            DynamicAABBTreeNode node = current;
-
-            while (node != null) {
-                if (rayAABB.intersects(node.aabb)) {
-                    if (node.left != null) {
-                        node = node.left;
-                        continue;
-                    } else if (BroadphaseDetector.raycast(ray, maxDistance, node.aabb)) {
-                        @SuppressWarnings("unchecked")
-                        DynamicAABBTreeLeaf<T> leaf = (DynamicAABBTreeLeaf<T>) node;
-
-                        next = leaf.member;
-                        found = true;
-                    }
-                }
-
-                boolean nextNode = false;
-                while(node.parent != null) {
-                    if (node == node.parent.left) {
-                        if (node.parent.right != null) {
-                            node = node.parent.right;
-                            nextNode = true;
-                            break;
-                        }
-                    }
-
-                    // if node.parent is null we break
-                    node = node.parent;
-                }
-
-                current = node;
-
-                if (!nextNode) {
-                    current = null;
-                    break;
-                }
-
-                if (found) break;
-            }
-            return found;
-        }
-
     }
 
 }

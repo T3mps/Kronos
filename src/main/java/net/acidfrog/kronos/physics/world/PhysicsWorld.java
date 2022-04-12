@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.awt.Graphics2D;
 import java.awt.Color;
+import java.awt.geom.Line2D;
 
 import net.acidfrog.kronos.core.lang.annotations.Debug;
 import net.acidfrog.kronos.math.Vector2k;
@@ -39,6 +40,7 @@ public final class PhysicsWorld implements World<Rigidbody> {
 
     public PhysicsWorld() {
         this.broadphaseDetector = new DynamicAABBTree<Rigidbody>();
+        // this.broadphaseDetector = new BruteForceBroadphase<Rigidbody>();
         this.narrowphaseDetector = new SAT();
         this.raycastDetector = new GJK();
         this.manifoldSolver = new ClippingManifoldSolver();
@@ -58,7 +60,7 @@ public final class PhysicsWorld implements World<Rigidbody> {
         for (var b : bodies) integrateForces(b, dt);
 
         // initialize manifolds
-        for (var manifold : manifolds) manifold.initialize();
+        for (var manifold : manifolds) manifold.initialize(dt);
 
         // resolve manifolds
         for (var manifold : manifolds) manifold.applyImpulse();
@@ -68,12 +70,6 @@ public final class PhysicsWorld implements World<Rigidbody> {
 
         // Correct positions
 		for (int i = 0; i < manifolds.size(); i++) manifolds.get(i).positionalCorrection();
-
-        // clear all forces
-        for (var b : bodies) {
-            b.force.set(0, 0);
-			b.torque = 0;
-        }
     }
 
     @Debug
@@ -85,17 +81,19 @@ public final class PhysicsWorld implements World<Rigidbody> {
         g2d.setColor(Color.WHITE);
         for (var manifold : manifolds) {
             for (int i = 0; i < manifold.contactCount(); i++) {
-                Vector2k p = manifold.getContactPoints()[i];
-                g2d.drawOval((int) p.x - 5, (int) -(p.y + 5), 10, 10);
+                Vector2k v = manifold.getContactPoints()[i];
+				Vector2k n = manifold.getPenetration().getNormal();
+
+				g2d.draw(new Line2D.Float(v.x, -v.y, v.x + n.x * 5f, -v.y - n.y * 5f));
             }
         }
 
-        ((DynamicAABBTree<Rigidbody>) broadphaseDetector).render(g2d);
+        if (broadphaseDetector instanceof DynamicAABBTree<Rigidbody>) ((DynamicAABBTree<Rigidbody>) broadphaseDetector).render(g2d);
     }
 
     @Override
     public void detect() {
-        List<CollisionPair<Rigidbody>> broadphasePairs = broadphaseDetector.detect(false);
+        List<CollisionPair<Rigidbody>> broadphasePairs = broadphaseDetector.detect();
         Penetration penetration = new Penetration();
         
         for (var pair : broadphasePairs) {
@@ -103,13 +101,16 @@ public final class PhysicsWorld implements World<Rigidbody> {
 
             Rigidbody b1 = pair.getA();
             Rigidbody b2 = pair.getB();
+
+            if (b1.getInverseMass() == 0 && b2.getInverseMass() == 0) continue;
+
             Collider  c1 = b1.getCollider();
             Collider  c2 = b2.getCollider();
 
             if (narrowphaseDetector.detect(c1, b1.getTransform(), c2, b2.getTransform(), penetration)) {
                 Manifold manifold = new Manifold(b1, b2, penetration);
                 manifoldSolver.solve(manifold);
-                if (manifold.contactCount() > 0) manifolds.add(manifold);
+                if (manifold.contactCount() > 0f) manifolds.add(manifold);
             }
         }
     }
@@ -117,20 +118,22 @@ public final class PhysicsWorld implements World<Rigidbody> {
     private void integrateForces(Rigidbody b, float dt) {
 		if (b.getInverseMass() == 0.0f) return;
 
-		float dts = dt * 0.5f;
-
-		b.velocity.addsi(b.force, b.getInverseInertia() * dts);
-		b.velocity.addsi(gravity, dts);
-		b.angularVelocity += b.torque * b.getInverseInertia() * dts;
+        // b->velocity += dt * (gravity + b->invMass * b->force);
+		b.velocity.addsi(gravity.add((b.getForce().mul(b.getInverseMass()))), dt);
+		
+        // b->angularVelocity += dt * b->invI * b->torque;
+        b.angularVelocity += dt * b.getInverseInertia() *  b.torque;
 	}
 
 	private void integrateVelocity(Rigidbody b, float dt) {
-		if (b.getInverseMass() == 0.0f) return;
-
+        // b->position += dt * b->velocity;
 		b.transform.getPosition().addsi(b.velocity, dt);
+
+        // b->rotation += dt * b->angularVelocity;
 		b.transform.rotate(b.angularVelocity * dt);
 
-		integrateForces(b, dt);
+        b.force.set(0f, 0f);
+        b.torque = 0f;
 	}
 
     public Rigidbody raycast(Vector2k start, Vector2k direction, float maxDistance, RaycastResult result) {

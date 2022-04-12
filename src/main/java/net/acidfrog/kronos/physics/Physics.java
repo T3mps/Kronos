@@ -28,12 +28,11 @@ public final class Physics {
     /** The precision for {@link RaycastDetector raycast} calculations. */
     public static final float RAYCAST_EPSILON = (float) Mathk.sqrt(Mathk.Precision.MACHINE_EPSILON);
 
-    public static final Vector2k GRAVITY 			     = 	 new Vector2k(0f, -981f);
+    public static final Vector2k GRAVITY 			     = 	 new Vector2k(0f, -768f);
 
     public static final float    DT 					 =   1f / 60f;
-    public static final float    RESTING 			     =   GRAVITY.mul(DT).magnitudeSquared() + (float) Mathk.Precision.MACHINE_EPSILON;
-	public static final float    PENETRATION_ALLOWANCE   = 	 0.0055f; // slop
-	public static final float    PENETRATION_CORRETION   = 	 0.33f;   // percent
+	public static final float    PENETRATION_ALLOWANCE   = 	 0.01f; // slop
+	public static final float    PENETRATION_CORRETION   = 	 0.2f;   // percent
 
     public static class Precision {
         

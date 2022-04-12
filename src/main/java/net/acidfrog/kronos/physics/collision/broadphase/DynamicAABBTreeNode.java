@@ -45,7 +45,7 @@ public sealed class DynamicAABBTreeNode permits DynamicAABBTreeLeaf<? extends Br
 
     @Debug
     public void render(Graphics2D g2d) {
-        G2DRenderer.render(g2d, aabb, Color.WHITE);
+        G2DRenderer.render(g2d, aabb, new Color(1, 1, 1, 0.25f));
 
         if (left != null) left.render(g2d);
         if (right != null) right.render(g2d);

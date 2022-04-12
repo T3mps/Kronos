@@ -1,6 +1,5 @@
 package net.acidfrog.kronos.physics.collision.broadphase;
 
-import java.util.Iterator;
 import java.util.List;
 
 import net.acidfrog.kronos.math.Vector2k;
@@ -57,22 +56,12 @@ public final class Quadtree<T extends BroadphaseMember> extends BroadphaseDetect
     }
 
     @Override
-    public List<CollisionPair<T>> detect(boolean all) {
+    public List<CollisionPair<T>> detect() {
         return null;
     }
 
     @Override
     public List<T> raycast(Ray ray, float maxDistance) {
-        return null;
-    }
-
-    @Override
-    public Iterator<CollisionPair<T>> detectIterator(boolean all) {
-        return null;
-    }
-
-    @Override
-    public Iterator<T> raycastIterator(Ray ray, float maxDistance) {
         return null;
     }
 

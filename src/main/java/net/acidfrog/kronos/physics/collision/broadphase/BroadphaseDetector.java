@@ -1,7 +1,5 @@
 package net.acidfrog.kronos.physics.collision.broadphase;
 
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import net.acidfrog.kronos.math.Mathk;
@@ -35,7 +33,7 @@ import net.acidfrog.kronos.physics.geometry.Transform;
  * 
  * @author Ethan Temprovich
  */
-public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> permits DynamicAABBTree<T>, Quadtree<T> {
+public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> permits BruteForceBroadphase<T>, DynamicAABBTree<T>, Quadtree<T> {
 
     /** A multiplier used when determining if we should update an AABB regardless if it fits within the existing AABB */
 	protected static final double AABB_REDUCTION_RATIO = 2.0;
@@ -46,11 +44,16 @@ public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> perm
     /** The {@link BroadphasePolicy policy} for this broadphase. */
     protected final BroadphasePolicy policy;
 
+    private static final int ESTIMATED_COLLISIONS_PER_OBJECT = 4;
+
     /**
-     * Determines if a seperate collection of members that are determined to have
-     * moved a significant distance should be created.
-     */
-    protected boolean updateTracking;
+	 * Returns an estimate on the number of collision pairs based on the number objects being simulated.
+	 * @param n the number of objects
+	 * @return int
+	 */
+	public static final int getEstimatedCollisionPairs(int n) {
+		return n * ESTIMATED_COLLISIONS_PER_OBJECT;
+	}
 
     /**
      * Super constructor.
@@ -59,7 +62,6 @@ public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> perm
      */
     public BroadphaseDetector(BroadphasePolicy policy) {
         this.policy = (policy == null) ? new StaticAABBPolicy() : policy;
-        this.updateTracking = false;
     }
     
     /**
@@ -123,22 +125,10 @@ public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> perm
     /**
 	 * Performs collision detection on all members that have been added to this 
 	 * {@link BroadphaseDetector} and returns the list of potential {@link CollisionPair collisions}.
-	 * The pairs returned from this method will depend on the parameter {@value all}. if true, query
-	 * all members, if false, only query members that have been updated.
      * 
-	 * @param all if true, query all members, if false, only query members that have been updated.
      * @return The list of potential {@link CollisionPair collisions}.
 	 */
-    public List<CollisionPair<T>> detect(boolean all) {
-        List<CollisionPair<T>> pairs = new ArrayList<CollisionPair<T>>();
-        Iterator<CollisionPair<T>> iterator = detectIterator(all);
-        
-        while (iterator.hasNext()) {
-            CollisionPair<T> pair = iterator.next();
-            pairs.add(pair);
-        }
-        return pairs;
-    }
+    public abstract List<CollisionPair<T>> detect();
 
     /**
      * Determines if the given {@link BroadphaseMember members} are considered to be colliding during this
@@ -180,16 +170,7 @@ public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> perm
      * @param maxDistance The maximum distance to query the ray. (0 for infinite)
      * @return The list of {@link BroadphaseMember members} that intersect with the {@link Ray}.
      */
-    public List<T> raycast(Ray ray, float maxDistance) {
-        List<T> members = new ArrayList<T>();
-        Iterator<T> iterator = raycastIterator(ray, maxDistance);
-
-        while (iterator.hasNext()) {
-            T member = iterator.next();
-            members.add(member);
-        }
-        return members;
-    }
+    public abstract List<T> raycast(Ray ray, float maxDistance);
     
     /**
      * Determines if the given {@link Ray ray} intersects with the given {@link AABB aabb}.
@@ -219,10 +200,6 @@ public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> perm
 		return tmax >= tmin;
     }
 
-    public abstract Iterator<CollisionPair<T>> detectIterator(boolean all);
-
-    public abstract Iterator<T> raycastIterator(Ray ray, float maxDistance);
-
     /**
      * @return the {@link BroadphasePolicy} used by this {@link BroadphaseDetector}.
      */
@@ -230,12 +207,4 @@ public abstract sealed class BroadphaseDetector<T extends BroadphaseMember> perm
         return policy;
     }
 
-    public boolean isTrackingUpdates() {
-        return updateTracking;
-    }
-
-    public void shouldTrackUpdates(boolean updateTracking) {
-        this.updateTracking = updateTracking;
-    }
-    
 }

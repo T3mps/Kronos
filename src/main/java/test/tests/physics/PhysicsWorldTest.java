@@ -17,6 +17,7 @@ import net.acidfrog.kronos.core.lang.logger.Logger;
 import net.acidfrog.kronos.core.util.Chrono;
 import net.acidfrog.kronos.math.Mathk;
 import net.acidfrog.kronos.math.Vector2k;
+import net.acidfrog.kronos.physics.Physics;
 import net.acidfrog.kronos.physics.geometry.Circle;
 import net.acidfrog.kronos.physics.geometry.Transform;
 import net.acidfrog.kronos.physics.world.PhysicsWorld;
@@ -51,10 +52,14 @@ public class PhysicsWorldTest extends Canvas implements Runnable {
         this.frame = new JFrame(TITLE);
 		this.world = new PhysicsWorld();
 
-		world.add(new Rigidbody(new Transform(), new Circle(50f), Material.m_Static, Rigidbody.Type.STATIC));
-		world.add(new Rigidbody(new Transform(new Vector2k(1, 100)), new Circle(16), Material.m_ExtremeRubber, Rigidbody.Type.DYNAMIC));
-		world.add(new Rigidbody(new Transform(new Vector2k(1, 200)), new Circle(16), Material.m_Rubber, Rigidbody.Type.DYNAMIC));
+		for (int i = -4; i < 5; i++) {
+			world.add(new Rigidbody(new Transform(new Vector2k(i * 100, 0)), new Circle(64f), Material.m_Static, Rigidbody.Type.STATIC));
+		}
 
+		for (int i = 0; i < 100; i++) {
+			world.add(new Rigidbody(new Transform(new Vector2k(1f, 100 + i * 40)), new Circle(Mathk.random(4f, 16f)), Material.m_Rubber, Rigidbody.Type.DYNAMIC));
+		}
+		
         JavaInputHandler.instance.initilize(this);
     }
 
@@ -94,9 +99,6 @@ public class PhysicsWorldTest extends Canvas implements Runnable {
 		int ticks = 0;
 		int frames = 0;
 		
-		double accumulator = 0;
-		float interval = 1.0f / 60.0f;
-
 		while (running) {
 			render = true;
 			long now = System.nanoTime();
@@ -107,13 +109,6 @@ public class PhysicsWorldTest extends Canvas implements Runnable {
 				update(deltaTime);
 				ticks++;
 				deltaTime--;
-			}
-
-			accumulator += interval;
-
-			if (accumulator >= 1) {
-				physicsUpdate(interval);
-				accumulator -= 1;
 			}
 
 			if (render) {
@@ -144,10 +139,10 @@ public class PhysicsWorldTest extends Canvas implements Runnable {
 		G2DCamera.instance.update(dt);
 		G2DRenderer.update(dt);
 		JavaInputHandler.instance.update();
-    }
+		world.update(Physics.DT);
+	}
 	
     public void physicsUpdate(float pdt) {
-		world.update(pdt);
     }
 
 	AffineTransform tx = new AffineTransform();

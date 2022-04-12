@@ -13,7 +13,6 @@ import net.acidfrog.kronos.math.Vector2k;
 import net.acidfrog.kronos.math.Vector3f;
 import net.acidfrog.kronos.physics.geometry.AABB;
 import net.acidfrog.kronos.physics.geometry.Circle;
-import net.acidfrog.kronos.physics.geometry.Collider;
 import net.acidfrog.kronos.physics.geometry.Polygon;
 import net.acidfrog.kronos.physics.geometry.Ray;
 import net.acidfrog.kronos.physics.geometry.Shape;

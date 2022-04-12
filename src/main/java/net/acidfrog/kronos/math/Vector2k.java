@@ -614,15 +614,15 @@ public class Vector2k implements Vector2kc, Externalizable, Cloneable {
 	/**
 	 * Sets this vector to the cross between a and v and returns this.
 	 */
-	public Vector2k cross(float a, Vector2k v) {
-		return cross(a, v, this);
+	public static Vector2k cross(float a, Vector2k v) {
+		return cross(a, v, new Vector2k());
 	}
 
 	/**
 	 * Sets this vector to the cross between v and a and returns this.
 	 */
-	public Vector2k cross(Vector2k v, float a) {
-		return cross(v, a, this);
+	public static Vector2k cross(Vector2k v, float a) {
+		return cross(v, a, new Vector2k());
 	}
 
 	/**
