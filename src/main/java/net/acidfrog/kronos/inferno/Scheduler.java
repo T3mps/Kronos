@@ -1,10 +1,10 @@
 package net.acidfrog.kronos.inferno;
 
+import java.io.Closeable;
 import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.StampedLock;
 import java.util.function.Function;
@@ -13,29 +13,31 @@ import java.util.stream.Collectors;
 import net.acidfrog.kronos.scribe.Logger;
 import net.acidfrog.kronos.scribe.LoggerFactory;
 
-public final class Scheduler {
+public final class Scheduler implements Closeable {
     private static final Logger LOGGER = LoggerFactory.get(Scheduler.class);
     
     private final int timeoutSeconds;
-    private final Map<Runnable, Single> taskMap = new HashMap<Runnable, Single>();
-    private final List<Task> mainTasks = new ArrayList<Task>();
+    private final Map<Runnable, Task> taskMap;
+    private final List<Task> mainTasks;
     private final ExecutorService mainExecutor;
-    private final ForkJoinPool workStealExecutor;
     private final ScheduledExecutorService updateExecutor;
-    private final StampedLock scheduleLock = new StampedLock();
-    private final Lock updateLock = new ReentrantLock();
+    private final ForkJoinPool workStealExecutor;
+    private final StampedLock scheduleLock;
+    private final ReentrantLock updateLock;
     private ScheduledFuture<?> scheduledupdates;
-    private int ups = 0;
-    private TimeStamp TimeStamp;
+    private int ups;
+    private TimeStamp timeStamp;
 
     protected Scheduler(int timeoutSeconds) {
         this.timeoutSeconds = timeoutSeconds;
+        this.taskMap = new HashMap<Runnable, Task>();
+        this.mainTasks = new ArrayList<Task>();
         var threadFactory = new ThreadFactory() {
 
             @Override
             public Thread newThread(Runnable r) {
                 SchedulerThread schedulerThread = new SchedulerThread(r);
-                LOGGER.debug("New scheduler-thread: " + schedulerThread.getName());
+                LOGGER.debug("New schedulerThread: " + schedulerThread.getName());
                 return schedulerThread;
             }
         };
@@ -45,10 +47,13 @@ public final class Scheduler {
         int nThreads = Runtime.getRuntime().availableProcessors();
         this.workStealExecutor = (ForkJoinPool) Executors.newWorkStealingPool(nThreads);
         LOGGER.debug("Parallel executor created with max " + nThreads + " thread count");
-        this.TimeStamp = new TimeStamp(System.nanoTime(), 1);
+        this.scheduleLock = new StampedLock();
+        this.updateLock = new ReentrantLock();
+        this.ups = 0;
+        this.timeStamp = new TimeStamp(System.nanoTime(), 1);
     }
 
-    private static TimeStamp calcupdateTime(TimeStamp currentupdateTime) {
+    private static TimeStamp computeUpdateTime(TimeStamp currentupdateTime) {
         long prevTime = currentupdateTime.time;
         long currentTime = System.nanoTime();
         return new TimeStamp(currentTime, currentTime - prevTime);
@@ -64,7 +69,7 @@ public final class Scheduler {
                 return single;
             });
             
-            LOGGER.debug("Schedule a new system in #" + mainTasks.size() + " position");
+            LOGGER.debug("Scheduled a new system | slot[" + mainTasks.size() + "]");
             return system;
         } finally {
             scheduleLock.unlockWrite(stamp);
@@ -82,7 +87,7 @@ public final class Scheduler {
                     Cluster cluster = new Cluster(systems);
                     mainTasks.add(cluster);
                     taskMap.putAll(cluster.taskMap);
-                    LOGGER.debug("Schedule " + systems.length + " parallel-systems in #" + mainTasks.size() + " position");
+                    LOGGER.debug("Scheduled new parallel systems | slot[" + mainTasks.size() + "]");
             }
             
             return systems;
@@ -95,8 +100,9 @@ public final class Scheduler {
         Thread currentThread = Thread.currentThread();
 
         if (!(currentThread instanceof SchedulerThread || currentThread instanceof ForkJoinWorkerThread)) {
-            throw new IllegalCallerException("Cannot invoke the forkAndJoin() method from outside other systems.");
+            throw new IllegalCallerException("Cannot invoke forkAndJoin() from outside other subsystems.");
         }
+
         try {
             workStealExecutor.invoke(new RecursiveAction() {
 
@@ -106,13 +112,13 @@ public final class Scheduler {
                 }
             });
         } catch (RuntimeException e) {
-            LOGGER.error("Fork-join error", e);
+            LOGGER.error("Fork-and-join failed", e);
         }
     }
 
     public void forkAndJoin(Runnable... subsystems) {
         if (!(Thread.currentThread() instanceof ForkJoinWorkerThread)) {
-            throw new IllegalCallerException("Cannot invoke the forkAndJoinAll() method from outside other subsystems.");
+            throw new IllegalCallerException("Cannot invoke forkAndJoin() from outside other subsystems.");
         }
 
         ForkJoinTask.invokeAll(Arrays.stream(subsystems).map(system -> new RecursiveAction() {
@@ -125,7 +131,7 @@ public final class Scheduler {
     }
 
     public void suspend(Runnable system) {
-        Single singleTask = taskMap.get(system);
+        Single singleTask = (Single) taskMap.get(system);
         
         if (singleTask == null) {
             return;
@@ -134,7 +140,7 @@ public final class Scheduler {
     }
 
     public void resume(Runnable system) {
-        Single singleTask = taskMap.get(system);
+        Single singleTask = (Single) taskMap.get(system);
 
         if (singleTask == null) {
             return;
@@ -146,7 +152,7 @@ public final class Scheduler {
         updateLock.lock();
 
         try {
-            TimeStamp = calcupdateTime(TimeStamp);
+            timeStamp = computeUpdateTime(timeStamp);
             var tasks = mainExecutor.invokeAll(mainTasks);
             tasks.get(0).get(timeoutSeconds, TimeUnit.SECONDS);
         } catch (InterruptedException | ExecutionException | TimeoutException e) {
@@ -164,7 +170,7 @@ public final class Scheduler {
                 try {
                     scheduledupdates.cancel(false);
                     scheduledupdates.get(timeoutSeconds, TimeUnit.SECONDS);
-                } catch (Exception /* InterruptedException | ExecutionException | TimeoutException | CancellationException */ ignored) {
+                } catch (Exception ignored) {
                 }
 
                 scheduledupdates = null;
@@ -182,21 +188,25 @@ public final class Scheduler {
     }
 
     public double getDeltaTime() {
-        return TimeStamp.deltaTime / 1_000_000_000d;
+        return timeStamp.deltaTime / 1_000_000_000d;
     }
 
-    public boolean shutdown() {
+    @Override
+    public void close() {
         updateExecutor.shutdown();
         mainExecutor.shutdown();
         workStealExecutor.shutdown();
 
         try {
-            return mainExecutor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS) &&
-                   workStealExecutor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS) &&
-                   updateExecutor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
+            boolean terminated = mainExecutor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS) &&
+                                 workStealExecutor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS) &&
+                                 updateExecutor.awaitTermination(timeoutSeconds, TimeUnit.SECONDS);
+
+            if (!terminated) {
+                LOGGER.warn("Executor did not terminate within " + timeoutSeconds + " seconds");
+            }
         } catch (InterruptedException e) {
-            LOGGER.error("Error while shutting down the system scheduler", e);
-            return false;
+            LOGGER.error("Error while shutting down system scheduler", e);
         } finally {
             scheduledupdates = null;
         }
@@ -213,7 +223,7 @@ public final class Scheduler {
         private static final AtomicInteger counter = new AtomicInteger(0);
 
         public SchedulerThread(Runnable runnable) {
-            super(runnable, "inferno-scheduler-" + counter.getAndIncrement());
+            super(runnable, new StringBuilder().append("Scheduler[").append(counter.getAndIncrement()).append("]").toString());
         }
     }
 

@@ -55,7 +55,7 @@ public final class Configuration implements Closeable {
         this.keys = new HashSet<String>();
         this.typeCache = new HashMap<String, Class<?>>();
         this.logger = LoggerFactory.get("kvloader", Configuration.class);
-        this.logMessages = false;
+        this.logMessages = true;
         
         parse();
     }

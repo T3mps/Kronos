@@ -24,9 +24,8 @@ public final class IDStack implements AutoCloseable {
         if (i < 0) {
             return Integer.MIN_VALUE;
         }
-        int returnValue = UNSAFE.getInt(address + i);
-        returnValue = index.compareAndSet(i, i - INT_BYTES) ? returnValue : Integer.MIN_VALUE;
-        return returnValue;
+        
+        return index.compareAndSet(i, i - INT_BYTES) ? UNSAFE.getInt(address + i) : Integer.MIN_VALUE;
     }
 
     public boolean push(int id) {

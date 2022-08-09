@@ -41,6 +41,10 @@ public final class IndexKey {
         this.hashCode = (int) (result ^ (result >>> 32));
     }
 
+    public byte[] getData() {
+        return data;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -11,15 +11,15 @@ public final class Telemetry implements Comparable<Telemetry>, Cloneable {
     private Time averageRuntime;
     private Time totalRuntime;
 
-    Telemetry(String name, int iterations, Time shortestRuntime, Time longestRuntime, Time averageRuntime, Time totalRuntime) {
+    protected Telemetry(String name, int iterations, Time shortestRuntime, Time longestRuntime, Time averageRuntime, Time totalRuntime) {
         set(name, iterations, shortestRuntime, longestRuntime, averageRuntime, totalRuntime);
     }
 
-    Telemetry() {
+    protected Telemetry() {
         this("", 0, Time.ZERO, Time.ZERO, Time.ZERO, Time.ZERO);
     }
 
-    void set(String name, int iterations, Time shortestRuntime, Time longestRuntime, Time averageRuntime, Time totalRuntime) {
+    protected void set(String name, int iterations, Time shortestRuntime, Time longestRuntime, Time averageRuntime, Time totalRuntime) {
         this.name = name;
         this.iterations = iterations;
         this.shortestRuntime = shortestRuntime;
@@ -52,7 +52,7 @@ public final class Telemetry implements Comparable<Telemetry>, Cloneable {
         return totalRuntime;
     }
 
-    long comparableRuntime() {
+    protected long comparableRuntime() {
         return totalRuntime.value();
     }
 

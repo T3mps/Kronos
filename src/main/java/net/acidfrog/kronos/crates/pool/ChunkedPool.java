@@ -86,9 +86,9 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
 
         int setID(int id);
 
-        Identifiable getPrev();
+        Identifiable getPrevious();
 
-        Identifiable setPrev(Identifiable prev);
+        Identifiable setPrevious(Identifiable prev);
 
         Identifiable getNext();
 

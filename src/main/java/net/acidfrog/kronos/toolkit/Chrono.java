@@ -116,24 +116,6 @@ public final class Chrono {
         }
 
         @Override
-        public int hashCode() {
-            int prime = 31;
-            int result = 1;
-            result = prime * result + Objects.hashCode(value);
-            result = prime * result + Objects.hashCode(unit);
-            return result;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof Time) {
-                Time other = (Time) obj;
-                return value == other.value && unit == other.unit;
-            }
-            return false;
-        }
-
-        @Override
         public int compareTo(Time o) {
             if (value < o.value) {
                 return -1;
@@ -208,7 +190,7 @@ public final class Chrono {
                 return new Time(Chrono.now() - start, TimeUnit.NANOSECONDS);
             }
 
-                return new Time(elapsed, TimeUnit.NANOSECONDS);
+            return new Time(elapsed, TimeUnit.NANOSECONDS);
         }
 
         public Time elapsed(TimeUnit unit) {

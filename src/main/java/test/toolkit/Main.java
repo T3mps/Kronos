@@ -1,5 +1,10 @@
 package test.toolkit;
 
+import java.io.IOException;
+
+import net.acidfrog.kronos.toolkit.benchmark.Benchmark;
+import net.acidfrog.kronos.toolkit.benchmark.StringFactory;
+
 public class Main {
     
     public static int sieve(int n) {
@@ -33,11 +38,21 @@ public class Main {
         return true;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // var b = Benchmark.prepare(Main.class, new Main());
         // b.run(1024, "sieve", 100);
         // b.run(1024, "isPrime", 1000);
 
-        // Benchmark.prepare(Main.class, new Main()).simulate(10000, "sieve");
+        Benchmark.prepare(Main.class, new Main()).simulate(100, "sieve");
+
+        // var factory = new StringFactory();
+
+        // for (int i = 0; i < 10; i++ ) {
+        //     System.out.println(factory.create());
+        // }
+
+        // Configuration config = Configuration.load("data/.properties").shouldLogMessages(true);
+        // config.put("kronos.gravity", 9.81);
+        // config.close();
     }
 }

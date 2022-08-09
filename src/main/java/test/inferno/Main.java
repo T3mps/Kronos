@@ -6,49 +6,83 @@ import net.acidfrog.kronos.inferno.Scheduler;
 public class Main {
 
     public static void main(String[] args) {
-        Registry registry = new Registry();
+        try (Registry registry = new Registry()) {
+            registry.create(new Position(0, 0), new Velocity(1, 4));
+            registry.create(new Position(12, 17), new Velocity(1, 1));
+            registry.create(new Position(-1, -4), new Velocity(3, 1));
 
-        registry.create(new Position(0, 0), new Velocity(1, 4));
-        registry.create(new Position(12, 17), new Velocity(1, 1));
-        registry.create(new Position(-1, -4), new Velocity(3, 1));
+            Runnable system = () -> {
+                registry.view(Position.class, Velocity.class).forEach(view -> {
+                    Position position = view.component1();
+                    Velocity velocity = view.component2();
 
-        Runnable system = () -> {
-            registry.view(Position.class, Velocity.class).forEach(view -> {
-                        Position position = view.component1();
-                        Velocity velocity = view.component2();
+                    position.x += velocity.x;
+                    position.y += velocity.y;
+                    System.out.printf("Entity %d moved with %s to %s\n", view.entity().getID(), velocity, position);
+                });
+            };
+            
+            Scheduler scheduler = registry.createScheduler();
+            scheduler.schedule(system);
 
-                        position.x += velocity.x;
-                        position.y += velocity.y;
-                        System.out.printf("Entity %d moved with %s to %s\n", view.entity().getID() - 16383, velocity, position);
-                    });
-        };
+            for (;;) {
+                scheduler.update();
+                Thread.sleep(512);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+        // Registry registry = new Registry();
 
-        Scheduler scheduler = registry.createScheduler();
-        scheduler.schedule(system);
-        scheduler.update(3);
+        // registry.create(new Position(0, 0), new Velocity(1, 4));
+
+        // Runnable system = () -> {
+        //     registry.view(Position.class, Velocity.class).forEach(view -> {
+        //         Position position = view.component1();
+        //         Velocity velocity = view.component2();
+
+        //         position.x += velocity.x;
+        //         position.y += velocity.y;
+
+        //         System.out.printf("Entity %d moved with %s to %s\n", view.entity().getID(), velocity, position);
+        //     });
+        // };
+
+        // Scheduler scheduler = registry.createScheduler();
+        // scheduler.schedule(system);
+
+        // scheduler.update(3);
     }
 
-    static class Position {
+    protected static class Position {
 
-        double x, y;
+        protected double x, y;
 
-        public Position(double x, double y) {
+        protected Position(double x, double y) {
             this.x = x;
             this.y = y;
         }
 
         @Override
         public String toString() {
-            return "Position { " + "x=" + x + ", y=" + y + " } ";
+            StringBuilder sb = new StringBuilder();
+            sb.append("Position { ");
+            sb.append("x=").append(x).append(", ");
+            sb.append("y=").append(y).append("} ");
+            return sb.toString();
         }
     }
 
-    record Velocity(double x, double y) {
+    protected record Velocity(double x, double y) {
         
         @Override
         public String toString() {
-            return "Velocity { " + "x=" + x + ", y=" + y + " } ";
+            StringBuilder sb = new StringBuilder();
+            sb.append("Velocity { ");
+            sb.append("x=").append(x).append(", ");
+            sb.append("y=").append(y).append("} ");
+            return sb.toString();
         }
     }
 }

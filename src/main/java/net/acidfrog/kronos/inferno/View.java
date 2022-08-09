@@ -11,12 +11,12 @@ import net.acidfrog.kronos.inferno.core.IndexKey;
 
 public abstract class View<T> implements Group<T> {
     
-    private final CompositionRepository compositionRepository;
-    private final Map<IndexKey, CompositionRepository.Node> nodeMap;
+    private final Registry registry;
+    private final Map<IndexKey, Registry.Node> nodeMap;
     protected IndexKey stateKey;
 
-    protected View(CompositionRepository compositionRepository, Map<IndexKey, CompositionRepository.Node> nodeMap) {
-        this.compositionRepository = compositionRepository;
+    protected View(Registry registry, Map<IndexKey, Registry.Node> nodeMap) {
+        this.registry = registry;
         this.nodeMap = nodeMap;
     }
 
@@ -24,19 +24,19 @@ public abstract class View<T> implements Group<T> {
 
     @Override
     public View<T> include(Class<?>... componentTypes) {
-        compositionRepository.include(nodeMap, componentTypes);
+        registry.include(nodeMap, componentTypes);
         return this;
     }
 
     @Override
     public View<T> exclude(Class<?>... componentTypes) {
-        compositionRepository.exclude(nodeMap, componentTypes);
+        registry.exclude(nodeMap, componentTypes);
         return this;
     }
 
     @Override
     public <S extends Enum<S>> View<T> withState(S state) {
-        stateKey = DataComposition.computeIndexKey(state, compositionRepository.getClassIndex());
+        stateKey = DataComposition.computeIndexKey(state, registry.getClassIndex());
         return this;
     }
 
@@ -62,13 +62,27 @@ public abstract class View<T> implements Group<T> {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false);
     }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("View { ");
+        nodeMap.forEach((key, node) -> sb.append(node.getComposition()).append(", "));
+        int sSize = sb.length();
+        if (sSize > 2) {
+            sb.setLength(--sSize);
+            sb.setCharAt(sSize - 1, '\s');
+        }
+        sb.append("}");
+        return sb.toString();
+    }
+
     private static final class IteratorWrapper<T> implements Iterator<T> {
         
         private final View<T> owner;
-        private final Iterator<CompositionRepository.Node> nodesIterator;
+        private final Iterator<Registry.Node> nodesIterator;
         private Iterator<T> wrapped;
 
-        public IteratorWrapper(View<T> owner, Iterator<CompositionRepository.Node> nodesIterator) {
+        public IteratorWrapper(View<T> owner, Iterator<Registry.Node> nodesIterator) {
             this.owner = owner;
             this.nodesIterator = nodesIterator;
             this.wrapped = this.nodesIterator.hasNext() ?
@@ -101,8 +115,8 @@ public abstract class View<T> implements Group<T> {
 
         private final Class<T> type;
         
-        protected With1(CompositionRepository compositionRepository, Map<IndexKey, CompositionRepository.Node> nodeMap, Class<T> type) {
-            super(compositionRepository, nodeMap);
+        protected With1(Registry registry, Map<IndexKey, Registry.Node> nodeMap, Class<T> type) {
+            super(registry, nodeMap);
             this.type = type;
         }
 
@@ -118,8 +132,8 @@ public abstract class View<T> implements Group<T> {
         private final Class<T1> type1;
         private final Class<T2> type2;
 
-        protected With2(CompositionRepository compositionRepository, Map<IndexKey, CompositionRepository.Node> nodeMap, Class<T1> type1, Class<T2> type2) {
-            super(compositionRepository, nodeMap);
+        protected With2(Registry registry, Map<IndexKey, Registry.Node> nodeMap, Class<T1> type1, Class<T2> type2) {
+            super(registry, nodeMap);
             this.type1 = type1;
             this.type2 = type2;
         }
@@ -137,8 +151,8 @@ public abstract class View<T> implements Group<T> {
         private final Class<T2> type2;
         private final Class<T3> type3;
 
-        protected With3(CompositionRepository compositionRepository, Map<IndexKey, CompositionRepository.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3) {
-            super(compositionRepository, nodeMap);
+        protected With3(Registry registry, Map<IndexKey, Registry.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3) {
+            super(registry, nodeMap);
             this.type1 = type1;
             this.type2 = type2;
             this.type3 = type3;
@@ -158,8 +172,8 @@ public abstract class View<T> implements Group<T> {
         private final Class<T3> type3;
         private final Class<T4> type4;
 
-        protected With4(CompositionRepository compositionRepository, Map<IndexKey, CompositionRepository.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3, Class<T4> type4) {
-            super(compositionRepository, nodeMap);
+        protected With4(Registry registry, Map<IndexKey, Registry.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3, Class<T4> type4) {
+            super(registry, nodeMap);
             this.type1 = type1;
             this.type2 = type2;
             this.type3 = type3;
@@ -181,8 +195,8 @@ public abstract class View<T> implements Group<T> {
         private final Class<T4> type4;
         private final Class<T5> type5;
 
-        protected With5(CompositionRepository compositionRepository, Map<IndexKey, CompositionRepository.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3, Class<T4> type4, Class<T5> type5) {
-            super(compositionRepository, nodeMap);
+        protected With5(Registry registry, Map<IndexKey, Registry.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3, Class<T4> type4, Class<T5> type5) {
+            super(registry, nodeMap);
             this.type1 = type1;
             this.type2 = type2;
             this.type3 = type3;
@@ -206,8 +220,8 @@ public abstract class View<T> implements Group<T> {
         private final Class<T5> type5;
         private final Class<T6> type6;
 
-        protected With6(CompositionRepository compositionRepository, Map<IndexKey, CompositionRepository.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3, Class<T4> type4, Class<T5> type5, Class<T6> type6) {
-            super(compositionRepository, nodeMap);
+        protected With6(Registry registry, Map<IndexKey, Registry.Node> nodeMap, Class<T1> type1, Class<T2> type2, Class<T3> type3, Class<T4> type4, Class<T5> type5, Class<T6> type6) {
+            super(registry, nodeMap);
             this.type1 = type1;
             this.type2 = type2;
             this.type3 = type3;

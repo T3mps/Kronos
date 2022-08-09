@@ -5,9 +5,9 @@ import java.util.stream.Stream;
 
 public interface Group<T> extends Iterable<T> {
 
-    public abstract Group<T> exclude(Class<?>... componentTypes);
-    
     public abstract Group<T> include(Class<?>... componentTypes);
+    
+    public abstract Group<T> exclude(Class<?>... componentTypes);
 
     public abstract <S extends Enum<S>> Group<T> withState(S state);
 

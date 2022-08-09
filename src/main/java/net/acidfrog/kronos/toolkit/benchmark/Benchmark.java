@@ -255,7 +255,6 @@ public final class Benchmark<T> implements Comparable<Benchmark<T>> {
         } catch (Exception e) {
             logger.fatal("Method failed to execute." + ANSI.NEWLINE, e);
         } finally {
-            // executes after return statement still
             lock.unlock(stamp);
         }
 

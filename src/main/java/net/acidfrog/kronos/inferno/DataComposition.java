@@ -17,7 +17,7 @@ public final class DataComposition {
     
     public static final int COMPONENT_INDEX_CAPACITY = 1 << 10;
 
-    private final CompositionRepository repository;
+    private final Registry repository;
     private final ChunkedPool.Tenant<IntEntity> tenant;
     private final ObjectArrayPool arrayPool;
     private final ClassIndex classIndex;
@@ -27,7 +27,7 @@ public final class DataComposition {
     private final Map<IndexKey, IntEntity> states;
     private final StampedLock stateLock;
 
-    public DataComposition(CompositionRepository repository, ChunkedPool.Tenant<IntEntity> tenant, ObjectArrayPool arrayPool, ClassIndex classIndex, IDSchema idSchema, Class<?>... componentTypes) {
+    public DataComposition(Registry repository, ChunkedPool.Tenant<IntEntity> tenant, ObjectArrayPool arrayPool, ClassIndex classIndex, IDSchema idSchema, Class<?>... componentTypes) {
         this.repository = repository;
         this.tenant = tenant;
         this.arrayPool = arrayPool;
@@ -38,7 +38,7 @@ public final class DataComposition {
             this.componentIndices = new int[COMPONENT_INDEX_CAPACITY];
             Arrays.fill(componentIndices, -1);
 
-            for (int i = 0; i < length(); i++) {
+            for (int i = 0; i < componentTypes.length; i++) {
                 this.componentIndices[classIndex.getIndex(componentTypes[i])] = i;
             }
         } else {
@@ -52,10 +52,6 @@ public final class DataComposition {
         int index = classIndex.getIndex(state.getClass());
         index = index == 0 ? classIndex.getIndexOrAddClass(state.getClass()) : index;
         return new IndexKey(new int[] { index, state.ordinal() });
-    }
-
-    public int length() {
-        return componentTypes.length;
     }
 
     public boolean isMultiComponent() {
@@ -103,7 +99,7 @@ public final class DataComposition {
         if (components != null && entity.isPooledArray()) {
             arrayPool.push(components);
         }
-        if (entity.getPrev() != null || entity.getNext() != null) {
+        if (entity.getPrevious() != null || entity.getNext() != null) {
             detachEntityState(entity);
         }
 
@@ -146,35 +142,38 @@ public final class DataComposition {
 
         if (key != null) {
             // if alone
-            if (entity.getPrev() == null) {
+            if (entity.getPrevious() == null) {
                 if (states.remove(key) != null) {
                     entity.setData(new IntEntity.Data(this, entity.getComponents(), (IntEntity.Data) null));
                     return true;
                 }
             } else {
-                IntEntity prev = (IntEntity) entity.getPrev();
+                IntEntity prev = (IntEntity) entity.getPrevious();
 
                 if (states.replace(key, entity, prev)) {
                     prev.setNext(null);
                     prev.setData(new IntEntity.Data(this, prev.getComponents(), entity.getData()));
-                    entity.setPrev(null);
+                    entity.setPrevious(null);
                     entity.setData(new IntEntity.Data(this, entity.getComponents(), (IntEntity.Data) null));
                     return true;
                 }
             }
         } else if (entity.getNext() != null) {
             long stamp = stateLock.writeLock();
+
             try {
                 IntEntity prev, next;
+
                 if ((next = (IntEntity) entity.getNext()) != null) {
-                    if ((prev = (IntEntity) entity.getPrev()) != null) {
+                    if ((prev = (IntEntity) entity.getPrevious()) != null) {
                         prev.setNext(next);
-                        next.setPrev(prev);
+                        next.setPrevious(prev);
                     } else {
-                        next.setPrev(null);
+                        next.setPrevious(null);
                     }
                 }
-                entity.setPrev(null);
+
+                entity.setPrevious(null);
                 entity.setNext(null);
                 return true;
             } finally {
@@ -191,7 +190,7 @@ public final class DataComposition {
 
         if (prev != entity) {
             states.computeIfPresent(indexKey, (k, oldEntity) -> {
-                entity.setPrev(oldEntity);
+                entity.setPrevious(oldEntity);
                 entity.setData(new IntEntity.Data(this, entityData.components(), k));
                 oldEntity.setNext(entity);
                 IntEntity.Data oldEntityData = oldEntity.getData();
@@ -201,11 +200,15 @@ public final class DataComposition {
         }
     }
 
+    public int size() {
+        return componentTypes.length;
+    }
+
     public Class<?>[] getComponentTypes() {
         return componentTypes;
     }
 
-    public CompositionRepository getRepository() {
+    public Registry getRepository() {
         return repository;
     }
 
@@ -224,14 +227,16 @@ public final class DataComposition {
     public IDSchema getIDSchema() {
         return idSchema;
     }
-
+    
     @Override
     public String toString() {
         int iMax = componentTypes.length - 1;
         if (iMax == -1) {
-            return "Composition=[]";
+            return "[]";
         }
-        StringBuilder sb = new StringBuilder("Composition=[");
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
         for (int i = 0;; i++) {
             sb.append(componentTypes[i].getSimpleName());
 
@@ -276,7 +281,7 @@ public final class DataComposition {
         private IntEntity next;
 
         private StateIterator(IntEntity rootEntity) {
-            next = rootEntity;
+            this.next = rootEntity;
         }
 
         @Override
@@ -287,7 +292,7 @@ public final class DataComposition {
         @Override
         public IntEntity next() {
             var current = next;
-            next = (IntEntity) next.getPrev();
+            next = (IntEntity) next.getPrevious();
             return current;
         }
     }
@@ -299,126 +304,116 @@ public final class DataComposition {
             return iterator.hasNext();
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
+        @SuppressWarnings("unchecked")
         public Group.With1<T> next() {
             IntEntity intEntity;
             IntEntity.Data data;
+
             while ((data = (intEntity = iterator.next()).getData()) == null || data.composition() != composition) ;
+            
             Object[] components = data.components();
             return new Group.With1<T>((T) components[index], intEntity);
         }
     }
 
-    public record IteratorWith2<T1, T2>(int idx1, int idx2, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With2<T1, T2>> {
+    public record IteratorWith2<T1, T2>(int index1, int index2, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With2<T1, T2>> {
 
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
+        @SuppressWarnings("unchecked")
         public Group.With2<T1, T2> next() {
             IntEntity intEntity;
             IntEntity.Data data;
+
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+
             Object[] components = data.components();
-            return new Group.With2<T1, T2>((T1) components[idx1], (T2) components[idx2], intEntity);
+            return new Group.With2<T1, T2>((T1) components[index1], (T2) components[index2], intEntity);
         }
     }
 
-    public record IteratorWith3<T1, T2, T3>(int idx1, int idx2, int idx3, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With3<T1, T2, T3>> {
+    public record IteratorWith3<T1, T2, T3>(int index1, int index2, int index3, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With3<T1, T2, T3>> {
         
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
+        @SuppressWarnings("unchecked")
         public Group.With3<T1, T2, T3> next() {
             IntEntity intEntity;
             IntEntity.Data data;
+
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+
             Object[] components = data.components();
-            return new Group.With3<T1, T2, T3>(
-                    (T1) components[idx1],
-                    (T2) components[idx2],
-                    (T3) components[idx3],
-                    intEntity);
+            return new Group.With3<T1, T2, T3>((T1) components[index1], (T2) components[index2], (T3) components[index3], intEntity);
         }
     }
 
-    public record IteratorWith4<T1, T2, T3, T4>(int idx1, int idx2, int idx3, int idx4, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With4<T1, T2, T3, T4>> {
+    public record IteratorWith4<T1, T2, T3, T4>(int index1, int index2, int index3, int index4, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With4<T1, T2, T3, T4>> {
 
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
+        @SuppressWarnings("unchecked")
         public Group.With4<T1, T2, T3, T4> next() {
             IntEntity intEntity;
             IntEntity.Data data;
+
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+
             Object[] components = data.components();
-            return new Group.With4<T1, T2, T3, T4>(
-                    (T1) components[idx1],
-                    (T2) components[idx2],
-                    (T3) components[idx3],
-                    (T4) components[idx4],
-                    intEntity);
+            return new Group.With4<T1, T2, T3, T4>((T1) components[index1], (T2) components[index2], (T3) components[index3], (T4) components[index4], intEntity);
         }
     }
 
-    public record IteratorWith5<T1, T2, T3, T4, T5>(int idx1, int idx2, int idx3, int idx4, int idx5, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With5<T1, T2, T3, T4, T5>> {
+    public record IteratorWith5<T1, T2, T3, T4, T5>(int index1, int index2, int index3, int index4, int index5, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With5<T1, T2, T3, T4, T5>> {
 
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
+        @SuppressWarnings("unchecked")
         public Group.With5<T1, T2, T3, T4, T5> next() {
             IntEntity intEntity;
             IntEntity.Data data;
+
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
             Object[] components = data.components();
-            return new Group.With5<T1, T2, T3, T4, T5>(
-                    (T1) components[idx1],
-                    (T2) components[idx2],
-                    (T3) components[idx3],
-                    (T4) components[idx4],
-                    (T5) components[idx5],
-                    intEntity);
+
+            return new Group.With5<T1, T2, T3, T4, T5>((T1) components[index1], (T2) components[index2], (T3) components[index3], (T4) components[index4], (T5) components[index5], intEntity);
         }
     }
 
-    public record IteratorWith6<T1, T2, T3, T4, T5, T6>(int idx1, int idx2, int idx3, int idx4, int idx5, int idx6, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With6<T1, T2, T3, T4, T5, T6>> {
+    public record IteratorWith6<T1, T2, T3, T4, T5, T6>(int index1, int index2, int index3, int index4, int index5, int index6, Iterator<IntEntity> iterator, DataComposition composition) implements Iterator<Group.With6<T1, T2, T3, T4, T5, T6>> {
 
         @Override
         public boolean hasNext() {
             return iterator.hasNext();
         }
 
-        @SuppressWarnings({"unchecked"})
         @Override
+        @SuppressWarnings("unchecked")
         public Group.With6<T1, T2, T3, T4, T5, T6> next() {
             IntEntity intEntity;
             IntEntity.Data data;
+
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+
             Object[] components = data.components();
-            return new Group.With6<T1, T2, T3, T4, T5, T6>(
-                    (T1) components[idx1],
-                    (T2) components[idx2],
-                    (T3) components[idx3],
-                    (T4) components[idx4],
-                    (T5) components[idx5],
-                    (T6) components[idx6],
-                    intEntity);
+            return new Group.With6<T1, T2, T3, T4, T5, T6>((T1) components[index1], (T2) components[index2], (T3) components[index3], (T4) components[index4], (T5) components[index5], (T6) components[index6], intEntity);
         }
     }
 }

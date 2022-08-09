@@ -21,7 +21,7 @@ public class StringFactory implements ArgumentFactory<String> {
         }
         
         sb.setCharAt(0, Character.toUpperCase(sb.charAt(0)));
-        sb.append(".");
+        sb.append("\033[1D.");
 
         return sb.toString();
     }

@@ -5,6 +5,34 @@
                 "type": "java",
                 "name": "Launch Main",
                 "request": "launch",
+                "mainClass": "test.toolkit.Main",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch HelloScribe",
+                "request": "launch",
+                "mainClass": "test.scribe.HelloScribe",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch DarkEntities",
+                "request": "launch",
+                "mainClass": "test.inferno.DarkEntities",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Main",
+                "request": "launch",
+                "mainClass": "test.rendering.ascii.Main",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Main",
+                "request": "launch",
                 "mainClass": "test.inferno.Main",
                 "projectName": "kronos-engine"
             },

@@ -34,32 +34,17 @@ public final class IntEntity implements Entity {
         this.data = new Data(composition, components, (Data) null);
     }
 
-    public DataComposition getComposition() {
-        return data.composition;
-    }
-
-    public Object[] getComponents() {
-        return data.components;
-    }
-
-    public Data getData() {
-        return data;
-    }
-
-    IntEntity setData(Data data) {
-        this.data = data;
-        return this;
-    }
-
     @Override
     public Entity add(Object component) {
         createLock();
+        
         long stamp = lock.writeLock();
 
         try {
             if (isDetachedID()) {
                 return null;
             }
+            
             return data.composition.getRepository().addComponent(this, component);
         } finally {
             lock.unlockWrite(stamp);
@@ -82,7 +67,7 @@ public final class IntEntity implements Entity {
         }
     }
 
-    public boolean modify(CompositionRepository compositions, DataComposition newDataComposition, Object[] newComponentArray) {
+    public boolean modify(Registry registry, DataComposition newDataComposition, Object[] newComponentArray) {
         createLock();
         long stamp = lock.writeLock();
 
@@ -91,7 +76,7 @@ public final class IntEntity implements Entity {
                 return false;
             }
 
-            compositions.modifyComponents(this, newDataComposition, newComponentArray);
+            registry.modifyComponents(this, newDataComposition, newComponentArray);
             return true;
         } finally {
             lock.unlockWrite(stamp);
@@ -141,10 +126,18 @@ public final class IntEntity implements Entity {
             if (isDetachedID()) {
                 return false;
             }
+
             return data.composition.deleteEntity(this);
         } finally {
             lock.unlockWrite(stamp);
         }
+    }
+
+    private void createLock() {
+        if (lock != null) {
+            return;
+        }
+        lockUpdater.compareAndSet(this, null, new StampedLock());
     }
 
     @Override
@@ -158,12 +151,12 @@ public final class IntEntity implements Entity {
     }
 
     @Override
-    public Identifiable getPrev() {
+    public Identifiable getPrevious() {
         return prev;
     }
 
     @Override
-    public Identifiable setPrev(Identifiable prev) {
+    public Identifiable setPrevious(Identifiable prev) {
         Identifiable old = this.prev;
         this.prev = (IntEntity) prev;
         return old;
@@ -184,6 +177,23 @@ public final class IntEntity implements Entity {
     @Override
     public <S extends Enum<S>> Entity setState(S state) {
         return data.composition.setEntityState(this, state);
+    }
+
+    public DataComposition getComposition() {
+        return data.composition;
+    }
+
+    public Object[] getComponents() {
+        return data.components;
+    }
+
+    public Data getData() {
+        return data;
+    }
+
+    IntEntity setData(Data data) {
+        this.data = data;
+        return this;
     }
 
     @Override
@@ -207,38 +217,38 @@ public final class IntEntity implements Entity {
         }
     }
 
-    private void createLock() {
-        if (lock == null) {
-            lockUpdater.compareAndSet(this, null, new StampedLock());
-        }
-    }
-
     public boolean isPooledArray() {
         return (id & ChunkedPool.IDSchema.FLAG_BIT) == ChunkedPool.IDSchema.FLAG_BIT;
     }
 
-    void flagPooledArray() {
+    protected void flagPooledArray() {
         id |= ChunkedPool.IDSchema.FLAG_BIT;
     }
 
-    boolean isDetachedID() {
+    protected boolean isDetachedID() {
         return (id & ChunkedPool.IDSchema.DETACHED_BIT) == ChunkedPool.IDSchema.DETACHED_BIT;
     }
 
-    void flagDetachedID() {
+    protected void flagDetachedID() {
         id |= ChunkedPool.IDSchema.DETACHED_BIT;
     }
 
     @Override
     public String toString() {
-        ChunkedPool.IDSchema idSchema = data.composition.getIDSchema();
-        return "Entity={" +
-                "id=" + idSchema.idToString(id) +
-                ", " + data.composition +
-                ", stateRootKey=" + data.stateRoot +
-                ", prev.id=" + (prev == null ? null : idSchema.idToString(prev.id)) +
-                ", next.id=" + (next == null ? null : idSchema.idToString(next.id)) +
-                '}';
+        StringBuilder sb = new StringBuilder();
+        var idSchema = data.composition.getIDSchema();
+        sb.append("Entity={");
+        sb.append("id=").append(idSchema.idToString(id));
+        sb.append(", ").append(data.composition);
+        sb.append(", stateRootKey=").append(data.stateRoot);
+        if (prev != null) {
+            sb.append(", prev.id=").append(idSchema.idToString(prev.id));
+        }
+        if (next != null) {
+            sb.append(", next.id=").append(idSchema.idToString(next.id));
+        }
+        sb.append('}');
+        return sb.toString();
     }
 
     public record Data(DataComposition composition, Object[] components, IndexKey stateRoot) {
