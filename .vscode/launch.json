@@ -3,6 +3,13 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch Main",
+                "request": "launch",
+                "mainClass": "test.inferno.Main",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch PhysicsWorldTest",
                 "request": "launch",
                 "mainClass": "test.tests.physics.PhysicsWorldTest",
