@@ -18,16 +18,14 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
     private final List<Tenant<T>> tenants;
 
     public ChunkedPool(int chunkBit, int chunkCountBit) {
-        this.idSchema = new IDSchema(chunkBit, chunkCountBit);
-        this.chunkIndex = new AtomicInteger(0);
-        this.chunks = new AtomicReferenceArray<LinkedChunk<T>>(chunkCountBit);
-        this.tenants = new ArrayList<Tenant<T>>();
+        this(new IDSchema(chunkBit, chunkCountBit));
     }
 
     public ChunkedPool(IDSchema idSchema) {
-        this.chunks = new AtomicReferenceArray<LinkedChunk<T>>(idSchema.chunkCount);
-        this.chunkIndex = new AtomicInteger(-1);
         this.idSchema = idSchema;
+        this.chunkIndex = new AtomicInteger(-1);
+        this.chunks = new AtomicReferenceArray<LinkedChunk<T>>(idSchema.chunkCount);
+        this.tenants = new ArrayList<Tenant<T>>();
     }
 
     private LinkedChunk<T> newChunk(Tenant<T> owner, int currentChunkIndex) {
@@ -138,7 +136,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
             return sb.toString();
         }
 
-        public int createID(int chunkID, int objectID) {
+        public int generateID(int chunkID, int objectID) {
             return (chunkID & chunkIDBitMask) << chunkBit | (objectID & objectIDBitMask);
         }
 
@@ -155,7 +153,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
         }
     }
 
-    public static final class Tenant<T extends Identifiable> implements AutoCloseable {
+    public static final class Tenant<T extends Identifiable> implements AutoCloseable, Iterable<T> {
         
         private final ChunkedPool<T> pool;
         private final AtomicReferenceArray<LinkedChunk<T>> chunks;
@@ -193,23 +191,26 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
                 if (chunk.index.get() < idSchema.chunkCapacity - 1) {
                     while ((objectID = chunk.index.get()) < idSchema.chunkCapacity - 1) {
                         if (chunk.index.compareAndSet(objectID, objectID + 1)) {
-                            newID = idSchema.createID(chunk.id, ++objectID);
+                            newID = idSchema.generateID(chunk.id, ++objectID);
                             return returnValue;
                         }
                     }
-                } else {
-                    if ((chunk = pool.newChunk(this, currentChunkIndex)) != null) {
-                        currentChunk = chunk;
-                        objectID = chunk.incrementIndex();
-                        newID = idSchema.createID(chunk.id, objectID);
-                        return returnValue;
-                    }
+
+                    continue;
+                }
+
+                if ((chunk = pool.newChunk(this, currentChunkIndex)) != null) {
+                    currentChunk = chunk;
+                    objectID = chunk.incrementIndex();
+                    newID = idSchema.generateID(chunk.id, objectID);
+                    return returnValue;
                 }
             }
         }
 
         public int freeID(int id) {
             LinkedChunk<T> chunk = pool.getChunk(id);
+
             if (chunk == null) {
                 return -1;
             }
@@ -217,6 +218,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
                 stack.push(id);
                 return id;
             }
+
             boolean notCurrentChunk = chunk != currentChunk;
             int reusableID = chunk.remove(id, notCurrentChunk);
             
@@ -225,11 +227,8 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
             } else {
                 newID = reusableID;
             }
-            return reusableID;
-        }
 
-        public Iterator<T> iterator() {
-            return new ChunkedPoolIterator<T>(firstChunk);
+            return reusableID;
         }
 
         public T register(int id, T entry) {
@@ -240,10 +239,6 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
             return currentChunk.size();
         }
 
-        public IDStack getStack() {
-            return stack;
-        }
-
         public ChunkedPool<T> getPool() {
             return pool;
         }
@@ -251,6 +246,11 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
         @Override
         public void close() {
             stack.close();
+        }
+
+        @Override
+        public Iterator<T> iterator() {
+            return new ChunkedPoolIterator<T>(firstChunk);
         }
     }
 
