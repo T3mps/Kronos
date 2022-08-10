@@ -29,11 +29,10 @@ public final class Registry implements AutoCloseable {
 
     private final String name;    
     private final ArrayPool arrayPool;
-    // private final NodeCache nodeCache;
     private final Map<IndexKey, Node> nodeCache;
     private final ClassIndex classIndex;
     private final IDSchema idSchema;
-    private final ChunkedPool<IntEntity> pool;
+    private final ChunkedPool<IntEntity> entityPool;
     private final Composition composition;
     private final Map<Class<?>, Transmute.ByAdding1AndRemoving<?>> addingTypeModifiers;
     private final Map<Class<?>, Transmute.ByRemoving> removingTypeModifiers;
@@ -60,12 +59,12 @@ public final class Registry implements AutoCloseable {
         this.nodeCache = new HashMap<IndexKey, Node>();
         this.classIndex = new ClassIndex(classIndexBit);
         this.idSchema = new IDSchema(chunkBit, chunkCountBit);
-        this.pool = new ChunkedPool<IntEntity>(idSchema);
+        this.entityPool = new ChunkedPool<IntEntity>(idSchema);
         this.composition = new Composition(this);
         this.addingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByAdding1AndRemoving<?>>();
         this.removingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByRemoving>();
         this.root = new Node();
-        root.composition = new DataComposition(this, pool.newTenant(), arrayPool, classIndex, idSchema);
+        root.composition = new DataComposition(this, entityPool.newTenant(), arrayPool, classIndex, idSchema);
         this.schedulers = new CopyOnWriteArrayList<Scheduler>();
         this.systemTimeoutSeconds = systemTimeoutSeconds;
     }
@@ -375,14 +374,14 @@ public final class Registry implements AutoCloseable {
     }
 
     public int size() {
-        return pool.size();
+        return entityPool.size();
     }
 
     @Override
     public void close() {
         nodeCache.clear();
         classIndex.close();
-        pool.close();
+        entityPool.close();
 
         int sSize = schedulers.size();
         for (int i = 0; i < sSize; i++) {
@@ -429,7 +428,7 @@ public final class Registry implements AutoCloseable {
                         continue;
                     }
                     // exclusive access
-                    value = composition = new DataComposition(Registry.this, pool.newTenant(), arrayPool, classIndex, idSchema, componentTypes);
+                    value = composition = new DataComposition(Registry.this, entityPool.newTenant(), arrayPool, classIndex, idSchema, componentTypes);
                     break;
                 }
                 

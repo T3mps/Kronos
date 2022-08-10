@@ -8,7 +8,7 @@ import java.util.concurrent.locks.StampedLock;
 
 import net.acidfrog.kronos.crates.set.SparseSet;
 
-public class ArrayPool {
+public class ArrayPool implements Pool<Object[]> {
     
     public static final int DEFAULT_INITIAL_CAPACITY = 1 << 16;
     public static final int SOFT_MAX_CAPACITY = Integer.MAX_VALUE - 8;
@@ -23,6 +23,7 @@ public class ArrayPool {
         this.layers = new SparseSet<Layer>(initialCapacity);
     }
 
+    @Override
     public Object[] push(Object... objects) {
         int oSize = objects.length;
         var layer = layers.get(oSize);
@@ -42,6 +43,10 @@ public class ArrayPool {
 
     public void clear() {
         layers.clear();
+    }
+
+    public int size() {
+        return layers.size();
     }
 
     public int size(int arrayLength) {

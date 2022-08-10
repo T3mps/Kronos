@@ -12,14 +12,22 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
 
     public static final int ID_STACK_CAPACITY = 1 << 16;
 
-    private final AtomicReferenceArray<LinkedChunk<T>> chunks;
-    private final AtomicInteger chunkIndex = new AtomicInteger(-1);
-    private final List<Tenant<T>> tenants = new ArrayList<Tenant<T>>();
     private final IDSchema idSchema;
+    private final AtomicInteger chunkIndex;
+    private final AtomicReferenceArray<LinkedChunk<T>> chunks;
+    private final List<Tenant<T>> tenants;
+
+    public ChunkedPool(int chunkBit, int chunkCountBit) {
+        this.idSchema = new IDSchema(chunkBit, chunkCountBit);
+        this.chunkIndex = new AtomicInteger(0);
+        this.chunks = new AtomicReferenceArray<LinkedChunk<T>>(chunkCountBit);
+        this.tenants = new ArrayList<Tenant<T>>();
+    }
 
     public ChunkedPool(IDSchema idSchema) {
-        this.idSchema = idSchema;
         this.chunks = new AtomicReferenceArray<LinkedChunk<T>>(idSchema.chunkCount);
+        this.chunkIndex = new AtomicInteger(-1);
+        this.idSchema = idSchema;
     }
 
     private LinkedChunk<T> newChunk(Tenant<T> owner, int currentChunkIndex) {
