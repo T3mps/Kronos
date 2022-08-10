@@ -11,6 +11,7 @@ import net.acidfrog.kronos.crates.IDStack;
 public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements AutoCloseable {
 
     public static final int ID_STACK_CAPACITY = 1 << 16;
+
     private final AtomicReferenceArray<LinkedChunk<T>> chunks;
     private final AtomicInteger chunkIndex = new AtomicInteger(-1);
     private final List<Tenant<T>> tenants = new ArrayList<Tenant<T>>();
@@ -43,7 +44,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
     }
 
     private LinkedChunk<T> getChunk(int id) {
-        return chunks.getPlain(idSchema.fetchChunkId(id));
+        return chunks.getPlain(idSchema.fetchChunkID(id));
     }
 
     public T getEntry(int id) {
@@ -96,7 +97,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
     }
 
     // |--FLAGS--|--CHUNK_ID--|--OBJECT_ID--|
-    public record IDSchema(int chunkBit, int chunkCountBit, int chunkCount, int chunkIdBitMask, int chunkIdBitMaskShifted, int chunkCapacity, int objectIdBitMask) {
+    public record IDSchema(int chunkBit, int chunkCountBit, int chunkCount, int chunkIDBitMask, int chunkIDBitMaskShifted, int chunkCapacity, int objectIDBitMask) {
         
         public static final int BIT_LENGTH = 30;
         public static final int MIN_CHUNK_BIT = 10;
@@ -123,26 +124,26 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
             StringBuilder sb = new StringBuilder();
             sb.append("|").append((id & DETACHED_BIT) >>> DETACHED_BIT_IDX);
             sb.append(":").append((id & FLAG_BIT) >>> FLAG_BIT_IDX);
-            sb.append(":").append(fetchChunkId(id));
-            sb.append(":").append(fetchObjectId(id));
+            sb.append(":").append(fetchChunkID(id));
+            sb.append(":").append(fetchObjectID(id));
             sb.append("|");
             return sb.toString();
         }
 
-        public int createId(int chunkId, int objectId) {
-            return (chunkId & chunkIdBitMask) << chunkBit | (objectId & objectIdBitMask);
+        public int createID(int chunkID, int objectID) {
+            return (chunkID & chunkIDBitMask) << chunkBit | (objectID & objectIDBitMask);
         }
 
-        public int mergeId(int id, int objectId) {
-            return (id & chunkIdBitMaskShifted) | objectId;
+        public int mergeID(int id, int objectID) {
+            return (id & chunkIDBitMaskShifted) | objectID;
         }
 
-        public int fetchChunkId(int id) {
-            return (id >>> chunkBit) & chunkIdBitMask;
+        public int fetchChunkID(int id) {
+            return (id >>> chunkBit) & chunkIDBitMask;
         }
 
-        public int fetchObjectId(int id) {
-            return id & objectIdBitMask;
+        public int fetchObjectID(int id) {
+            return id & objectIDBitMask;
         }
     }
 
@@ -155,7 +156,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
         private final IDStack stack;
         private final LinkedChunk<T> firstChunk;
         private LinkedChunk<T> currentChunk;
-        private int newId = Integer.MIN_VALUE;
+        private int newID = Integer.MIN_VALUE;
 
         private Tenant(ChunkedPool<T> pool, AtomicReferenceArray<LinkedChunk<T>> chunks, AtomicInteger chunkIndex, IDSchema idSchema) {
             this.pool = pool;
@@ -175,24 +176,24 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
             }
 
             for (;;) {
-                returnValue = newId;
-                int objectId;
+                returnValue = newID;
+                int objectID;
                 int currentChunkIndex = chunkIndex.get();
                 LinkedChunk<T> chunk;
-                while ((chunk = chunks.get(currentChunkIndex)) == null) {
-                }
+                while ((chunk = chunks.get(currentChunkIndex)) == null) ;
+                
                 if (chunk.index.get() < idSchema.chunkCapacity - 1) {
-                    while ((objectId = chunk.index.get()) < idSchema.chunkCapacity - 1) {
-                        if (chunk.index.compareAndSet(objectId, objectId + 1)) {
-                            newId = idSchema.createId(chunk.id, ++objectId);
+                    while ((objectID = chunk.index.get()) < idSchema.chunkCapacity - 1) {
+                        if (chunk.index.compareAndSet(objectID, objectID + 1)) {
+                            newID = idSchema.createID(chunk.id, ++objectID);
                             return returnValue;
                         }
                     }
                 } else {
                     if ((chunk = pool.newChunk(this, currentChunkIndex)) != null) {
                         currentChunk = chunk;
-                        objectId = chunk.incrementIndex();
-                        newId = idSchema.createId(chunk.id, objectId);
+                        objectID = chunk.incrementIndex();
+                        newID = idSchema.createID(chunk.id, objectID);
                         return returnValue;
                     }
                 }
@@ -209,18 +210,18 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
                 return id;
             }
             boolean notCurrentChunk = chunk != currentChunk;
-            int reusableId = chunk.remove(id, notCurrentChunk);
+            int reusableID = chunk.remove(id, notCurrentChunk);
             
             if (notCurrentChunk) {
-                stack.push(reusableId);
+                stack.push(reusableID);
             } else {
-                newId = reusableId;
+                newID = reusableID;
             }
-            return reusableId;
+            return reusableID;
         }
 
         public Iterator<T> iterator() {
-            return new PoolIterator<T>(firstChunk);
+            return new ChunkedPoolIterator<T>(firstChunk);
         }
 
         public T register(int id, T entry) {
@@ -245,17 +246,16 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
         }
     }
 
-    public static class PoolIterator<T extends Identifiable> implements Iterator<T> {
+    public static class ChunkedPoolIterator<T extends Identifiable> implements Iterator<T> {
 
         int next = 0;
         private LinkedChunk<T> currentChunk;
 
-        public PoolIterator(LinkedChunk<T> currentChunk) {
+        public ChunkedPoolIterator(LinkedChunk<T> currentChunk) {
             this.currentChunk = currentChunk;
         }
 
         @Override
-        @SuppressWarnings("ConstantConditions")
         public boolean hasNext() {
             return currentChunk.size() > next || ((next = 0) == 0 && (currentChunk = currentChunk.next) != null);
         }
@@ -290,7 +290,8 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
 
         public int remove(int id, boolean doNotUpdateIndex) {
             int capacity = idSchema.chunkCapacity;
-            int objectIdToBeReused = idSchema.fetchObjectId(id);
+            int objectIDToBeReused = idSchema.fetchObjectID(id);
+            int chunkID = idSchema.fetchChunkID(id);
             for (;;) {
                 int lastIndex = doNotUpdateIndex ? index.get() : index.decrementAndGet();
                 
@@ -302,25 +303,25 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
                     return 0;
                 }
                 
-                data[objectIdToBeReused] = data[lastIndex];
+                data[objectIDToBeReused] = data[lastIndex];
                 data[lastIndex] = null;
                 
-                if (data[objectIdToBeReused] != null) {
-                    data[objectIdToBeReused].setID(objectIdToBeReused);
+                if (data[objectIDToBeReused] != null) {
+                    data[objectIDToBeReused].setID(objectIDToBeReused);
                 }
                 
-                return idSchema.mergeId(id, lastIndex);
+                return idSchema.mergeID(id, lastIndex);
             }
         }
 
         @SuppressWarnings("unchecked")
         public T get(int id) {
-            return (T) data[idSchema.fetchObjectId(id)];
+            return (T) data[idSchema.fetchObjectID(id)];
         }
 
         @SuppressWarnings("unchecked")
         public T set(int id, T value) {
-            return (T) (data[idSchema.fetchObjectId(id)] = value);
+            return (T) (data[idSchema.fetchObjectID(id)] = value);
         }
 
         public boolean hasCapacity() {

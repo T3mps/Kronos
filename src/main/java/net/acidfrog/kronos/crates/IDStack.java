@@ -37,7 +37,7 @@ public final class IDStack implements AutoCloseable {
         index.addAndGet(-INT_BYTES);
         return false;
     }
-
+                                                               
     public int size() {
         return (index.get() >> 2) + 1;
     }

@@ -87,7 +87,7 @@ public final class SparseSet<E> implements Set<E> {
 
     @Override
     public boolean containsAll(Collection<?> c) {
-        for (Object o : c) {
+        for (var o : c) {
             if (!contains(o)) {
                 return false;
             }
@@ -105,22 +105,26 @@ public final class SparseSet<E> implements Set<E> {
                 if (stamp == 0L) {
                     continue;
                 }
+
                 value = get(key);
+
                 if (!lock.validate(stamp)) {
                     continue;
                 }
                 if (value != null) {
                     break;
                 }
+
                 stamp = lock.tryConvertToWriteLock(stamp);
+
                 if (stamp == 0L) {
                     continue;
                 }
                 
                 put(key, value = mappingFunction.apply(key));
-
                 break;
             }
+            
             return value;
         } finally {
             if (StampedLock.isWriteLockStamp(stamp)) {
@@ -218,10 +222,6 @@ public final class SparseSet<E> implements Set<E> {
 
     public Stream<E> stream() {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false);
-    }
-
-    public Stream<E> parallelStream() {
-        return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED | Spliterator.IMMUTABLE), true);
     }
 
     private static class ValueIterator<E> implements Iterator<E> {

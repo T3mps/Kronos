@@ -1,18 +1,19 @@
 package net.acidfrog.kronos.inferno;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.StampedLock;
 import java.util.stream.Collectors;
 
 import net.acidfrog.kronos.crates.pool.ChunkedPool;
-import net.acidfrog.kronos.crates.pool.ObjectArrayPool;
+import net.acidfrog.kronos.crates.pool.ArrayPool;
 import net.acidfrog.kronos.crates.pool.ChunkedPool.IDSchema;
 import net.acidfrog.kronos.inferno.core.ClassIndex;
 import net.acidfrog.kronos.inferno.core.IndexKey;
@@ -27,20 +28,21 @@ public final class Registry implements AutoCloseable {
     private static int UNNAMED_COUNT = 0;
 
     private final String name;    
-    private final ObjectArrayPool arrayPool;
-    private final NodeCache nodeCache;
+    private final ArrayPool arrayPool;
+    // private final NodeCache nodeCache;
+    private final Map<IndexKey, Node> nodeCache;
     private final ClassIndex classIndex;
-    private final ChunkedPool<IntEntity> pool;
     private final IDSchema idSchema;
+    private final ChunkedPool<IntEntity> pool;
     private final Composition composition;
     private final Map<Class<?>, Transmute.ByAdding1AndRemoving<?>> addingTypeModifiers;
     private final Map<Class<?>, Transmute.ByRemoving> removingTypeModifiers;
     private final Node root;
-    private List<Scheduler> schedulers;
+    private final List<Scheduler> schedulers;
     private final int systemTimeoutSeconds;
 
     public Registry() {
-        this("registry (" + UNNAMED_COUNT++ + ")");
+        this("registry (" + (UNNAMED_COUNT++) + ")");
     }
 
     public Registry(String name) {
@@ -53,16 +55,18 @@ public final class Registry implements AutoCloseable {
         chunkCountBit = Math.max(IDSchema.MIN_CHUNK_COUNT_BIT, Math.min(chunkCountBit, Math.min(reservedBit, IDSchema.MAX_CHUNK_COUNT_BIT)));
         
         this.name = name;
-        this.arrayPool = new ObjectArrayPool();
-        this.nodeCache = new NodeCache();
-        this.classIndex = new ClassIndex(classIndexBit, true);
-        this.pool = new ChunkedPool<IntEntity>(this.idSchema = new IDSchema(chunkBit, chunkCountBit));
+        this.arrayPool = new ArrayPool();
+        // this.nodeCache = new NodeCache();
+        this.nodeCache = new HashMap<IndexKey, Node>();
+        this.classIndex = new ClassIndex(classIndexBit);
+        this.idSchema = new IDSchema(chunkBit, chunkCountBit);
+        this.pool = new ChunkedPool<IntEntity>(idSchema);
         this.composition = new Composition(this);
         this.addingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByAdding1AndRemoving<?>>();
         this.removingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByRemoving>();
         this.root = new Node();
         root.composition = new DataComposition(this, pool.newTenant(), arrayPool, classIndex, idSchema);
-        this.schedulers = new ArrayList<Scheduler>(4);
+        this.schedulers = new CopyOnWriteArrayList<Scheduler>();
         this.systemTimeoutSeconds = systemTimeoutSeconds;
     }
 
@@ -107,13 +111,21 @@ public final class Registry implements AutoCloseable {
         return ((IntEntity) entity).delete();
     }
 
-    public boolean modifyEntity(Transmute.Modifier modifier) {
+    public boolean modify(Transmute.Modifier modifier) {
         var mod = (Composition.NewEntityComposition) modifier.getModifier();
         return mod == null ? false : mod.entity().modify(this, mod.dataComposition(), mod.components());
     }
 
     public void update() {
-        
+        for (int i = 0; i < schedulers.size(); i++) {
+            schedulers.get(i).update();
+        }
+    }
+    
+    public void update(int ups) {
+        for (int i = 0; i < schedulers.size(); i++) {
+            schedulers.get(i).update(ups);
+        }
     }
 
     public Scheduler createScheduler() {
@@ -122,12 +134,13 @@ public final class Registry implements AutoCloseable {
         return scheduler;
     }
 
-    public void include(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
+    protected void include(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
         if (componentTypes.length == 0) {
             return;
         }
         for (var componentType : componentTypes) {
-            Node node = nodeCache.getNode(new IndexKey(classIndex.getIndex(componentType)));
+            Node node = nodeCache.get(new IndexKey(classIndex.getIndex(componentType)));
+            
             if (node == null) {
                 continue;
             }
@@ -136,7 +149,7 @@ public final class Registry implements AutoCloseable {
         }
     }
 
-    public void exclude(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
+    protected void exclude(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
         if (componentTypes.length == 0) {
             return;
         }
@@ -144,7 +157,7 @@ public final class Registry implements AutoCloseable {
         for (var componentType : componentTypes) {
             IndexKey indexKey = new IndexKey(classIndex.getIndex(componentType));
             nodeMap.remove(indexKey);
-            Node node = nodeCache.getNode(indexKey);
+            Node node = nodeCache.get(indexKey);
 
             if (node != null) {
                 for (var linkedNodeKey : node.linkedNodes.keySet()) {
@@ -166,14 +179,30 @@ public final class Registry implements AutoCloseable {
 
         return subject;
     }
+    public Node getOrCreateNode(IndexKey key, Class<?>... componentTypes) {
+        Node node = nodeCache.computeIfAbsent(key, k -> new Node(componentTypes));
 
-    @SuppressWarnings("unchecked")
-    public Transmute.ByAdding1AndRemoving<Object> fetchAddingTypeModifier(Class<?> compType) {
-        return (Transmute.ByAdding1AndRemoving<Object>) addingTypeModifiers.computeIfAbsent(compType, k -> composition.byAdding1AndRemoving(compType));
+        if (componentTypes.length > 1) {
+            for (int i = 0; i < componentTypes.length; i++) {
+                Class<?> componentType = componentTypes[i];
+                IndexKey typeKey = new IndexKey(classIndex.getIndex(componentType));
+                Node singleTypeNode = nodeCache.computeIfAbsent(typeKey, k -> new Node(componentType));
+                singleTypeNode.linkNode(key, node);
+            }
+        } else {
+            node.linkNode(key, node);
+        }
+
+        return node;
     }
 
-    public Transmute.ByRemoving fetchRemovingTypeModifier(Class<?> compType) {
-        return removingTypeModifiers.computeIfAbsent(compType, k -> composition.byRemoving(compType));
+    @SuppressWarnings("unchecked")
+    public Transmute.ByAdding1AndRemoving<Object> fetchAddingTypeModifier(Class<?> componentType) {
+        return (Transmute.ByAdding1AndRemoving<Object>) addingTypeModifiers.computeIfAbsent(componentType, k -> composition.byAdding1AndRemoving(componentType));
+    }
+
+    public Transmute.ByRemoving fetchRemovingTypeModifier(Class<?> componentType) {
+        return removingTypeModifiers.computeIfAbsent(componentType, k -> composition.byRemoving(componentType));
     }
 
     public DataComposition getOrCreate(Object[] components) {
@@ -184,10 +213,10 @@ public final class Registry implements AutoCloseable {
             case 1: return getSingleTypeComposition(components[0].getClass());
             default:
                 IndexKey indexKey = classIndex.getIndexKey(components);
-                Node node = nodeCache.getNode(indexKey);
+                Node node = nodeCache.get(indexKey);
                 
                 if (node == null) {
-                    node = nodeCache.getOrCreateNode(indexKey, getComponentTypes(components));
+                    node = getOrCreateNode(indexKey, getComponentTypes(components));
                 }
                 return getNodeComposition(node);
         }
@@ -201,10 +230,10 @@ public final class Registry implements AutoCloseable {
             case 1: return getSingleTypeComposition(componentTypes[0]);
             default:
                 IndexKey indexKey = classIndex.getIndexKey(componentTypes);
-                Node node = nodeCache.getNode(indexKey);
+                Node node = nodeCache.get(indexKey);
 
                 if (node == null) {
-                    node = nodeCache.getOrCreateNode(indexKey, componentTypes);
+                    node = getOrCreateNode(indexKey, componentTypes);
                 }
                 return getNodeComposition(node);
         }
@@ -212,13 +241,13 @@ public final class Registry implements AutoCloseable {
 
     private DataComposition getSingleTypeComposition(Class<?> componentType) {
         IndexKey key = new IndexKey(classIndex.getIndex(componentType));
-        Node node = nodeCache.getNode(key);
+        Node node = nodeCache.get(key);
         
         if (node == null) {
             key = new IndexKey(classIndex.getIndexOrAddClass(componentType));
-            node = nodeCache.getNode(key);
+            node = nodeCache.get(key);
             if (node == null) {
-                node = nodeCache.getOrCreateNode(key, componentType);
+                node = getOrCreateNode(key, componentType);
             }
         } else {
             // node may not be yet connected to itself
@@ -307,13 +336,13 @@ public final class Registry implements AutoCloseable {
             case 0:
                 return null;
             case 1:
-                Node node = nodeCache.getNode(new IndexKey(classIndex.getIndex(componentTypes[0])));
+                Node node = nodeCache.get(new IndexKey(classIndex.getIndex(componentTypes[0])));
                 return node == null ? null : node.copyOfLinkedNodes();
             default:
                 Map<IndexKey, Node> currentCompositions = null;
 
                 for (int i = 0; i < componentTypes.length; i++) {
-                    node = nodeCache.getNode(new IndexKey(classIndex.getIndex(componentTypes[i])));
+                    node = nodeCache.get(new IndexKey(classIndex.getIndex(componentTypes[i])));
 
                     if (node == null) {
                         continue;
@@ -333,7 +362,7 @@ public final class Registry implements AutoCloseable {
         return root;
     }
 
-    public NodeCache getNodeCache() {
+    public Map<IndexKey, Node> getNodeCache() {
         return nodeCache;
     }
 
@@ -361,58 +390,27 @@ public final class Registry implements AutoCloseable {
         }
     }
 
-    public final class NodeCache {
-        
-        private final Map<IndexKey, Node> data = new ConcurrentHashMap<>();
+    protected final class Node {
 
-        public Node getOrCreateNode(IndexKey key, Class<?>... componentTypes) {
-            Node node = data.computeIfAbsent(key, k -> new Node(componentTypes));
-
-            if (componentTypes.length > 1) {
-                for (int i = 0; i < componentTypes.length; i++) {
-                    Class<?> componentType = componentTypes[i];
-                    IndexKey typeKey = new IndexKey(classIndex.getIndex(componentType));
-                    Node singleTypeNode = data.computeIfAbsent(typeKey, k -> new Node(componentType));
-                    singleTypeNode.linkNode(key, node);
-                }
-            } else {
-                node.linkNode(key, node);
-            }
-
-            return node;
-        }
-
-        public Node getNode(IndexKey key) {
-            return data.get(key);
-        }
-
-        public boolean contains(IndexKey key) {
-            return data.containsKey(key);
-        }
-
-        public void clear() {
-            data.clear();
-        }
-    }
-
-    public final class Node {
-
-        private final StampedLock lock = new StampedLock();
-        private final Map<IndexKey, Node> linkedNodes = new ConcurrentHashMap<>();
+        private final StampedLock lock;
+        private final Map<IndexKey, Node> linkedNodes;
         private final Class<?>[] componentTypes;
         private DataComposition composition;
 
-        public Node(Class<?>... componentTypes) {
+        private Node(Class<?>... componentTypes) {
+            this.lock = new StampedLock();
+            this.linkedNodes = new ConcurrentHashMap<IndexKey, Node>();
             this.componentTypes = componentTypes;
         }
 
-        public void linkNode(IndexKey key, Node node) {
+        protected void linkNode(IndexKey key, Node node) {
             linkedNodes.putIfAbsent(key, node);
         }
 
-        public DataComposition getOrCreateComposition() {
+        protected DataComposition getOrCreateComposition() {
             DataComposition value;
             long stamp = lock.tryOptimisticRead();
+
             try {
                 for (;; stamp = lock.writeLock()) {
                     if (stamp == 0L) {
@@ -461,4 +459,43 @@ public final class Registry implements AutoCloseable {
             Arrays.stream(componentTypes).map(Class::getSimpleName).sorted().collect(Collectors.joining(","))) + "]}";
         }
     }
+
+    // private final class NodeCache implements Iterable<Node> {
+        
+    //     private final Map<IndexKey, Node> data;
+
+    //     private NodeCache() {
+    //         this.data = new ConcurrentHashMap<IndexKey, Node>();
+    //     }
+
+    //     public Node getOrCreateNode(IndexKey key, Class<?>... componentTypes) {
+    //         Node node = data.computeIfAbsent(key, k -> new Node(componentTypes));
+
+    //         if (componentTypes.length > 1) {
+    //             for (int i = 0; i < componentTypes.length; i++) {
+    //                 Class<?> componentType = componentTypes[i];
+    //                 IndexKey typeKey = new IndexKey(classIndex.getIndex(componentType));
+    //                 Node singleTypeNode = data.computeIfAbsent(typeKey, k -> new Node(componentType));
+    //                 singleTypeNode.linkNode(key, node);
+    //             }
+    //         } else {
+    //             node.linkNode(key, node);
+    //         }
+
+    //         return node;
+    //     }
+
+    //     public Node get(IndexKey key) {
+    //         return data.get(key);
+    //     }
+
+    //     public void clear() {
+    //         data.clear();
+    //     }
+
+    //     @Override
+    //     public Iterator<Node> iterator() {
+    //         return data.values().iterator();
+    //     }
+    // }
 }

@@ -7,12 +7,16 @@ public class Main {
 
     public static void main(String[] args) {
         try (Registry registry = new Registry()) {
-            registry.create(new Position(0, 0), new Velocity(1, 4));
-            registry.create(new Position(12, 17), new Velocity(1, 1));
-            registry.create(new Position(-1, -4), new Velocity(3, 1));
+            // registry.create(new Position(0, 0), new Velocity(1, 4));
+
+            // for (int i = 0; i < 2_000_000; i++) {
+            //     registry.create(new Position(Math.max(1, Math.random() * i), Math.max(1, Math.random() * i)), new Velocity(Math.max(1, Math.random() * i), Math.max(1, Math.random() * i)));
+            // }
+
+            registry.emplace(new Position(Math.max(1, Math.random() * 10), Math.max(1, Math.random() * 10)), new Velocity(Math.max(1, Math.random() * 10), Math.max(1, Math.random() * 10)));
 
             Runnable system = () -> {
-                registry.view(Position.class, Velocity.class).forEach(view -> {
+                registry.view(Position.class, Velocity.class).stream().forEach(view -> {
                     Position position = view.component1();
                     Velocity velocity = view.component2();
 
@@ -27,32 +31,11 @@ public class Main {
 
             for (;;) {
                 scheduler.update();
-                Thread.sleep(512);
+                Thread.sleep(2000);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-        // Registry registry = new Registry();
-
-        // registry.create(new Position(0, 0), new Velocity(1, 4));
-
-        // Runnable system = () -> {
-        //     registry.view(Position.class, Velocity.class).forEach(view -> {
-        //         Position position = view.component1();
-        //         Velocity velocity = view.component2();
-
-        //         position.x += velocity.x;
-        //         position.y += velocity.y;
-
-        //         System.out.printf("Entity %d moved with %s to %s\n", view.entity().getID(), velocity, position);
-        //     });
-        // };
-
-        // Scheduler scheduler = registry.createScheduler();
-        // scheduler.schedule(system);
-
-        // scheduler.update(3);
     }
 
     protected static class Position {

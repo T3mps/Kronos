@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.StampedLock;
 
 import net.acidfrog.kronos.crates.pool.ChunkedPool;
-import net.acidfrog.kronos.crates.pool.ObjectArrayPool;
+import net.acidfrog.kronos.crates.pool.ArrayPool;
 import net.acidfrog.kronos.crates.pool.ChunkedPool.IDSchema;
 import net.acidfrog.kronos.inferno.core.ClassIndex;
 import net.acidfrog.kronos.inferno.core.IndexKey;
@@ -19,7 +19,7 @@ public final class DataComposition {
 
     private final Registry repository;
     private final ChunkedPool.Tenant<IntEntity> tenant;
-    private final ObjectArrayPool arrayPool;
+    private final ArrayPool arrayPool;
     private final ClassIndex classIndex;
     private final IDSchema idSchema;
     private final Class<?>[] componentTypes;
@@ -27,7 +27,7 @@ public final class DataComposition {
     private final Map<IndexKey, IntEntity> states;
     private final StampedLock stateLock;
 
-    public DataComposition(Registry repository, ChunkedPool.Tenant<IntEntity> tenant, ObjectArrayPool arrayPool, ClassIndex classIndex, IDSchema idSchema, Class<?>... componentTypes) {
+    public DataComposition(Registry repository, ChunkedPool.Tenant<IntEntity> tenant, ArrayPool arrayPool, ClassIndex classIndex, IDSchema idSchema, Class<?>... componentTypes) {
         this.repository = repository;
         this.tenant = tenant;
         this.arrayPool = arrayPool;

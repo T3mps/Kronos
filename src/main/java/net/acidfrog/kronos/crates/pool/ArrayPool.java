@@ -8,19 +8,29 @@ import java.util.concurrent.locks.StampedLock;
 
 import net.acidfrog.kronos.crates.set.SparseSet;
 
-public class ObjectArrayPool {
+public class ArrayPool {
     
     public static final int DEFAULT_INITIAL_CAPACITY = 1 << 16;
     public static final int SOFT_MAX_CAPACITY = Integer.MAX_VALUE - 8;
     
-    private final SparseSet<Layer> layers = new SparseSet<Layer>();
+    private final SparseSet<Layer> layers;
 
-    public Object[] push(Object[] objects) {
+    public ArrayPool() {
+        this(DEFAULT_INITIAL_CAPACITY);
+    }
+
+    public ArrayPool(int initialCapacity) {
+        this.layers = new SparseSet<Layer>(initialCapacity);
+    }
+
+    public Object[] push(Object... objects) {
         int oSize = objects.length;
         var layer = layers.get(oSize);
+
         if (layer == null) {
-            layer = layers.computeIfAbsent(oSize, k -> new Layer(oSize));
+            layer = layers.computeIfAbsent(oSize, l -> new Layer(oSize));
         }
+
         return layer.push(objects);
     }
 
@@ -30,6 +40,10 @@ public class ObjectArrayPool {
         return objects == null ? new Object[size] : objects;
     }
 
+    public void clear() {
+        layers.clear();
+    }
+
     public int size(int arrayLength) {
         var layer = layers.get(arrayLength);
         return layer == null ? -1 : layer.size.get() + 1;
@@ -37,16 +51,14 @@ public class ObjectArrayPool {
 
     public static final class Layer {
 
-        private final AtomicInteger size;
         private final StampedLock lock;
         private Reference<?>[] data;
-        final int length;
+        private final AtomicInteger size;
     
-        Layer(int length) {
-            this.length = length;
-            this.size = new AtomicInteger(-1);
+        protected Layer(int capacity) {
             this.lock = new StampedLock();
             this.data = new Reference<?>[DEFAULT_INITIAL_CAPACITY];
+            this.size = new AtomicInteger(-1);
         }
 
         public Object[] push(Object... objects) {
@@ -59,17 +71,17 @@ public class ObjectArrayPool {
                         Arrays.fill(objects, null);
                         return objects;
                     }
-                } else {
-                    int cap = data.length;
-                    long stamp = lock.writeLock();
+                }
+                
+                int cap = data.length;
+                long stamp = lock.writeLock();
 
-                    try {
-                        if (data.length == cap) {
-                            ensureCapacity();
-                        }
-                    } finally {
-                        lock.unlockWrite(stamp);
+                try {
+                    if (data.length == cap) {
+                        ensureCapacity();
                     }
+                } finally {
+                    lock.unlockWrite(stamp);
                 }
             }
         }

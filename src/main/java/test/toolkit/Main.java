@@ -3,7 +3,6 @@ package test.toolkit;
 import java.io.IOException;
 
 import net.acidfrog.kronos.toolkit.benchmark.Benchmark;
-import net.acidfrog.kronos.toolkit.benchmark.StringFactory;
 
 public class Main {
     
