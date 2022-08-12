@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.inferno.core;
+package net.acidfrog.kronos.inferno;
 
 import sun.misc.Unsafe;
 
@@ -84,36 +84,36 @@ public final class ClassIndex implements AutoCloseable {
         return hashBit;
     }
 
-    public int getIndex(Class<?> klass) {
-        return getObjectIndex(klass);
+    public int getIndex(Class<?> clazz) {
+        return getObjectIndex(clazz);
     }
 
-    public int getObjectIndex(Object klass) {
+    public int getObjectIndex(Object clazz) {
         if (useFallbackMap.get()) {
-            return fallbackMap.get((Class<?>) klass);
+            return fallbackMap.get((Class<?>) clazz);
         }
-        int identityHashCode = capacityHashCode(System.identityHashCode(klass), hashBit);
+        int identityHashCode = capacityHashCode(System.identityHashCode(clazz), hashBit);
         return UNSAFE.getInt(getIdentityAddress(identityHashCode, memoryAddress));
     }
 
-    public int getObjectIndexVolatile(Object klass) {
+    public int getObjectIndexVolatile(Object clazz) {
         if (useFallbackMap.get()) {
-            return fallbackMap.get((Class<?>) klass);
+            return fallbackMap.get((Class<?>) clazz);
         }
-        int identityHashCode = capacityHashCode(System.identityHashCode(klass), hashBit);
+        int identityHashCode = capacityHashCode(System.identityHashCode(clazz), hashBit);
         return UNSAFE.getIntVolatile(null, getIdentityAddress(identityHashCode, memoryAddress));
     }
 
-    public int getIndexOrAddClass(Class<?> klass) {
-        return getIndexOrAddObject(klass);
+    public int getIndexOrAddClass(Class<?> clazz) {
+        return getIndexOrAddObject(clazz);
     }
 
-    public int getIndexOrAddObject(Object klass) {
-        int value = getObjectIndexVolatile(klass);
+    public int getIndexOrAddObject(Object clazz) {
+        int value = getObjectIndexVolatile(clazz);
         if (value != 0) {
             return value;
         }
-        return addObject(klass);
+        return addObject(clazz);
     }
 
     public int[] getIndexOrAddClassBatch(Class<?>[] classes) {

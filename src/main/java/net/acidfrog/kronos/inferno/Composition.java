@@ -1,486 +1,417 @@
 package net.acidfrog.kronos.inferno;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.StampedLock;
+
+import net.acidfrog.kronos.crates.pool.ChunkedPool;
+import net.acidfrog.kronos.crates.pool.ArrayPool;
+import net.acidfrog.kronos.crates.pool.ChunkedPool.IDSchema;
 
 public final class Composition {
-
-    private final Registry registry;
-
-    public Composition(Registry registry) {
-        this.registry = registry;
-    }
-
-    private static final void populateIndices(final Class<?>[] componentTypes, final int[] indices, final DataComposition data) {
-        if (data.isMultiComponent()) {
-            for (int i = 0; i < componentTypes.length; i++) {
-                indices[i] = data.fetchComponentIndex(componentTypes[i]);
-            }
-            
-            return;
-        }
-
-        Class<?>[] newComponentTypes = data.getComponentTypes();
-        Class<?> componentType = newComponentTypes.length > 0 ? newComponentTypes[0] : null;
-
-        for (int i = 0; i < componentTypes.length; i++) {
-            indices[i] = componentTypes[i].equals(componentType) ? 0 : -1;
-        }
-    }
-
-    public <T> Transmute.Of1<T> of(Class<T> componentType) {
-        return new Of1<T>(registry.getOrCreateByType(new Class<?>[]{componentType}));
-    }
-
-    public <T1, T2> Of2<T1, T2> of(Class<T1> componentType1, Class<T2> componentType2) {
-        Class<?>[] componentTypes = { componentType1, componentType2 };
-        return new Of2<T1, T2>(registry.getOrCreateByType(componentTypes), componentTypes);
-    }
-
-    public <T1, T2, T3> Of3<T1, T2, T3> of(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3) {
-        Class<?>[] componentTypes = { componentType1, componentType2, componentType3 };
-        return new Of3<T1, T2, T3>(registry.getOrCreateByType(componentTypes), componentTypes);
-    }
-
-    public <T1, T2, T3, T4> Of4<T1, T2, T3, T4> of(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4) {
-        Class<?>[] componentTypes = { componentType1, componentType2, componentType3, componentType4 };
-        return new Of4<T1, T2, T3, T4>(registry.getOrCreateByType(componentTypes), componentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5> Of5<T1, T2, T3, T4, T5> of(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5) {
-        Class<?>[] componentTypes = { componentType1, componentType2, componentType3, componentType4, componentType5 };
-        return new Of5<T1, T2, T3, T4, T5>(registry.getOrCreateByType(componentTypes), componentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5, T6> Of6<T1, T2, T3, T4, T5, T6> of(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6) {
-        Class<?>[] componentTypes = { componentType1, componentType2, componentType3, componentType4, componentType5, componentType6 };
-        return new Of6<T1, T2, T3, T4, T5, T6>(registry.getOrCreateByType(componentTypes), componentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5, T6, T7> Of7<T1, T2, T3, T4, T5, T6, T7> of(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Class<T7> componentType7) {
-        Class<?>[] componentTypes = { componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7 };
-        return new Of7<T1, T2, T3, T4, T5, T6, T7>(registry.getOrCreateByType(componentTypes), componentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5, T6, T7, T8> Of8<T1, T2, T3, T4, T5, T6, T7, T8> of(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Class<T7> componentType7, Class<T8> componentType8) {
-        Class<?>[] componentTypes = { componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7, componentType8 };
-        return new Of8<T1, T2, T3, T4, T5, T6, T7, T8>(registry.getOrCreateByType(componentTypes), componentTypes);
-    }
-
-    public Transmute.ByRemoving byRemoving(Class<?>... removedComponentTypes) {
-        return new PreparedModifier(registry, null, removedComponentTypes);
-    }
-
-    public <T> ByAdding1AndRemoving<T> byAdding1AndRemoving(Class<T> componentType, Class<?>... removedComponentTypes) {
-        return new ByAdding1AndRemoving<>(registry, new Class<?>[]{componentType}, removedComponentTypes);
-    }
-
-    public <T1, T2> ByAdding2AndRemoving<T1, T2> byAdding2AndRemoving(Class<T1> componentType1, Class<T2> componentType2, Class<?>... removedComponentTypes) {
-        return new ByAdding2AndRemoving<>(registry, new Class<?>[]{componentType1, componentType2}, removedComponentTypes);
-    }
-
-    public <T1, T2, T3> ByAdding3AndRemoving<T1, T2, T3> byAdding3AndRemoving(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<?>... removedComponentTypes) {
-        return new ByAdding3AndRemoving<>(registry, new Class<?>[]{componentType1, componentType2, componentType3}, removedComponentTypes);
-    }
-
-    public <T1, T2, T3, T4> ByAdding4AndRemoving<T1, T2, T3, T4> byAdding4AndRemoving(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<?>... removedComponentTypes) {
-        return new ByAdding4AndRemoving<>(registry, new Class<?>[]{componentType1, componentType2, componentType3, componentType4}, removedComponentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5> ByAdding5AndRemoving<T1, T2, T3, T4, T5> byAdding5AndRemoving(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<?>... removedComponentTypes) {
-        return new ByAdding5AndRemoving<>(registry, new Class<?>[]{componentType1, componentType2, componentType3, componentType4, componentType5}, removedComponentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5, T6> ByAdding6AndRemoving<T1, T2, T3, T4, T5, T6> byAdding6AndRemoving(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Class<?>... removedComponentTypes) {
-        return new ByAdding6AndRemoving<>(registry, new Class<?>[]{componentType1, componentType2, componentType3, componentType4, componentType5, componentType6}, removedComponentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5, T6, T7> ByAdding7AndRemoving<T1, T2, T3, T4, T5, T6, T7> byAdding7AndRemoving(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Class<T7> componentType7, Class<?>... removedComponentTypes) {
-        return new ByAdding7AndRemoving<>(registry, new Class<?>[]{componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7}, removedComponentTypes);
-    }
-
-    public <T1, T2, T3, T4, T5, T6, T7, T8> ByAdding8AndRemoving<T1, T2, T3, T4, T5, T6, T7, T8> byAdding8AndRemoving(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Class<T7> componentType7, Class<T8> componentType8, Class<?>... removedComponentTypes) {
-        return new ByAdding8AndRemoving<>(registry, new Class<?>[]{componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7, componentType8}, removedComponentTypes);
-    }
-
-    private static class OfTypes {
-
-        protected final DataComposition data;
-        protected final int[] indices;
-
-        protected Object[] components;
-
-        public OfTypes(DataComposition data, Class<?>[] componentTypes) {
-            this.data = data;
-
-            if (componentTypes == null) {
-                this.indices = new int[0];
-            } else {
-                int length = componentTypes.length;
-                this.indices = new int[length];
-                populateIndices(componentTypes, indices, data);
-            }
-        }
-
-        public Object[] getComponents() {
-            return components;
-        }
-
-        public Object getContext() {
-            return data;
-        }
-    }
-
-    public record NewEntityComposition(IntEntity entity, DataComposition dataComposition, Object[] components) {
-    }
     
-    private static class PreparedModifier implements Transmute.ByRemoving {
+    public static final int COMPONENT_INDEX_CAPACITY = 1 << 10;
 
-        protected final Registry registry;
-        protected final Map<DataComposition, TargetComposition> cache;
-        protected final Class<?>[] addedComponentTypes;
-        protected final Set<Class<?>> removedComponentTypes;
-        protected NewEntityComposition modifier;
+    private final Registry repository;
+    private final ChunkedPool.PooledNode<Entity> pooledNode;
+    private final ArrayPool arrayPool;
+    private final ClassIndex classIndex;
+    private final IDSchema idSchema;
+    private final Class<?>[] componentTypes;
+    private final int[] componentIndices;
+    private final Map<IndexKey, Entity> states;
+    private final StampedLock stateLock;
 
-        public PreparedModifier(Registry registry, Class<?>[] addedComponentTypes, Class<?>... removedComponentTypes) {
-            this.registry = registry;
-            this.cache = new ConcurrentHashMap<DataComposition, TargetComposition>();;
-            this.addedComponentTypes = addedComponentTypes;
-            this.removedComponentTypes = new HashSet<Class<?>>(removedComponentTypes.length);
+    public Composition(Registry repository, ChunkedPool.PooledNode<Entity> pooledNode, ArrayPool arrayPool, ClassIndex classIndex, IDSchema idSchema, Class<?>... componentTypes) {
+        this.repository = repository;
+        this.pooledNode = pooledNode;
+        this.arrayPool = arrayPool;
+        this.classIndex = classIndex;
+        this.idSchema = idSchema;
+        this.componentTypes = componentTypes;
+        if (isMultiComponent()) {
+            this.componentIndices = new int[COMPONENT_INDEX_CAPACITY];
+            Arrays.fill(componentIndices, -1);
 
-            Collections.addAll(this.removedComponentTypes, removedComponentTypes);
-        }
-
-        @Override
-        public Transmute.Modifier withValue(Entity entity) {
-            modifier = fetchModifier(entity);
-            return this;
-        }
-
-        protected NewEntityComposition fetchModifier(Entity entity, Object... addedComponents) {
-            var intEntity = (IntEntity) entity;
-            var composition = intEntity.getComposition();
-            var targetComposition = fetchTargetComposition(composition);
-            return !targetComposition.target.equals(composition) ? new NewEntityComposition(intEntity, targetComposition.target, fetchComponentArray(intEntity, targetComposition, addedComponents)) : null;
-        }
-
-        private Object[] fetchComponentArray(IntEntity entity, TargetComposition targetComposition, Object... addedComponents) {
-            int tSize = targetComposition.target.getComponentTypes().length;
-            if (tSize == 0) {
-                return new Object[0];
+            for (int i = 0; i < componentTypes.length; i++) {
+                this.componentIndices[classIndex.getIndex(componentTypes[i])] = i;
             }
+        } else {
+            this.componentIndices = null;
+        }
+        this.states = new ConcurrentHashMap<IndexKey, Entity>();
+        this.stateLock = new StampedLock();
+    }
 
-            Object[] components = new Object[tSize];
-            Object[] prevComponentArray = entity.getComponents();
+    public static <S extends Enum<S>> IndexKey computeIndexKey(S state, ClassIndex classIndex) {
+        int index = classIndex.getIndex(state.getClass());
+        index = index == 0 ? classIndex.getIndexOrAddClass(state.getClass()) : index;
+        return new IndexKey(new int[] { index, state.ordinal() });
+    }
 
-            if (prevComponentArray != null && prevComponentArray.length > 0) {
-                populateComponentArray(components, prevComponentArray, targetComposition.indices);
+    public boolean isMultiComponent() {
+        return componentTypes.length > 1;
+    }
+
+    public int getComponentIndex(Class<?> componentType) {
+        return componentIndices[classIndex.getIndex(componentType)];
+    }
+
+    public Object[] sortComponentsByIndex(Object[] components) {
+        int newIndex;
+
+        for (int i = 0; i < components.length; i++) {
+            newIndex = getComponentIndex(components[i].getClass());
+
+            if (newIndex != i) {
+                swapComponents(components, i, newIndex);
             }
-            if (addedComponents.length > 0) {
-                populateComponentArray(components, addedComponents, targetComposition.addedIndices);
-            }
-            
-            return components;
         }
 
-        private void populateComponentArray(Object[] components, Object[] otherComponents, int[] indices) {
-            int oSize = otherComponents.length;
+        newIndex = getComponentIndex(components[0].getClass());
+        
+        if (newIndex > 0) {
+            swapComponents(components, 0, newIndex);
+        }
+        return components;
+    }
 
-            for (int i = 0; i < oSize; i++) {
-                int index = indices[i];
+    private void swapComponents(Object[] components, int i, int newIndex) {
+        Object temp = components[newIndex];
+        components[newIndex] = components[i];
+        components[i] = temp;
+    }
 
-                if (index < 0) {
-                    continue;
+    protected Entity createEntity(boolean prepared, Object... components) {
+        int id = pooledNode.nextID();
+        return pooledNode.register(id, new Entity(id, this, !prepared && isMultiComponent() ? sortComponentsByIndex(components) : components));
+    }
+
+    protected boolean deleteEntity(Entity entity) {
+        detachEntity(entity);
+        Object[] components = entity.getComponents();
+
+        if (components != null && entity.isPooledArray()) {
+            arrayPool.push(components);
+        }
+        if (entity.getPrevious() != null || entity.getNext() != null) {
+            detachEntityState(entity);
+        }
+
+        entity.setData(null);
+        return true;
+    }
+
+    protected Entity attachEntity(Entity entity, boolean prepared, Object... components) {
+        entity = pooledNode.register(entity.setID(pooledNode.nextID()), switch (componentTypes.length) {
+            case 00 -> entity.setData(new Entity.Data(this, null, entity.getData()));
+            case 01 -> entity.setData(new Entity.Data(this, components, entity.getData()));
+            default -> entity.setData(new Entity.Data(this, prepared ? components : sortComponentsByIndex(components), entity.getData()));
+        });
+
+        return entity;
+    }
+
+    protected void reattachEntity(Entity entity) {
+        pooledNode.register(entity.setID(pooledNode.nextID()), entity);
+    }
+
+    protected Entity detachEntity(Entity entity) {
+        pooledNode.freeID(entity.getID());
+        entity.flagDetachedID();
+        return entity;
+    }
+
+    public <S extends Enum<S>> Entity setEntityState(Entity entity, S state) {
+        detachEntityState(entity);
+        
+        if (state != null) {
+            attachEntityState(entity, state);
+        }
+        return entity;
+    }
+
+    private boolean detachEntityState(Entity entity) {
+        IndexKey key = entity.getData().stateRoot();
+        // if entity is root
+
+        if (key != null) {
+            // if alone
+            if (entity.getPrevious() == null) {
+                if (states.remove(key) != null) {
+                    entity.setData(new Entity.Data(this, entity.getComponents(), (Entity.Data) null));
+                    return true;
                 }
-                components[index] = otherComponents[i];
+            } else {
+                Entity prev = (Entity) entity.getPrevious();
+
+                if (states.replace(key, entity, prev)) {
+                    prev.setNext(null);
+                    prev.setData(new Entity.Data(this, prev.getComponents(), entity.getData()));
+                    entity.setPrevious(null);
+                    entity.setData(new Entity.Data(this, entity.getComponents(), (Entity.Data) null));
+                    return true;
+                }
+            }
+        } else if (entity.getNext() != null) {
+            long stamp = stateLock.writeLock();
+
+            try {
+                Entity prev, next;
+
+                if ((next = (Entity) entity.getNext()) != null) {
+                    if ((prev = (Entity) entity.getPrevious()) != null) {
+                        prev.setNext(next);
+                        next.setPrevious(prev);
+                    } else {
+                        next.setPrevious(null);
+                    }
+                }
+
+                entity.setPrevious(null);
+                entity.setNext(null);
+                return true;
+            } finally {
+                stateLock.unlockWrite(stamp);
             }
         }
+        return false;
+    }
 
-        @Override
-        public Object getModifier() {
-            return modifier;
-        }
+    private <S extends Enum<S>> void attachEntityState(Entity entity, S state) {
+        IndexKey indexKey = computeIndexKey(state, classIndex);
+        Entity.Data entityData = entity.getData();
+        Entity prev = states.computeIfAbsent(indexKey, k -> entity.setData(new Entity.Data(this, entityData.components(), k)));
 
-        private TargetComposition fetchTargetComposition(DataComposition composition) {
-            return cache.computeIfAbsent(composition, prevComposition -> {
-                Class<?>[] prevComponentTypes = prevComposition.getComponentTypes();
-                int newLength = prevComponentTypes.length + (addedComponentTypes == null ? 0 : addedComponentTypes.length);
-                List<Class<?>> typeList = new ArrayList<Class<?>>(newLength);
-                
-                populateTypeList(typeList, prevComponentTypes);
-
-                if (addedComponentTypes != null) {
-                    populateTypeList(typeList, addedComponentTypes);
-                }
-                
-                Class<?>[] newComponentTypes = typeList.toArray(new Class<?>[0]);
-                DataComposition newComposition = registry.getOrCreateByType(newComponentTypes);
-                int[] indices = new int[prevComponentTypes.length];
-                
-                populateIndices(prevComponentTypes, indices, newComposition);
-                
-                int[] addedIndices = null;
-                if (addedComponentTypes != null) {
-                    addedIndices = new int[addedComponentTypes.length];
-                    populateIndices(addedComponentTypes, addedIndices, newComposition);
-                }
-                
-                return new TargetComposition(newComposition, indices, addedIndices);
+        if (prev != entity) {
+            states.computeIfPresent(indexKey, (k, oldEntity) -> {
+                entity.setPrevious(oldEntity);
+                entity.setData(new Entity.Data(this, entityData.components(), k));
+                oldEntity.setNext(entity);
+                Entity.Data oldEntityData = oldEntity.getData();
+                oldEntity.setData(new Entity.Data(this, oldEntityData.components(), (Entity.Data) null));
+                return entity;
             });
         }
+    }
 
-        private void populateTypeList(List<Class<?>> typeList, Class<?>[] componentTypes) {
-            for (var type : componentTypes) {
-                if (!removedComponentTypes.contains(type)) {
-                    typeList.add(type);
-                }
+    public int size() {
+        return componentTypes.length;
+    }
+
+    public Class<?>[] getComponentTypes() {
+        return componentTypes;
+    }
+
+    public Registry getRepository() {
+        return repository;
+    }
+
+    public ChunkedPool.PooledNode<Entity> getNode() {
+        return pooledNode;
+    }
+
+    public Map<IndexKey, Entity> getStates() {
+        return Collections.unmodifiableMap(states);
+    }
+
+    public Entity getStateRootEntity(IndexKey key) {
+        return states.get(key);
+    }
+
+    public IDSchema getIDSchema() {
+        return idSchema;
+    }
+    
+    @Override
+    public String toString() {
+        int iMax = componentTypes.length - 1;
+        if (iMax == -1) {
+            return "[]";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
+        for (int i = 0;; i++) {
+            sb.append(componentTypes[i].getSimpleName());
+
+            if (i == iMax) {
+                return sb.append(']').toString();
             }
-        }
-
-        private record TargetComposition(DataComposition target, int[] indices, int[] addedIndices) {
+            sb.append(", ");
         }
     }
 
-    public final static class Of1<T> extends OfTypes implements Transmute.Of1<T> {
+    public <T> Iterator<Group.With1<T>> select(Class<T> componentType, Iterator<Entity> iterator) {
+        int index = componentIndices == null ? 0 : getComponentIndex(componentType);
+        return new IteratorWith1<T>(index, iterator, this);
+    }
 
-        public Of1(DataComposition data) {
-            super(data, null);
+    public <T1, T2> Iterator<Group.With2<T1, T2>> select(Class<T1> componentType1, Class<T2> componentType2, Iterator<Entity> iterator) {
+        return new IteratorWith2<T1, T2>(getComponentIndex(componentType1), getComponentIndex(componentType2), iterator, this);
+    }
+
+    public <T1, T2, T3> Iterator<Group.With3<T1, T2, T3>> select(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Iterator<Entity> iterator) {
+        return new IteratorWith3<T1, T2, T3>(getComponentIndex(componentType1), getComponentIndex(componentType2), getComponentIndex(componentType3), iterator, this);
+    }
+
+    public <T1, T2, T3, T4> Iterator<Group.With4<T1, T2, T3, T4>> select(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Iterator<Entity> iterator) {
+        return new IteratorWith4<T1, T2, T3, T4>(getComponentIndex(componentType1), getComponentIndex(componentType2), getComponentIndex(componentType3), getComponentIndex(componentType4), iterator, this);
+    }
+
+    public <T1, T2, T3, T4, T5> Iterator<Group.With5<T1, T2, T3, T4, T5>> select(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Iterator<Entity> iterator) {
+        return new IteratorWith5<T1, T2, T3, T4, T5>(getComponentIndex(componentType1), getComponentIndex(componentType2), getComponentIndex(componentType3), getComponentIndex(componentType4), getComponentIndex(componentType5), iterator, this);
+    }
+
+    public <T1, T2, T3, T4, T5, T6> Iterator<Group.With6<T1, T2, T3, T4, T5, T6>> select(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Iterator<Entity> iterator) {
+        return new IteratorWith6<T1, T2, T3, T4, T5, T6>(getComponentIndex(componentType1), getComponentIndex(componentType2), getComponentIndex(componentType3), getComponentIndex(componentType4), getComponentIndex(componentType5), getComponentIndex(componentType6), iterator, this);
+    }
+
+    public Iterator<Entity> entityStateIterator(Entity rootEntity) {
+        return new StateIterator(rootEntity);
+    }
+
+    private class StateIterator implements Iterator<Entity> {
+
+        private Entity next;
+
+        private StateIterator(Entity rootEntity) {
+            this.next = rootEntity;
         }
 
         @Override
-        public Transmute.OfTypes withValue(T comp) {
-            components = new Object[]{ comp };
-            return this;
+        public boolean hasNext() {
+            return next != null;
+        }
+
+        @Override
+        public Entity next() {
+            var current = next;
+            next = (Entity) next.getPrevious();
+            return current;
         }
     }
 
-    public final static class Of2<T1, T2> extends OfTypes implements Transmute.Of2<T1, T2> {
+    public record IteratorWith1<T>(int index, Iterator<Entity> iterator, Composition composition) implements Iterator<Group.With1<T>> {
 
-        public Of2(DataComposition data, Class<?>[] componentTypes) {
-            super(data, componentTypes);
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
         }
 
         @Override
-        public Transmute.OfTypes withValue(T1 component1, T2 component2) {
-            components = new Object[2];
-            components[indices[0]] = component1;
-            components[indices[1]] = component2;
-            return this;
+        @SuppressWarnings("unchecked")
+        public Group.With1<T> next() {
+            Entity intEntity;
+            Entity.Data data;
+
+            while ((data = (intEntity = iterator.next()).getData()) == null || data.composition() != composition) ;
+            
+            Object[] components = data.components();
+            return new Group.With1<T>((T) components[index], intEntity);
         }
     }
 
-    public final static class Of3<T1, T2, T3> extends OfTypes implements Transmute.Of3<T1, T2, T3> {
+    public record IteratorWith2<T1, T2>(int index1, int index2, Iterator<Entity> iterator, Composition composition) implements Iterator<Group.With2<T1, T2>> {
 
-        public Of3(DataComposition data, Class<?>[] componentTypes) {
-            super(data, componentTypes);
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
         }
 
         @Override
-        public Transmute.OfTypes withValue(T1 component1, T2 component2, T3 component3) {
-            components = new Object[3];
-            components[indices[0]] = component1;
-            components[indices[1]] = component2;
-            components[indices[2]] = component3;
-            return this;
+        @SuppressWarnings("unchecked")
+        public Group.With2<T1, T2> next() {
+            Entity intEntity;
+            Entity.Data data;
+
+            while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+
+            Object[] components = data.components();
+            return new Group.With2<T1, T2>((T1) components[index1], (T2) components[index2], intEntity);
         }
     }
 
-    public final static class Of4<T1, T2, T3, T4> extends OfTypes implements Transmute.Of4<T1, T2, T3, T4> {
-
-        public Of4(DataComposition data, Class<?>[] componentTypes) {
-            super(data, componentTypes);
+    public record IteratorWith3<T1, T2, T3>(int index1, int index2, int index3, Iterator<Entity> iterator, Composition composition) implements Iterator<Group.With3<T1, T2, T3>> {
+        
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
         }
 
         @Override
-        public Transmute.OfTypes withValue(T1 component1, T2 component2, T3 component3, T4 component4) {
-            components = new Object[4];
-            components[indices[0]] = component1;
-            components[indices[1]] = component2;
-            components[indices[2]] = component3;
-            components[indices[3]] = component4;
-            return this;
+        @SuppressWarnings("unchecked")
+        public Group.With3<T1, T2, T3> next() {
+            Entity intEntity;
+            Entity.Data data;
+
+            while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+
+            Object[] components = data.components();
+            return new Group.With3<T1, T2, T3>((T1) components[index1], (T2) components[index2], (T3) components[index3], intEntity);
         }
     }
 
-    public final static class Of5<T1, T2, T3, T4, T5> extends OfTypes implements Transmute.Of5<T1, T2, T3, T4, T5> {
+    public record IteratorWith4<T1, T2, T3, T4>(int index1, int index2, int index3, int index4, Iterator<Entity> iterator, Composition composition) implements Iterator<Group.With4<T1, T2, T3, T4>> {
 
-        public Of5(DataComposition data, Class<?>[] componentTypes) {
-            super(data, componentTypes);
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
         }
 
         @Override
-        public Transmute.OfTypes withValue(T1 component1, T2 component2, T3 component3, T4 component4, T5 component5) {
-            components = new Object[5];
-            components[indices[0]] = component1;
-            components[indices[1]] = component2;
-            components[indices[2]] = component3;
-            components[indices[3]] = component4;
-            components[indices[4]] = component5;
-            return this;
+        @SuppressWarnings("unchecked")
+        public Group.With4<T1, T2, T3, T4> next() {
+            Entity intEntity;
+            Entity.Data data;
+
+            while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+
+            Object[] components = data.components();
+            return new Group.With4<T1, T2, T3, T4>((T1) components[index1], (T2) components[index2], (T3) components[index3], (T4) components[index4], intEntity);
         }
     }
 
-    public final static class Of6<T1, T2, T3, T4, T5, T6> extends OfTypes implements Transmute.Of6<T1, T2, T3, T4, T5, T6> {
+    public record IteratorWith5<T1, T2, T3, T4, T5>(int index1, int index2, int index3, int index4, int index5, Iterator<Entity> iterator, Composition composition) implements Iterator<Group.With5<T1, T2, T3, T4, T5>> {
 
-        public Of6(DataComposition data, Class<?>[] componentTypes) {
-            super(data, componentTypes);
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
         }
 
         @Override
-        public Transmute.OfTypes withValue(T1 component1, T2 component2, T3 component3, T4 component4, T5 component5, T6 component6) {
-            components = new Object[6];
-            components[indices[0]] = component1;
-            components[indices[1]] = component2;
-            components[indices[2]] = component3;
-            components[indices[3]] = component4;
-            components[indices[4]] = component5;
-            components[indices[5]] = component6;
-            return this;
+        @SuppressWarnings("unchecked")
+        public Group.With5<T1, T2, T3, T4, T5> next() {
+            Entity intEntity;
+            Entity.Data data;
+
+            while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
+            Object[] components = data.components();
+
+            return new Group.With5<T1, T2, T3, T4, T5>((T1) components[index1], (T2) components[index2], (T3) components[index3], (T4) components[index4], (T5) components[index5], intEntity);
         }
     }
 
-    public final static class Of7<T1, T2, T3, T4, T5, T6, T7> extends OfTypes implements Transmute.Of7<T1, T2, T3, T4, T5, T6, T7> {
+    public record IteratorWith6<T1, T2, T3, T4, T5, T6>(int index1, int index2, int index3, int index4, int index5, int index6, Iterator<Entity> iterator, Composition composition) implements Iterator<Group.With6<T1, T2, T3, T4, T5, T6>> {
 
-        public Of7(DataComposition data, Class<?>[] componentTypes) {
-            super(data, componentTypes);
+        @Override
+        public boolean hasNext() {
+            return iterator.hasNext();
         }
 
         @Override
-        public Transmute.OfTypes withValue(T1 component1, T2 component2, T3 component3, T4 component4, T5 component5, T6 component6, T7 component7) {
-            components = new Object[7];
-            components[indices[0]] = component1;
-            components[indices[1]] = component2;
-            components[indices[2]] = component3;
-            components[indices[3]] = component4;
-            components[indices[4]] = component5;
-            components[indices[5]] = component6;
-            components[indices[6]] = component7;
-            return this;
-        }
-    }
+        @SuppressWarnings("unchecked")
+        public Group.With6<T1, T2, T3, T4, T5, T6> next() {
+            Entity intEntity;
+            Entity.Data data;
 
-    public final static class Of8<T1, T2, T3, T4, T5, T6, T7, T8> extends OfTypes implements Transmute.Of8<T1, T2, T3, T4, T5, T6, T7, T8> {
+            while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
 
-        public Of8(DataComposition data, Class<?>[] componentTypes) {
-            super(data, componentTypes);
-        }
-
-        @Override
-        public Transmute.OfTypes withValue(T1 component1, T2 component2, T3 component3, T4 component4, T5 component5, T6 component6, T7 component7, T8 component8) {
-            components = new Object[8];
-            components[indices[0]] = component1;
-            components[indices[1]] = component2;
-            components[indices[2]] = component3;
-            components[indices[3]] = component4;
-            components[indices[4]] = component5;
-            components[indices[5]] = component6;
-            components[indices[6]] = component7;
-            components[indices[7]] = component8;
-            return this;
-        }
-    }
-
-    public final static class ByAdding1AndRemoving<T> extends PreparedModifier implements Transmute.ByAdding1AndRemoving<T> {
-
-        public ByAdding1AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.Modifier withValue(Entity entity, T comp) {
-            modifier = fetchModifier(entity, comp);
-            return this;
-        }
-    }
-
-    public final static class ByAdding2AndRemoving<T1, T2> extends PreparedModifier implements Transmute.ByAdding2AndRemoving<T1, T2> {
-
-        public ByAdding2AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.Modifier withValue(Entity entity, T1 component1, T2 component2) {
-            modifier = fetchModifier(entity, component1, component2);
-            return this;
-        }
-    }
-
-    public final static class ByAdding3AndRemoving<T1, T2, T3> extends PreparedModifier implements Transmute.ByAdding3AndRemoving<T1, T2, T3> {
-
-        public ByAdding3AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.Modifier withValue(Entity entity, T1 component1, T2 component2, T3 component3) {
-            modifier = fetchModifier(entity, component1, component2, component3);
-            return this;
-        }
-    }
-
-    public final static class ByAdding4AndRemoving<T1, T2, T3, T4> extends PreparedModifier implements Transmute.ByAdding4AndRemoving<T1, T2, T3, T4> {
-
-        public ByAdding4AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.Modifier withValue(Entity entity, T1 component1, T2 component2, T3 component3, T4 component4) {
-            modifier = fetchModifier(entity, component1, component2, component3, component4);
-            return this;
-        }
-    }
-
-    public final static class ByAdding5AndRemoving<T1, T2, T3, T4, T5> extends PreparedModifier implements Transmute.ByAdding5AndRemoving<T1, T2, T3, T4, T5> {
-
-        public ByAdding5AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.Modifier withValue(Entity entity, T1 component1, T2 component2, T3 component3, T4 component4, T5 component5) {
-            modifier = fetchModifier(entity, component1, component2, component3, component4, component5);
-            return this;
-        }
-    }
-
-    public final static class ByAdding6AndRemoving<T1, T2, T3, T4, T5, T6> extends PreparedModifier implements Transmute.ByAdding6AndRemoving<T1, T2, T3, T4, T5, T6> {
-
-        public ByAdding6AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.Modifier withValue(Entity entity, T1 component1, T2 component2, T3 component3, T4 component4, T5 component5, T6 component6) {
-            modifier = fetchModifier(entity, component1, component2, component3, component4, component5, component6);
-            return this;
-        }
-    }
-
-    public final static class ByAdding7AndRemoving<T1, T2, T3, T4, T5, T6, T7> extends PreparedModifier implements Transmute.ByAdding7AndRemoving<T1, T2, T3, T4, T5, T6, T7> {
-
-        public ByAdding7AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.ByRemoving withValue(Entity entity, T1 component1, T2 component2, T3 component3, T4 component4, T5 component5, T6 component6, T7 component7) {
-            modifier = fetchModifier(entity, component1, component2, component3, component4, component5, component6, component7);
-            return this;
-        }
-    }
-
-    public final static class ByAdding8AndRemoving<T1, T2, T3, T4, T5, T6, T7, T8> extends PreparedModifier implements Transmute.ByAdding8AndRemoving<T1, T2, T3, T4, T5, T6, T7, T8> {
-
-        public ByAdding8AndRemoving(Registry registry, Class<?>[] addedComponentTypes, Class<?>... componentTypes) {
-            super(registry, addedComponentTypes, componentTypes);
-        }
-
-        @Override
-        public Transmute.ByRemoving withValue(Entity entity, T1 component1, T2 component2, T3 component3, T4 component4, T5 component5, T6 component6, T7 component7, T8 component8) {
-            modifier = fetchModifier(entity, component1, component2, component3, component4, component5, component6, component7, component8);
-            return this;
+            Object[] components = data.components();
+            return new Group.With6<T1, T2, T3, T4, T5, T6>((T1) components[index1], (T2) components[index2], (T3) components[index3], (T4) components[index4], (T5) components[index5], (T6) components[index6], intEntity);
         }
     }
 }

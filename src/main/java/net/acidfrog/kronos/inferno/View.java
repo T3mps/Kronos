@@ -7,8 +7,6 @@ import java.util.Spliterators;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import net.acidfrog.kronos.inferno.core.IndexKey;
-
 public abstract class View<T> implements Group<T> {
     
     private final Registry registry;
@@ -20,7 +18,7 @@ public abstract class View<T> implements Group<T> {
         this.nodeMap = nodeMap;
     }
 
-    protected abstract Iterator<T> compositionIterator(DataComposition composition);
+    protected abstract Iterator<T> compositionIterator(Composition composition);
 
     @Override
     public View<T> include(Class<?>... componentTypes) {
@@ -36,7 +34,7 @@ public abstract class View<T> implements Group<T> {
 
     @Override
     public <S extends Enum<S>> View<T> withState(S state) {
-        stateKey = DataComposition.computeIndexKey(state, registry.getClassIndex());
+        stateKey = Composition.computeIndexKey(state, registry.getClassIndex());
         return this;
     }
 
@@ -121,8 +119,8 @@ public abstract class View<T> implements Group<T> {
         }
 
         @Override
-        protected Iterator<Group.With1<T>> compositionIterator(DataComposition composition) {
-            Iterator<IntEntity> iterator = stateKey == null ? composition.getTenant().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
+        protected Iterator<Group.With1<T>> compositionIterator(Composition composition) {
+            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
             return composition.select(type, iterator);
         }
     }
@@ -139,8 +137,8 @@ public abstract class View<T> implements Group<T> {
         }
 
         @Override
-        protected Iterator<Group.With2<T1, T2>> compositionIterator(DataComposition composition) {
-            Iterator<IntEntity> iterator = stateKey == null ? composition.getTenant().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
+        protected Iterator<Group.With2<T1, T2>> compositionIterator(Composition composition) {
+            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
             return composition.select(type1, type2, iterator);
         }
     }
@@ -159,8 +157,8 @@ public abstract class View<T> implements Group<T> {
         }
 
         @Override
-        protected Iterator<Group.With3<T1, T2, T3>> compositionIterator(DataComposition composition) {
-            Iterator<IntEntity> iterator = stateKey == null ? composition.getTenant().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
+        protected Iterator<Group.With3<T1, T2, T3>> compositionIterator(Composition composition) {
+            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
             return composition.select(type1, type2, type3, iterator);
         }
     }
@@ -181,8 +179,8 @@ public abstract class View<T> implements Group<T> {
         }
 
         @Override
-        protected Iterator<Group.With4<T1, T2, T3, T4>> compositionIterator(DataComposition composition) {
-            Iterator<IntEntity> iterator = stateKey == null ? composition.getTenant().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
+        protected Iterator<Group.With4<T1, T2, T3, T4>> compositionIterator(Composition composition) {
+            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
             return composition.select(type1, type2, type3, type4, iterator);
         }
     }
@@ -205,8 +203,8 @@ public abstract class View<T> implements Group<T> {
         }
 
         @Override
-        protected Iterator<Group.With5<T1, T2, T3, T4, T5>> compositionIterator(DataComposition composition) {
-            Iterator<IntEntity> iterator = stateKey == null ? composition.getTenant().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
+        protected Iterator<Group.With5<T1, T2, T3, T4, T5>> compositionIterator(Composition composition) {
+            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
             return composition.select(type1, type2, type3, type4, type5, iterator);
         }
     }
@@ -231,8 +229,8 @@ public abstract class View<T> implements Group<T> {
         }
 
         @Override
-        protected Iterator<Group.With6<T1, T2, T3, T4, T5, T6>> compositionIterator(DataComposition composition) {
-            Iterator<IntEntity> iterator = stateKey == null ? composition.getTenant().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
+        protected Iterator<Group.With6<T1, T2, T3, T4, T5, T6>> compositionIterator(Composition composition) {
+            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
             return composition.select(type1, type2, type3, type4, type5, type6, iterator);
         }
     }

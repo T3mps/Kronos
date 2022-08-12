@@ -2,10 +2,7 @@ package net.acidfrog.kronos.crates.pool;
 
 public interface Pool<E> {
     
-    @SuppressWarnings("unchecked")
-    public abstract <T> E push(T... objects);
-
-    public abstract <T> E pop(int size);
+    public abstract E get(int id);
 
     public abstract void clear();
 

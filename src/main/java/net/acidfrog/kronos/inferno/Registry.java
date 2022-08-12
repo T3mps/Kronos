@@ -1,8 +1,10 @@
 package net.acidfrog.kronos.inferno;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -10,13 +12,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.StampedLock;
-import java.util.stream.Collectors;
 
 import net.acidfrog.kronos.crates.pool.ChunkedPool;
 import net.acidfrog.kronos.crates.pool.ArrayPool;
 import net.acidfrog.kronos.crates.pool.ChunkedPool.IDSchema;
-import net.acidfrog.kronos.inferno.core.ClassIndex;
-import net.acidfrog.kronos.inferno.core.IndexKey;
+import net.acidfrog.kronos.inferno.Transmute.NewEntityComposition;
 
 public final class Registry implements AutoCloseable {
 
@@ -32,9 +32,8 @@ public final class Registry implements AutoCloseable {
     private final Map<IndexKey, Node> nodeCache;
     private final ClassIndex classIndex;
     private final IDSchema idSchema;
-    private final ChunkedPool<IntEntity> entityPool;
-    private final Composition composition;
-    private final Map<Class<?>, Transmute.ByAdding1AndRemoving<?>> addingTypeModifiers;
+    private final ChunkedPool<Entity> entityPool;
+    private final Map<Class<?>, Transmute.ByAddingAndRemoving<?>> addingTypeModifiers;
     private final Map<Class<?>, Transmute.ByRemoving> removingTypeModifiers;
     private final Node root;
     private final List<Scheduler> schedulers;
@@ -55,16 +54,14 @@ public final class Registry implements AutoCloseable {
         
         this.name = name;
         this.arrayPool = new ArrayPool();
-        // this.nodeCache = new NodeCache();
         this.nodeCache = new HashMap<IndexKey, Node>();
         this.classIndex = new ClassIndex(classIndexBit);
         this.idSchema = new IDSchema(chunkBit, chunkCountBit);
-        this.entityPool = new ChunkedPool<IntEntity>(idSchema);
-        this.composition = new Composition(this);
-        this.addingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByAdding1AndRemoving<?>>();
+        this.entityPool = new ChunkedPool<Entity>(idSchema);
+        this.addingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByAddingAndRemoving<?>>();
         this.removingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByRemoving>();
         this.root = new Node();
-        root.composition = new DataComposition(this, entityPool.newTenant(), arrayPool, classIndex, idSchema);
+        root.composition = new Composition(this, entityPool.newNode(), arrayPool, classIndex, idSchema);
         this.schedulers = new CopyOnWriteArrayList<Scheduler>();
         this.systemTimeoutSeconds = systemTimeoutSeconds;
     }
@@ -75,7 +72,7 @@ public final class Registry implements AutoCloseable {
 
     public Entity create(Object... components) {
         Object[] componentArray = components.length == 0 ? null : components;
-        DataComposition composition = getOrCreate(componentArray);
+        Composition composition = getOrCreate(componentArray);
         Entity entity = composition.createEntity(false, componentArray);
         return entity;
     }
@@ -85,18 +82,18 @@ public final class Registry implements AutoCloseable {
             throw new IllegalArgumentException("Cannot emplace an entity with no components");
         }
 
-        DataComposition composition = getOrCreate(components);
+        Composition composition = getOrCreate(components);
         Entity entity = composition.createEntity(true, components);
         return entity;
     }
 
     public Entity emplace(Transmute.OfTypes withValues) {
-        DataComposition composition = (DataComposition) withValues.getContext();
+        Composition composition = (Composition) withValues.getContext();
         return composition.createEntity(true, withValues.getComponents());
     }
 
     public Entity emulate(Entity prefab, Object... components) {
-        IntEntity origin = (IntEntity) prefab;
+        Entity origin = (Entity) prefab;
         Object[] originComponents = origin.getComponents();
         if (originComponents == null || originComponents.length == 0) {
             return create(components);
@@ -107,12 +104,7 @@ public final class Registry implements AutoCloseable {
     }
 
     public boolean delete(Entity entity) {
-        return ((IntEntity) entity).delete();
-    }
-
-    public boolean modify(Transmute.Modifier modifier) {
-        var mod = (Composition.NewEntityComposition) modifier.getModifier();
-        return mod == null ? false : mod.entity().modify(this, mod.dataComposition(), mod.components());
+        return ((Entity) entity).delete();
     }
 
     public void update() {
@@ -131,173 +123,6 @@ public final class Registry implements AutoCloseable {
         var scheduler = new Scheduler(systemTimeoutSeconds);
         schedulers.add(scheduler);
         return scheduler;
-    }
-
-    protected void include(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
-        if (componentTypes.length == 0) {
-            return;
-        }
-        for (var componentType : componentTypes) {
-            Node node = nodeCache.get(new IndexKey(classIndex.getIndex(componentType)));
-            
-            if (node == null) {
-                continue;
-            }
-
-            intersect(nodeMap, node.linkedNodes);
-        }
-    }
-
-    protected void exclude(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
-        if (componentTypes.length == 0) {
-            return;
-        }
-
-        for (var componentType : componentTypes) {
-            IndexKey indexKey = new IndexKey(classIndex.getIndex(componentType));
-            nodeMap.remove(indexKey);
-            Node node = nodeCache.get(indexKey);
-
-            if (node != null) {
-                for (var linkedNodeKey : node.linkedNodes.keySet()) {
-                    nodeMap.remove(linkedNodeKey);
-                }
-            }
-        }
-    }
-
-    private Map<IndexKey, Node> intersect(Map<IndexKey, Node> subject, Map<IndexKey, Node> other) {
-        Set<IndexKey> indexKeySet = subject.keySet();
-        Iterator<IndexKey> iterator = indexKeySet.iterator();
-
-        while (iterator.hasNext()) {
-            if (!other.containsKey(iterator.next())) {
-                iterator.remove();
-            }
-        }
-
-        return subject;
-    }
-    public Node getOrCreateNode(IndexKey key, Class<?>... componentTypes) {
-        Node node = nodeCache.computeIfAbsent(key, k -> new Node(componentTypes));
-
-        if (componentTypes.length > 1) {
-            for (int i = 0; i < componentTypes.length; i++) {
-                Class<?> componentType = componentTypes[i];
-                IndexKey typeKey = new IndexKey(classIndex.getIndex(componentType));
-                Node singleTypeNode = nodeCache.computeIfAbsent(typeKey, k -> new Node(componentType));
-                singleTypeNode.linkNode(key, node);
-            }
-        } else {
-            node.linkNode(key, node);
-        }
-
-        return node;
-    }
-
-    @SuppressWarnings("unchecked")
-    public Transmute.ByAdding1AndRemoving<Object> fetchAddingTypeModifier(Class<?> componentType) {
-        return (Transmute.ByAdding1AndRemoving<Object>) addingTypeModifiers.computeIfAbsent(componentType, k -> composition.byAdding1AndRemoving(componentType));
-    }
-
-    public Transmute.ByRemoving fetchRemovingTypeModifier(Class<?> componentType) {
-        return removingTypeModifiers.computeIfAbsent(componentType, k -> composition.byRemoving(componentType));
-    }
-
-    public DataComposition getOrCreate(Object[] components) {
-        int componentsLength = components == null ? 0 : components.length;
-
-        switch (componentsLength) {
-            case 0: return root.composition;
-            case 1: return getSingleTypeComposition(components[0].getClass());
-            default:
-                IndexKey indexKey = classIndex.getIndexKey(components);
-                Node node = nodeCache.get(indexKey);
-                
-                if (node == null) {
-                    node = getOrCreateNode(indexKey, getComponentTypes(components));
-                }
-                return getNodeComposition(node);
-        }
-    }
-
-    public DataComposition getOrCreateByType(Class<?>[] componentTypes) {
-        int length = componentTypes == null ? 0 : componentTypes.length;
-
-        switch (length) {
-            case 0: return root.composition;
-            case 1: return getSingleTypeComposition(componentTypes[0]);
-            default:
-                IndexKey indexKey = classIndex.getIndexKey(componentTypes);
-                Node node = nodeCache.get(indexKey);
-
-                if (node == null) {
-                    node = getOrCreateNode(indexKey, componentTypes);
-                }
-                return getNodeComposition(node);
-        }
-    }
-
-    private DataComposition getSingleTypeComposition(Class<?> componentType) {
-        IndexKey key = new IndexKey(classIndex.getIndex(componentType));
-        Node node = nodeCache.get(key);
-        
-        if (node == null) {
-            key = new IndexKey(classIndex.getIndexOrAddClass(componentType));
-            node = nodeCache.get(key);
-            if (node == null) {
-                node = getOrCreateNode(key, componentType);
-            }
-        } else {
-            // node may not be yet connected to itself
-            node.linkNode(new IndexKey(classIndex.getIndex(componentType)), node);
-        }
-        return getNodeComposition(node);
-    }
-
-    private Class<?>[] getComponentTypes(Object[] components) {
-        Class<?>[] componentTypes = new Class<?>[components.length];
-
-        for (int i = 0; i < components.length; i++) {
-            componentTypes[i] = components[i].getClass();
-        }
-        return componentTypes;
-    }
-
-    private DataComposition getNodeComposition(Node link) {
-        DataComposition composition = link.getComposition();
-        
-        if (composition != null) {
-            return composition;
-        }
-        return link.getOrCreateComposition();
-    }
-
-    public void modifyComponents(IntEntity entity, DataComposition newDataComposition, Object[] newComponentArray) {
-        entity.getComposition().detachEntity(entity);
-        newDataComposition.attachEntity(entity, true, newComponentArray);
-    }
-
-    public Entity addComponent(IntEntity entity, Object component) {
-        var modifier = fetchAddingTypeModifier(component.getClass());
-        var mod = (Composition.NewEntityComposition) modifier.withValue(entity, component).getModifier();
-        modifyComponents(mod.entity(), mod.dataComposition(), mod.components());
-        return entity;
-    }
-
-    public boolean removeComponentType(IntEntity entity, Class<?> componentType) {
-        if (componentType == null) {
-            return false;
-        }
-
-        var modifier = fetchRemovingTypeModifier(componentType);
-        var mod = (Composition.NewEntityComposition) modifier.withValue(entity).getModifier();
-        if(mod == null) {
-            return false;
-        }
-
-        modifyComponents(mod.entity(), mod.dataComposition(), mod.components());
-        return true;
     }
 
     public <T> Group<Group.With1<T>> view(Class<T> type) {
@@ -353,6 +178,183 @@ public final class Registry implements AutoCloseable {
         }
     }
 
+    protected void include(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
+        if (componentTypes.length == 0) {
+            return;
+        }
+        for (var componentType : componentTypes) {
+            Node node = nodeCache.get(new IndexKey(classIndex.getIndex(componentType)));
+            
+            if (node == null) {
+                continue;
+            }
+
+            intersect(nodeMap, node.linkedNodes);
+        }
+    }
+
+    protected void exclude(Map<IndexKey, Node> nodeMap, Class<?>... componentTypes) {
+        if (componentTypes.length == 0) {
+            return;
+        }
+
+        for (var componentType : componentTypes) {
+            IndexKey indexKey = new IndexKey(classIndex.getIndex(componentType));
+            nodeMap.remove(indexKey);
+            Node node = nodeCache.get(indexKey);
+
+            if (node != null) {
+                for (var linkedNodeKey : node.linkedNodes.keySet()) {
+                    nodeMap.remove(linkedNodeKey);
+                }
+            }
+        }
+    }
+
+    private Map<IndexKey, Node> intersect(Map<IndexKey, Node> subject, Map<IndexKey, Node> other) {
+        Set<IndexKey> indexKeySet = subject.keySet();
+        Iterator<IndexKey> iterator = indexKeySet.iterator();
+
+        while (iterator.hasNext()) {
+            if (!other.containsKey(iterator.next())) {
+                iterator.remove();
+            }
+        }
+
+        return subject;
+    }
+    
+    public Node getOrCreateNode(IndexKey key, Class<?>... componentTypes) {
+        Node node = nodeCache.computeIfAbsent(key, k -> new Node(componentTypes));
+
+        if (componentTypes.length > 1) {
+            for (int i = 0; i < componentTypes.length; i++) {
+                Class<?> componentType = componentTypes[i];
+                IndexKey typeKey = new IndexKey(classIndex.getIndex(componentType));
+                Node singleTypeNode = nodeCache.computeIfAbsent(typeKey, k -> new Node(componentType));
+                singleTypeNode.linkNode(key, node);
+            }
+        } else {
+            node.linkNode(key, node);
+        }
+
+        return node;
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Transmute.ByAddingAndRemoving<Object> getAddingTypeModifier(Class<?> componentType) {
+        return (Transmute.ByAddingAndRemoving<Object>) addingTypeModifiers.computeIfAbsent(componentType, k -> byAddingAndRemoving(componentType));
+    }
+
+    protected Transmute.ByRemoving getRemovingTypeModifier(Class<?> componentType) {
+        return removingTypeModifiers.computeIfAbsent(componentType, k -> byRemoving(componentType));
+    }
+
+    protected Composition getOrCreate(Object[] components) {
+        int componentsLength = components == null ? 0 : components.length;
+
+        switch (componentsLength) {
+            case 0: return root.composition;
+            case 1: return getSingleTypeComposition(components[0].getClass());
+            default:
+                IndexKey indexKey = classIndex.getIndexKey(components);
+                Node node = nodeCache.get(indexKey);
+                
+                if (node == null) {
+                    node = getOrCreateNode(indexKey, getComponentTypes(components));
+                }
+                return getNodeComposition(node);
+        }
+    }
+
+    protected Composition getOrCreateByType(Class<?>[] componentTypes) {
+        int length = componentTypes == null ? 0 : componentTypes.length;
+
+        switch (length) {
+            case 0: return root.composition;
+            case 1: return getSingleTypeComposition(componentTypes[0]);
+            default:
+                IndexKey indexKey = classIndex.getIndexKey(componentTypes);
+                Node node = nodeCache.get(indexKey);
+
+                if (node == null) {
+                    node = getOrCreateNode(indexKey, componentTypes);
+                }
+                return getNodeComposition(node);
+        }
+    }
+
+    private Composition getSingleTypeComposition(Class<?> componentType) {
+        IndexKey key = new IndexKey(classIndex.getIndex(componentType));
+        Node node = nodeCache.get(key);
+        
+        if (node == null) {
+            key = new IndexKey(classIndex.getIndexOrAddClass(componentType));
+            node = nodeCache.get(key);
+            if (node == null) {
+                node = getOrCreateNode(key, componentType);
+            }
+        } else {
+            // node may not be yet connected to itself
+            node.linkNode(new IndexKey(classIndex.getIndex(componentType)), node);
+        }
+        return getNodeComposition(node);
+    }
+
+    private Class<?>[] getComponentTypes(Object[] components) {
+        Class<?>[] componentTypes = new Class<?>[components.length];
+
+        for (int i = 0; i < components.length; i++) {
+            componentTypes[i] = components[i].getClass();
+        }
+        return componentTypes;
+    }
+
+    private Composition getNodeComposition(Node node) {
+        Composition composition = node.getComposition();
+        
+        if (composition != null) {
+            return composition;
+        }
+        return node.getOrCreateComposition();
+    }
+
+    public void modifyComponents(Entity entity, Composition newDataComposition, Object[] newComponentArray) {
+        entity.getComposition().detachEntity(entity);
+        newDataComposition.attachEntity(entity, true, newComponentArray);
+    }
+
+    public Entity addComponent(Entity entity, Object component) {
+        var modifier = getAddingTypeModifier(component.getClass());
+        var mod = (NewEntityComposition) modifier.withValue(entity, component).getModifier();
+        modifyComponents(mod.entity(), mod.dataComposition(), mod.components());
+        return entity;
+    }
+
+    public boolean removeComponentType(Entity entity, Class<?> componentType) {
+        if (componentType == null) {
+            return false;
+        }
+
+        var modifier = getRemovingTypeModifier(componentType);
+        var mod = (NewEntityComposition) modifier.withValue(entity).getModifier();
+        if(mod == null) {
+            return false;
+        }
+
+        modifyComponents(mod.entity(), mod.dataComposition(), mod.components());
+        return true;
+    }
+
+
+    protected Transmute.ByRemoving byRemoving(Class<?>... removedComponentTypes) {
+        return new Transmute.PreparedModifier(this, null, removedComponentTypes);
+    }
+
+    protected <T> Transmute.ByAddingAndRemoving<T> byAddingAndRemoving(Class<T> componentType, Class<?>... removedComponentTypes) {
+        return new Transmute.ByAddingAndRemoving<T>(this, new Class<?>[] { componentType }, removedComponentTypes);
+    }
+
     public ClassIndex getClassIndex() {
         return classIndex;
     }
@@ -367,10 +369,6 @@ public final class Registry implements AutoCloseable {
 
     public IDSchema getIDSchema() {
         return idSchema;
-    }
-
-    public Composition composition() {
-        return composition;
     }
 
     public int size() {
@@ -394,20 +392,21 @@ public final class Registry implements AutoCloseable {
         private final StampedLock lock;
         private final Map<IndexKey, Node> linkedNodes;
         private final Class<?>[] componentTypes;
-        private DataComposition composition;
+        private Composition composition;
 
         private Node(Class<?>... componentTypes) {
             this.lock = new StampedLock();
             this.linkedNodes = new ConcurrentHashMap<IndexKey, Node>();
             this.componentTypes = componentTypes;
+            this.composition = null;
         }
 
         protected void linkNode(IndexKey key, Node node) {
             linkedNodes.putIfAbsent(key, node);
         }
 
-        protected DataComposition getOrCreateComposition() {
-            DataComposition value;
+        protected Composition getOrCreateComposition() {
+            Composition value;
             long stamp = lock.tryOptimisticRead();
 
             try {
@@ -428,7 +427,7 @@ public final class Registry implements AutoCloseable {
                         continue;
                     }
                     // exclusive access
-                    value = composition = new DataComposition(Registry.this, entityPool.newTenant(), arrayPool, classIndex, idSchema, componentTypes);
+                    value = composition = new Composition(Registry.this, entityPool.newNode(), arrayPool, classIndex, idSchema, componentTypes);
                     break;
                 }
                 
@@ -440,7 +439,7 @@ public final class Registry implements AutoCloseable {
             }
         }
 
-        public DataComposition getComposition() {
+        public Composition getComposition() {
             return composition;
         }
 
@@ -454,47 +453,18 @@ public final class Registry implements AutoCloseable {
 
         @Override
         public String toString() {
-            return "Node={types=[" + (componentTypes == null ? "" :
-            Arrays.stream(componentTypes).map(Class::getSimpleName).sorted().collect(Collectors.joining(","))) + "]}";
+            StringBuilder sb = new StringBuilder();
+            sb.append("Node={types=[");
+            if (componentTypes != null) {
+                for (int i = 0; i < componentTypes.length; i++) {
+                    sb.append(componentTypes[i].getSimpleName());
+                    sb.append(",");
+                }
+
+                sb.setLength(sb.length() - 1);
+            }   
+            sb.append("]}");
+            return sb.toString();
         }
     }
-
-    // private final class NodeCache implements Iterable<Node> {
-        
-    //     private final Map<IndexKey, Node> data;
-
-    //     private NodeCache() {
-    //         this.data = new ConcurrentHashMap<IndexKey, Node>();
-    //     }
-
-    //     public Node getOrCreateNode(IndexKey key, Class<?>... componentTypes) {
-    //         Node node = data.computeIfAbsent(key, k -> new Node(componentTypes));
-
-    //         if (componentTypes.length > 1) {
-    //             for (int i = 0; i < componentTypes.length; i++) {
-    //                 Class<?> componentType = componentTypes[i];
-    //                 IndexKey typeKey = new IndexKey(classIndex.getIndex(componentType));
-    //                 Node singleTypeNode = data.computeIfAbsent(typeKey, k -> new Node(componentType));
-    //                 singleTypeNode.linkNode(key, node);
-    //             }
-    //         } else {
-    //             node.linkNode(key, node);
-    //         }
-
-    //         return node;
-    //     }
-
-    //     public Node get(IndexKey key) {
-    //         return data.get(key);
-    //     }
-
-    //     public void clear() {
-    //         data.clear();
-    //     }
-
-    //     @Override
-    //     public Iterator<Node> iterator() {
-    //         return data.values().iterator();
-    //     }
-    // }
 }

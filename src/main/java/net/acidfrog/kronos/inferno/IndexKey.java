@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.inferno.core;
+package net.acidfrog.kronos.inferno;
 
 import java.util.Arrays;
 

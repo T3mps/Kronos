@@ -3,6 +3,27 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch IntStack",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.crates.IntStack",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch IDStack",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.crates.IDStack",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch ArrayPool",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.crates.pool.ArrayPool",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch Main",
                 "request": "launch",
                 "mainClass": "test.toolkit.Main",

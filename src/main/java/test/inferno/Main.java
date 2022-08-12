@@ -7,13 +7,9 @@ public class Main {
 
     public static void main(String[] args) {
         try (Registry registry = new Registry()) {
-            // registry.create(new Position(0, 0), new Velocity(1, 4));
-
-            // for (int i = 0; i < 2_000_000; i++) {
-            //     registry.create(new Position(Math.max(1, Math.random() * i), Math.max(1, Math.random() * i)), new Velocity(Math.max(1, Math.random() * i), Math.max(1, Math.random() * i)));
-            // }
-
-            registry.emplace(new Position(Math.max(1, Math.random() * 10), Math.max(1, Math.random() * 10)), new Velocity(Math.max(1, Math.random() * 10), Math.max(1, Math.random() * 10)));
+            for (int i = 0; i < 25_000_000; i++) {
+                registry.create(new Position(Math.max(1, Math.random() * i), Math.max(1, Math.random() * i)), new Velocity(Math.max(1, Math.random() * i), Math.max(1, Math.random() * i)));
+            }
 
             Runnable system = () -> {
                 registry.view(Position.class, Velocity.class).stream().forEach(view -> {
@@ -25,13 +21,12 @@ public class Main {
                     System.out.printf("Entity %d moved with %s to %s\n", view.entity().getID(), velocity, position);
                 });
             };
-            
+
             Scheduler scheduler = registry.createScheduler();
             scheduler.schedule(system);
 
             for (;;) {
                 scheduler.update();
-                Thread.sleep(2000);
             }
         } catch (Exception e) {
             e.printStackTrace();

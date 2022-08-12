@@ -6,40 +6,41 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReferenceArray;
 
-import net.acidfrog.kronos.crates.IDStack;
+import net.acidfrog.kronos.crates.IntStack;
+import net.acidfrog.kronos.crates.Identifiable;
 
-public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements AutoCloseable {
+public final class ChunkedPool<T extends Identifiable> implements Pool<T>, AutoCloseable {
 
     public static final int ID_STACK_CAPACITY = 1 << 16;
 
-    private final IDSchema idSchema;
+    private final IDSchema schema;
     private final AtomicInteger chunkIndex;
     private final AtomicReferenceArray<LinkedChunk<T>> chunks;
-    private final List<Tenant<T>> tenants;
+    private final List<PooledNode<T>> pooledNodes;
 
     public ChunkedPool(int chunkBit, int chunkCountBit) {
         this(new IDSchema(chunkBit, chunkCountBit));
     }
 
-    public ChunkedPool(IDSchema idSchema) {
-        this.idSchema = idSchema;
+    public ChunkedPool(IDSchema schema) {
+        this.schema = schema;
         this.chunkIndex = new AtomicInteger(-1);
-        this.chunks = new AtomicReferenceArray<LinkedChunk<T>>(idSchema.chunkCount);
-        this.tenants = new ArrayList<Tenant<T>>();
+        this.chunks = new AtomicReferenceArray<LinkedChunk<T>>(schema.chunkCount);
+        this.pooledNodes = new ArrayList<PooledNode<T>>();
     }
 
-    private LinkedChunk<T> newChunk(Tenant<T> owner, int currentChunkIndex) {
+    private LinkedChunk<T> newChunk(PooledNode<T> owner, int currentChunkIndex) {
         int id;
 
         if (!chunkIndex.compareAndSet(currentChunkIndex, id = currentChunkIndex + 1)) {
             return null;
         }
-        if (id > idSchema.chunkCount - 1) {
+        if (id > schema.chunkCount - 1) {
             throw new OutOfMemoryError(ChunkedPool.class.getName() + ": cannot create a new memory chunk");
         }
         
         var currentChunk = owner.currentChunk;
-        LinkedChunk<T> newChunk = new LinkedChunk<T>(id, idSchema, currentChunk);
+        var newChunk = new LinkedChunk<T>(id, schema, currentChunk);
         
         if (currentChunk != null) {
             currentChunk.setNext(newChunk);
@@ -50,17 +51,24 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
     }
 
     private LinkedChunk<T> getChunk(int id) {
-        return chunks.getPlain(idSchema.fetchChunkID(id));
+        return chunks.getPlain(schema.fetchChunkID(id));
     }
 
-    public T getEntry(int id) {
+    public T get(int id) {
         return getChunk(id).get(id);
     }
 
-    public Tenant<T> newTenant() {
-        Tenant<T> newTenant = new Tenant<T>(this, chunks, chunkIndex, idSchema);
-        tenants.add(newTenant);
-        return newTenant;
+    public PooledNode<T> newNode() {
+        PooledNode<T> node = new PooledNode<T>(this, chunks, chunkIndex, schema);
+        pooledNodes.add(node);
+        return node;
+    }
+
+    public void clear() {
+        for (int i = 0; i < chunks.length(); i++) {
+            chunks.set(i, null);
+        }
+        pooledNodes.clear();
     }
 
     public int size() {
@@ -73,103 +81,41 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
         return sum;
     }
 
+    public IDSchema getSchema() {
+        return schema;
+    }
+
     @Override
     public void close() {
-        tenants.forEach(Tenant::close);
+        pooledNodes.forEach(PooledNode::close);
     }
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("ChunkedPool={");
-        sb.append("chunkCount=").append(idSchema.chunkCount).append("|off-heap");
+        sb.append("chunkCount=").append(schema.chunkCount).append("|off-heap");
         sb.append('}');
         return sb.toString();
     }
 
-    public interface Identifiable {
-
-        int getID();
-
-        int setID(int id);
-
-        Identifiable getPrevious();
-
-        Identifiable setPrevious(Identifiable prev);
-
-        Identifiable getNext();
-
-        Identifiable setNext(Identifiable next);
-    }
-
-    // |--FLAGS--|--CHUNK_ID--|--OBJECT_ID--|
-    public record IDSchema(int chunkBit, int chunkCountBit, int chunkCount, int chunkIDBitMask, int chunkIDBitMaskShifted, int chunkCapacity, int objectIDBitMask) {
-        
-        public static final int BIT_LENGTH = 30;
-        public static final int MIN_CHUNK_BIT = 10;
-        public static final int MIN_CHUNK_COUNT_BIT = 6;
-        public static final int MAX_CHUNK_BIT = BIT_LENGTH - MIN_CHUNK_COUNT_BIT;
-        public static final int MAX_CHUNK_COUNT_BIT = BIT_LENGTH - MIN_CHUNK_BIT;
-        public static final int DETACHED_BIT_IDX = 31;
-        public static final int DETACHED_BIT = 1 << DETACHED_BIT_IDX;
-        public static final int FLAG_BIT_IDX = 30;
-        public static final int FLAG_BIT = 1 << FLAG_BIT_IDX;
-
-        public IDSchema(int chunkBit, int chunkCountBit) {
-            this(chunkBit
-                    , chunkCountBit
-                    , 1 << chunkCountBit
-                    , (1 << (BIT_LENGTH - chunkBit)) - 1
-                    , ((1 << (BIT_LENGTH - chunkBit)) - 1) << chunkBit
-                    , 1 << Math.min(chunkBit, MAX_CHUNK_BIT)
-                    , (1 << chunkBit) - 1
-            );
-        }
-
-        public String idToString(int id) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("|").append((id & DETACHED_BIT) >>> DETACHED_BIT_IDX);
-            sb.append(":").append((id & FLAG_BIT) >>> FLAG_BIT_IDX);
-            sb.append(":").append(fetchChunkID(id));
-            sb.append(":").append(fetchObjectID(id));
-            sb.append("|");
-            return sb.toString();
-        }
-
-        public int generateID(int chunkID, int objectID) {
-            return (chunkID & chunkIDBitMask) << chunkBit | (objectID & objectIDBitMask);
-        }
-
-        public int mergeID(int id, int objectID) {
-            return (id & chunkIDBitMaskShifted) | objectID;
-        }
-
-        public int fetchChunkID(int id) {
-            return (id >>> chunkBit) & chunkIDBitMask;
-        }
-
-        public int fetchObjectID(int id) {
-            return id & objectIDBitMask;
-        }
-    }
-
-    public static final class Tenant<T extends Identifiable> implements AutoCloseable, Iterable<T> {
+    public static final class PooledNode<T extends Identifiable> implements AutoCloseable, Iterable<T> {
         
         private final ChunkedPool<T> pool;
         private final AtomicReferenceArray<LinkedChunk<T>> chunks;
         private final AtomicInteger chunkIndex;
-        private final IDSchema idSchema;
-        private final IDStack stack;
+        private final IDSchema schema;
+        private final IntStack stack;
         private final LinkedChunk<T> firstChunk;
         private LinkedChunk<T> currentChunk;
         private int newID = Integer.MIN_VALUE;
 
-        private Tenant(ChunkedPool<T> pool, AtomicReferenceArray<LinkedChunk<T>> chunks, AtomicInteger chunkIndex, IDSchema idSchema) {
+        private PooledNode(ChunkedPool<T> pool, AtomicReferenceArray<LinkedChunk<T>> chunks, AtomicInteger chunkIndex, IDSchema schema) {
             this.pool = pool;
             this.chunks = chunks;
             this.chunkIndex = chunkIndex;
-            this.idSchema = idSchema;
-            this.stack = new IDStack(ID_STACK_CAPACITY);
+            this.schema = schema;
+            this.stack = new IntStack(ID_STACK_CAPACITY);
             while ((currentChunk = pool.newChunk(this, chunkIndex.get())) == null) ;
             this.firstChunk = currentChunk;
             nextID();
@@ -188,10 +134,10 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
                 LinkedChunk<T> chunk;
                 while ((chunk = chunks.get(currentChunkIndex)) == null) ;
                 
-                if (chunk.index.get() < idSchema.chunkCapacity - 1) {
-                    while ((objectID = chunk.index.get()) < idSchema.chunkCapacity - 1) {
+                if (chunk.index.get() < schema.chunkCapacity - 1) {
+                    while ((objectID = chunk.index.get()) < schema.chunkCapacity - 1) {
                         if (chunk.index.compareAndSet(objectID, objectID + 1)) {
-                            newID = idSchema.generateID(chunk.id, ++objectID);
+                            newID = schema.generateID(chunk.id, ++objectID);
                             return returnValue;
                         }
                     }
@@ -202,7 +148,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
                 if ((chunk = pool.newChunk(this, currentChunkIndex)) != null) {
                     currentChunk = chunk;
                     objectID = chunk.incrementIndex();
-                    newID = idSchema.generateID(chunk.id, objectID);
+                    newID = schema.generateID(chunk.id, objectID);
                     return returnValue;
                 }
             }
@@ -277,7 +223,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
 
     public static final class LinkedChunk<T extends Identifiable> {
 
-        private final IDSchema idSchema;
+        private final IDSchema schema;
         private final Identifiable[] data;
         private final LinkedChunk<T> previous;
         private final int id;
@@ -285,9 +231,9 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
         private LinkedChunk<T> next;
         private int sizeOffset;
 
-        public LinkedChunk(int id, IDSchema idSchema, LinkedChunk<T> previous) {
-            this.idSchema = idSchema;
-            this.data = new Identifiable[idSchema.chunkCapacity];
+        public LinkedChunk(int id, IDSchema schema, LinkedChunk<T> previous) {
+            this.schema = schema;
+            this.data = new Identifiable[schema.chunkCapacity];
             this.previous = previous;
             this.id = id;
         }
@@ -297,9 +243,9 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
         }
 
         public int remove(int id, boolean doNotUpdateIndex) {
-            int capacity = idSchema.chunkCapacity;
-            int objectIDToBeReused = idSchema.fetchObjectID(id);
-            int chunkID = idSchema.fetchChunkID(id);
+            int capacity = schema.chunkCapacity;
+            int objectIDToBeReused = schema.fetchObjectID(id);
+            
             for (;;) {
                 int lastIndex = doNotUpdateIndex ? index.get() : index.decrementAndGet();
                 
@@ -318,22 +264,22 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
                     data[objectIDToBeReused].setID(objectIDToBeReused);
                 }
                 
-                return idSchema.mergeID(id, lastIndex);
+                return schema.mergeID(id, lastIndex);
             }
         }
 
         @SuppressWarnings("unchecked")
         public T get(int id) {
-            return (T) data[idSchema.fetchObjectID(id)];
+            return (T) data[schema.fetchObjectID(id)];
         }
 
         @SuppressWarnings("unchecked")
         public T set(int id, T value) {
-            return (T) (data[idSchema.fetchObjectID(id)] = value);
+            return (T) (data[schema.fetchObjectID(id)] = value);
         }
 
         public boolean hasCapacity() {
-            return index.get() < idSchema.chunkCapacity - 1;
+            return index.get() < schema.chunkCapacity - 1;
         }
 
         public LinkedChunk<T> getPrevious() {
@@ -358,11 +304,62 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Au
             StringBuilder sb = new StringBuilder();
             sb.append("LinkedChunk={");
             sb.append("id=").append(id);
-            sb.append(", capacity=").append(idSchema.chunkCapacity);
+            sb.append(", capacity=").append(schema.chunkCapacity);
             sb.append(", previous=").append(previous == null ? null : previous.id);
             sb.append(", next=").append(next == null ? null : next.id);
             sb.append('}');
             return sb.toString();
+        }
+    }
+
+    public record IDSchema(int chunkBit, int chunkCountBit, int chunkCount, int chunkIDBitMask, int chunkIDBitMaskShifted, int chunkCapacity, int objectIDBitMask) {
+        
+        public static final int BIT_LENGTH = 30;
+        public static final int MIN_CHUNK_BIT = 10;
+        public static final int MIN_CHUNK_COUNT_BIT = 6;
+        public static final int MAX_CHUNK_BIT = BIT_LENGTH - MIN_CHUNK_COUNT_BIT;
+        public static final int MAX_CHUNK_COUNT_BIT = BIT_LENGTH - MIN_CHUNK_BIT;
+        public static final int DETACHED_BIT_IDX = 31;
+        public static final int DETACHED_BIT = 1 << DETACHED_BIT_IDX;
+        public static final int FLAG_BIT_IDX = 30;
+        public static final int FLAG_BIT = 1 << FLAG_BIT_IDX;
+
+        public IDSchema(int chunkBit, int chunkCountBit) {
+            this(chunkBit
+                    , chunkCountBit
+                    , 1 << chunkCountBit
+                    , (1 << (BIT_LENGTH - chunkBit)) - 1
+                    , ((1 << (BIT_LENGTH - chunkBit)) - 1) << chunkBit
+                    , 1 << Math.min(chunkBit, MAX_CHUNK_BIT)
+                    , (1 << chunkBit) - 1
+            );
+        }
+
+        // |--FLAGS--|--CHUNK_ID--|--OBJECT_ID--|
+        public String idToString(int id) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("|").append((id & DETACHED_BIT) >>> DETACHED_BIT_IDX);
+            sb.append(":").append((id & FLAG_BIT) >>> FLAG_BIT_IDX);
+            sb.append(":").append(fetchChunkID(id));
+            sb.append(":").append(fetchObjectID(id));
+            sb.append("|");
+            return sb.toString();
+        }
+
+        public int generateID(int chunkID, int objectID) {
+            return (chunkID & chunkIDBitMask) << chunkBit | (objectID & objectIDBitMask);
+        }
+
+        public int mergeID(int id, int objectID) {
+            return (id & chunkIDBitMaskShifted) | objectID;
+        }
+
+        public int fetchChunkID(int id) {
+            return (id >>> chunkBit) & chunkIDBitMask;
+        }
+
+        public int fetchObjectID(int id) {
+            return id & objectIDBitMask;
         }
     }
 }

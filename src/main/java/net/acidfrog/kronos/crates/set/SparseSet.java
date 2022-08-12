@@ -1,9 +1,9 @@
 package net.acidfrog.kronos.crates.set;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Objects;
-import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,7 +12,9 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public final class SparseSet<E> implements Set<E> {
+import net.acidfrog.kronos.crates.GenericArrayIterator;
+
+public final class SparseSet<E> implements Iterable<E>{
     
     private final int[] dense;
     private final int[] sparse;
@@ -43,16 +45,6 @@ public final class SparseSet<E> implements Set<E> {
         return current;
     }
 
-    @Override
-    public boolean add(E e) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean addAll(Collection<? extends E> c) {
-        throw new UnsupportedOperationException();
-    }
-
     @SuppressWarnings("unchecked")
     public void putAll(SparseSet<E> map) {
         for (int i = 0; i < map.size(); i++) {
@@ -74,7 +66,6 @@ public final class SparseSet<E> implements Set<E> {
         return i <= size.get() && dense[i] == key;
     }
 
-    @Override
     public boolean contains(Object value) {
         for (int i = 0; i < size.get(); i++) {
             if (Objects.equals(value, values[i])) {
@@ -85,15 +76,49 @@ public final class SparseSet<E> implements Set<E> {
         return false;
     }
 
-    @Override
-    public boolean containsAll(Collection<?> c) {
-        for (var o : c) {
-            if (!contains(o)) {
+    public boolean containsAll(Collection<?> collection) {
+        for (var e : collection) {
+            if (!contains(e)) {
                 return false;
             }
         }
 
         return true;
+    }
+
+    public E computeIfPresent(int key, Function<E, ? extends E> remappingFunction) {
+        E value;
+        long stamp = lock.tryOptimisticRead();
+
+        try {
+            for (;; stamp = lock.writeLock()) {
+                if (stamp == 0L) {
+                    continue;
+                }
+
+                value = get(key);
+
+                if (!lock.validate(stamp)) {
+                    continue;
+                }
+                if (value == null) {
+                    return value;
+                }
+
+                stamp = lock.tryConvertToWriteLock(stamp);
+
+                if (stamp == 0L) {
+                    continue;
+                }
+                
+                put(key, value = remappingFunction.apply(value));
+                return value;
+            }
+        } finally {
+            if (StampedLock.isWriteLockStamp(stamp)) {
+                lock.unlockWrite(stamp);
+            }
+        }
     }
 
     public E computeIfAbsent(int key, Function<Integer, ? extends E> mappingFunction) {
@@ -112,7 +137,7 @@ public final class SparseSet<E> implements Set<E> {
                     continue;
                 }
                 if (value != null) {
-                    break;
+                    return value;
                 }
 
                 stamp = lock.tryConvertToWriteLock(stamp);
@@ -122,10 +147,8 @@ public final class SparseSet<E> implements Set<E> {
                 }
                 
                 put(key, value = mappingFunction.apply(key));
-                break;
+                return value;
             }
-            
-            return value;
         } finally {
             if (StampedLock.isWriteLockStamp(stamp)) {
                 lock.unlockWrite(stamp);
@@ -151,21 +174,6 @@ public final class SparseSet<E> implements Set<E> {
         sparse[key] = -1;
 
         return value;
-    }
-
-    @Override
-    public boolean remove(Object o) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean removeAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public boolean retainAll(Collection<?> c) {
-        throw new UnsupportedOperationException();
     }
 
     public void clear() {
@@ -207,47 +215,31 @@ public final class SparseSet<E> implements Set<E> {
     @Override
     @SuppressWarnings("unchecked")
     public Iterator<E> iterator() {
-        return new ValueIterator<E>((E[]) values, size.get());
+        return new GenericArrayIterator<E>((E[]) values, size.get());
     }
-
-    @Override
+    
     public Object[] toArray() {
-        return values();
+        return values().clone();
     }
 
-    @Override
-    public <T> T[] toArray(T[] a) {
-        throw new UnsupportedOperationException();
+    @SuppressWarnings("unchecked")
+    public <T> T[] toArray(T[] arr) {
+        var values = values();
+
+        if (arr.length < values.length) {
+            return (T[]) Arrays.copyOf(values, values.length, arr.getClass());
+        }
+
+        System.arraycopy(values, 0, arr, 0, values.length);
+
+        if (arr.length > values.length) {
+            arr[values.length] = null;
+        }
+
+        return arr;
     }
 
     public Stream<E> stream() {
         return StreamSupport.stream(Spliterators.spliteratorUnknownSize(iterator(), Spliterator.ORDERED), false);
-    }
-
-    private static class ValueIterator<E> implements Iterator<E> {
-        
-        private final E[] values;
-        private final int size;
-        private int index;
-        
-        public ValueIterator(E[] values, int size) {
-            this.values = values;
-            this.size = size;
-        }
-        
-        @Override
-        public boolean hasNext() {
-            return index < size;
-        }
-        
-        @Override
-        public E next() {
-            return values[index++];
-        }
-        
-        @Override
-        public void remove() {
-            throw new UnsupportedOperationException();
-        }
     }
 }

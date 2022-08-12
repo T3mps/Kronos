@@ -1,4 +1,4 @@
-package net.acidfrog.kronos.inferno.core;
+package net.acidfrog.kronos.inferno;
 
 import net.acidfrog.kronos.crates.Crates;
 import sun.misc.Unsafe;

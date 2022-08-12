@@ -5,16 +5,18 @@ import java.util.Iterator;
 public class GenericArrayIterator<E> implements Iterator<E> {
 
     private final E[] array;
+    private int size;
     private int index;
 
-    public GenericArrayIterator(E[] array) {
+    public GenericArrayIterator(E[] array, int size) {
         this.array = array;
+        this.size = size;
         this.index = 0;
     }
 
     @Override
     public boolean hasNext() {
-        return index < array.length;
+        return index < size;
     }
 
     @Override
