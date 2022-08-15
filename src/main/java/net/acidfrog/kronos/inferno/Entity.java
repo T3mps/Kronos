@@ -3,6 +3,7 @@ package net.acidfrog.kronos.inferno;
 import java.util.concurrent.locks.StampedLock;
 
 import net.acidfrog.kronos.crates.pool.ChunkedPool;
+import net.acidfrog.kronos.toolkit.internal.memory.UncheckedReferenceUpdater;
 import net.acidfrog.kronos.crates.Identifiable;
 
 public final class Entity implements Identifiable {
@@ -22,14 +23,12 @@ public final class Entity implements Identifiable {
     }
 
     private int id;
-    private Entity prev = null;
-    private Entity next = null;
-    private volatile Data data;
+    private volatile ComponentData data;
     private volatile StampedLock lock;
 
     protected Entity(int id, Composition composition, Object... components) {
         this.id = id;
-        this.data = new Data(composition, components, (Data) null);
+        this.data = new ComponentData(composition, components);
     }
 
     public Entity add(Object component) {
@@ -141,30 +140,6 @@ public final class Entity implements Identifiable {
         return this.id = id | (this.id & ChunkedPool.IDSchema.FLAG_BIT);
     }
 
-    public Identifiable getPrevious() {
-        return prev;
-    }
-
-    public Identifiable setPrevious(Identifiable prev) {
-        var old = this.prev;
-        this.prev = (Entity) prev;
-        return old;
-    }
-
-    public Identifiable getNext() {
-        return next;
-    }
-
-    public Identifiable setNext(Identifiable next) {
-        var old = this.next;
-        this.next = (Entity) next;
-        return old;
-    }
-
-    public <S extends Enum<S>> Entity setState(S state) {
-        return data.composition.setEntityState(this, state);
-    }
-
     public Composition getComposition() {
         return data.composition;
     }
@@ -173,11 +148,11 @@ public final class Entity implements Identifiable {
         return data.components;
     }
 
-    public Data getData() {
+    public ComponentData getData() {
         return data;
     }
 
-    Entity setData(Data data) {
+    Entity setData(ComponentData data) {
         this.data = data;
         return this;
     }
@@ -223,21 +198,10 @@ public final class Entity implements Identifiable {
         sb.append("Entity={");
         sb.append("id=").append(idSchema.idToString(id));
         sb.append(", ").append(data.composition);
-        sb.append(", stateRootKey=").append(data.stateRoot);
-        if (prev != null) {
-            sb.append(", prev.id=").append(idSchema.idToString(prev.id));
-        }
-        if (next != null) {
-            sb.append(", next.id=").append(idSchema.idToString(next.id));
-        }
         sb.append('}');
         return sb.toString();
     }
 
-    public record Data(Composition composition, Object[] components, IndexKey stateRoot) {
-
-        public Data(Composition composition, Object[] components, Data other) {
-            this(composition, components, other == null ? null : other.stateRoot);
-        }
+    public record ComponentData(Composition composition, Object[] components) {
     }
 }

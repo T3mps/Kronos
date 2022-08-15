@@ -34,6 +34,62 @@ public final class ANSI {
         return sb.toString().replace(SEPARATOR + POSTFIX, POSTFIX);
     }
 
+    public static String format(Transmutation[] pre, String text, Transmutation[] post) {
+        StringBuilder sb = new StringBuilder();
+        
+        for (var trait : pre) {
+            String code = trait.toString();
+            if (code.equals("")) {
+                continue;
+            }
+            
+            sb.append(code);
+        }
+        sb.append(text);
+        for (var trait : post) {
+            String code = trait.toString();
+            if (code.equals("")) {
+                continue;
+            }
+            
+            sb.append(code);
+        }
+
+        return sb.toString();
+    }
+
+    public static String format(Transmutation[] pre, String text) {
+        StringBuilder sb = new StringBuilder();
+        
+        for (var trait : pre) {
+            String code = trait.toString();
+            if (code.equals("")) {
+                continue;
+            }
+            
+            sb.append(code);
+        }
+        sb.append(text);
+
+        return sb.toString();
+    }
+
+    public static String format(String text, Transmutation[] post) {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append(text);
+        for (var trait : post) {
+            String code = trait.toString();
+            if (code.equals("")) {
+                continue;
+            }
+            
+            sb.append(code);
+        }
+
+        return sb.toString();
+    }
+
     public static String colorize(String text, String ansiCode) {
         StringBuilder sb = new StringBuilder();
 
@@ -95,7 +151,7 @@ public final class ANSI {
         return sb.toString();
     }
 
-    public interface AnsiTrait {
+    public sealed interface AnsiTrait permits Traits, ComplexColor, Transmutation {
 
         @Override
         public abstract String toString();
@@ -420,8 +476,8 @@ public final class ANSI {
 
     public static final class ComplexColor implements AnsiTrait {
     
-        private String[] color;
-        private boolean fg;
+        private final String[] color;
+        private final boolean fg;
     
         private ComplexColor(int color8, boolean fg) {
             if (0 <= color8 && color8 <= 255) {
@@ -475,6 +531,66 @@ public final class ANSI {
             String ANSI_TRUE_COLOR_PREFIX = fg ? "38;2;" : "48;2;";
     
             return (isTrueColor() ? ANSI_TRUE_COLOR_PREFIX : ANSI_8BIT_COLOR_PREFIX) + code();
+        }
+    }
+
+    public static final class Transmutation implements AnsiTrait {
+
+        private static final String ESCAPE_CODE = "\033[";
+
+        private String code;
+
+        private Transmutation(String code) {
+            this.code = code;
+        }
+
+        public static Transmutation POSITION(int L, int C) {
+            return new Transmutation(ESCAPE_CODE + L + ";" + C + "H");
+        }
+
+        public static Transmutation UP(int n) {
+            return new Transmutation(ESCAPE_CODE + n + "A");
+        }
+
+        public static Transmutation DOWN(int n) {
+            return new Transmutation(ESCAPE_CODE + n + "B");
+        }
+
+        public static Transmutation FORWARD(int n) {
+            return new Transmutation(ESCAPE_CODE + n + "C");
+        }
+
+        public static Transmutation BACKWARD(int n) {
+            return new Transmutation(ESCAPE_CODE + n + "D");
+        }
+
+        public static Transmutation CLEAR_LINE() {
+            return new Transmutation(ESCAPE_CODE + "2K");
+        }
+
+        public static Transmutation CLEAR_SCREEN() {
+            return new Transmutation(ESCAPE_CODE + "2J");
+        }
+
+        public static Transmutation SAVE_CURSOR_POSITION() {
+            return new Transmutation(ESCAPE_CODE + "s");
+        }
+
+        public static Transmutation RESTORE_CURSOR_POSITION() {
+            return new Transmutation(ESCAPE_CODE + "u");
+        }
+
+        public static Transmutation HIDE_CURSOR() {
+            return new Transmutation(ESCAPE_CODE + "?25l");
+        }
+
+        public static Transmutation SHOW_CURSOR() {
+            return new Transmutation(ESCAPE_CODE + "?25h");
+        }
+
+        @Override
+        public String toString() {
+            return code;
         }
     }
 }

@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import net.acidfrog.kronos.crates.Crates;
+import net.acidfrog.kronos.toolkit.internal.UnsafeSupport;
 
-public final class ClassIndex implements AutoCloseable {
+final class ClassIndex implements AutoCloseable {
 
-    private static final Unsafe UNSAFE = Crates.UNSAFE;
+    private static final Unsafe UNSAFE = UnsafeSupport.getUnsafe();
 
     private final static int INT_BYTES_SHIFT = 2;
     private static final int DEFAULT_HASH_BIT = 20; // 1MB -> about 1K types
@@ -25,11 +25,11 @@ public final class ClassIndex implements AutoCloseable {
     private final long memoryAddress;
     private final ClassValue<Integer> fallbackMap;
 
-    public ClassIndex() {
+    protected ClassIndex() {
         this(DEFAULT_HASH_BIT);
     }
 
-    public ClassIndex(final int hashBit) {
+    protected ClassIndex(final int hashBit) {
         this.controlMap = new ConcurrentHashMap<Object, Integer>(1 << 10);
         this.hashBit = Math.min(Math.max(hashBit, MIN_HASH_BIT), MAX_HASH_BIT);
         this.useFallbackMap = new AtomicBoolean(false);
@@ -51,11 +51,11 @@ public final class ClassIndex implements AutoCloseable {
         return address + (identityHashCode << INT_BYTES_SHIFT);
     }
 
-    public int addClass(Class<?> clazz) {
+    protected int addClass(Class<?> clazz) {
         return addObject(clazz);
     }
 
-    public int addObject(Object object) {
+    protected int addObject(Object object) {
         if (useFallbackMap.get()) {
             return fallbackMap.get((Class<?>) object);
         }
@@ -80,15 +80,15 @@ public final class ClassIndex implements AutoCloseable {
         return currentIndex;
     }
 
-    public int getHashBit() {
+    protected int getHashBit() {
         return hashBit;
     }
 
-    public int getIndex(Class<?> clazz) {
+    protected int getIndex(Class<?> clazz) {
         return getObjectIndex(clazz);
     }
 
-    public int getObjectIndex(Object clazz) {
+    protected int getObjectIndex(Object clazz) {
         if (useFallbackMap.get()) {
             return fallbackMap.get((Class<?>) clazz);
         }
@@ -96,7 +96,7 @@ public final class ClassIndex implements AutoCloseable {
         return UNSAFE.getInt(getIdentityAddress(identityHashCode, memoryAddress));
     }
 
-    public int getObjectIndexVolatile(Object clazz) {
+    protected int getObjectIndexVolatile(Object clazz) {
         if (useFallbackMap.get()) {
             return fallbackMap.get((Class<?>) clazz);
         }
@@ -104,11 +104,11 @@ public final class ClassIndex implements AutoCloseable {
         return UNSAFE.getIntVolatile(null, getIdentityAddress(identityHashCode, memoryAddress));
     }
 
-    public int getIndexOrAddClass(Class<?> clazz) {
+    protected int getIndexOrAddClass(Class<?> clazz) {
         return getIndexOrAddObject(clazz);
     }
 
-    public int getIndexOrAddObject(Object clazz) {
+    protected int getIndexOrAddObject(Object clazz) {
         int value = getObjectIndexVolatile(clazz);
         if (value != 0) {
             return value;
@@ -116,7 +116,7 @@ public final class ClassIndex implements AutoCloseable {
         return addObject(clazz);
     }
 
-    public int[] getIndexOrAddClassBatch(Class<?>[] classes) {
+    protected int[] getIndexOrAddClassBatch(Class<?>[] classes) {
         int[] indexes = new int[classes.length];
         for (int i = 0; i < classes.length; i++) {
             indexes[i] = getIndexOrAddClass(classes[i]);
@@ -124,7 +124,7 @@ public final class ClassIndex implements AutoCloseable {
         return indexes;
     }
     
-    public IndexKey getIndexKey(Object[] objects) {
+    protected IndexKey getIndexKey(Object[] objects) {
         int length = objects.length;
         boolean[] checkArray = new boolean[index + length + 1];
         int min = Integer.MAX_VALUE, max = 0;
@@ -144,7 +144,7 @@ public final class ClassIndex implements AutoCloseable {
         return new IndexKey(checkArray, min, max, length);
     }
 
-    public IndexKey getIndexKeyByType(Class<?>[] classes) {
+    protected IndexKey getIndexKeyByType(Class<?>[] classes) {
         int length = classes.length;
         boolean[] checkArray = new boolean[index + length + 1];
         int min = Integer.MAX_VALUE, max = 0;
@@ -168,11 +168,11 @@ public final class ClassIndex implements AutoCloseable {
         return hashCode >> (32 - hashBits);
     }
 
-    public int size() {
+    protected int size() {
         return index - 1;
     }
 
-    public void useUseFallbackMap() {
+    protected void useUseFallbackMap() {
         useFallbackMap.set(true);
     }
 

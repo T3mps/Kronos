@@ -9,8 +9,6 @@ public interface Group<T> extends Iterable<T> {
     
     public abstract Group<T> exclude(Class<?>... componentTypes);
 
-    public abstract <S extends Enum<S>> Group<T> withState(S state);
-
     @Override
     public abstract Iterator<T> iterator();
     

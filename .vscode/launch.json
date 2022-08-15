@@ -3,6 +3,153 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch CRC32",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.crypto.CRC32",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch TestMurmurHash3",
+                "request": "launch",
+                "mainClass": "test.toolkit.crypto.TestMurmurHash3",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch MurmurHash3",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.crypto.MurmurHash3",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Hash",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.crypto.Hash",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch ClassSchema",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.serialization.ClassSchema",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch StriveKronAPI",
+                "request": "launch",
+                "mainClass": "test.serialization.StriveKronAPI",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch KronAPI",
+                "request": "launch",
+                "mainClass": "test.serialization.KronAPI",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch TestKronOutputStream",
+                "request": "launch",
+                "mainClass": "test.serialization.TestKronOutputStream",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Kron",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.serialization.Kron",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch TestKronWriter",
+                "request": "launch",
+                "mainClass": "test.serialization.TestKronWriter",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch KronWriter",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.serialization.KronWriter",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch ANSI$CursorTransmutation",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.scribe.ANSI$CursorTransmutation",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Configuration",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.Configuration",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch MemoryBlock",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.internal.memory.MemoryBlock",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch TestSerialisationPerf",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.serialization.TestSerialisationPerf",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch RingArray",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.array.RingArray",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch RingBuffer",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.array.RingBuffer",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch DynamicArray",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.array.DynamicArray",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch IntArray",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.internal.memory.IntArray",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch UnsafeSupport",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.internal.memory.UnsafeSupport",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch UnsafeSupport",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.internal.UnsafeSupport",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch IntStack",
                 "request": "launch",
                 "mainClass": "net.acidfrog.kronos.crates.IntStack",

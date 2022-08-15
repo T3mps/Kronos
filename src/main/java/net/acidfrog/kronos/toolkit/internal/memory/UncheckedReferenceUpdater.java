@@ -1,11 +1,11 @@
-package net.acidfrog.kronos.inferno;
+package net.acidfrog.kronos.toolkit.internal.memory;
 
-import net.acidfrog.kronos.crates.Crates;
+import net.acidfrog.kronos.toolkit.internal.UnsafeSupport;
 import sun.misc.Unsafe;
 
 public final class UncheckedReferenceUpdater<T, V> {
 
-    private static final Unsafe UNSAFE = Crates.UNSAFE;
+    private static final Unsafe UNSAFE = UnsafeSupport.getUnsafe();
 
     private final long offset;
 

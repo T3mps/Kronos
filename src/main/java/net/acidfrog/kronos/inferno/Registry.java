@@ -1,16 +1,11 @@
 package net.acidfrog.kronos.inferno;
-
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.StampedLock;
 
 import net.acidfrog.kronos.crates.pool.ChunkedPool;
@@ -36,7 +31,6 @@ public final class Registry implements AutoCloseable {
     private final Map<Class<?>, Transmute.ByAddingAndRemoving<?>> addingTypeModifiers;
     private final Map<Class<?>, Transmute.ByRemoving> removingTypeModifiers;
     private final Node root;
-    private final List<Scheduler> schedulers;
     private final int systemTimeoutSeconds;
 
     public Registry() {
@@ -62,7 +56,6 @@ public final class Registry implements AutoCloseable {
         this.removingTypeModifiers = new ConcurrentHashMap<Class<?>, Transmute.ByRemoving>();
         this.root = new Node();
         root.composition = new Composition(this, entityPool.newNode(), arrayPool, classIndex, idSchema);
-        this.schedulers = new CopyOnWriteArrayList<Scheduler>();
         this.systemTimeoutSeconds = systemTimeoutSeconds;
     }
 
@@ -107,21 +100,8 @@ public final class Registry implements AutoCloseable {
         return ((Entity) entity).delete();
     }
 
-    public void update() {
-        for (int i = 0; i < schedulers.size(); i++) {
-            schedulers.get(i).update();
-        }
-    }
-    
-    public void update(int ups) {
-        for (int i = 0; i < schedulers.size(); i++) {
-            schedulers.get(i).update(ups);
-        }
-    }
-
     public Scheduler createScheduler() {
         var scheduler = new Scheduler(systemTimeoutSeconds);
-        schedulers.add(scheduler);
         return scheduler;
     }
 
@@ -380,11 +360,6 @@ public final class Registry implements AutoCloseable {
         nodeCache.clear();
         classIndex.close();
         entityPool.close();
-
-        int sSize = schedulers.size();
-        for (int i = 0; i < sSize; i++) {
-            schedulers.get(i).close();
-        }
     }
 
     protected final class Node {

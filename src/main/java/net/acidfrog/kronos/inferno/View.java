@@ -11,7 +11,6 @@ public abstract class View<T> implements Group<T> {
     
     private final Registry registry;
     private final Map<IndexKey, Registry.Node> nodeMap;
-    protected IndexKey stateKey;
 
     protected View(Registry registry, Map<IndexKey, Registry.Node> nodeMap) {
         this.registry = registry;
@@ -29,12 +28,6 @@ public abstract class View<T> implements Group<T> {
     @Override
     public View<T> exclude(Class<?>... componentTypes) {
         registry.exclude(nodeMap, componentTypes);
-        return this;
-    }
-
-    @Override
-    public <S extends Enum<S>> View<T> withState(S state) {
-        stateKey = Composition.computeIndexKey(state, registry.getClassIndex());
         return this;
     }
 
@@ -120,8 +113,7 @@ public abstract class View<T> implements Group<T> {
 
         @Override
         protected Iterator<Group.With1<T>> compositionIterator(Composition composition) {
-            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
-            return composition.select(type, iterator);
+            return composition.select(type, composition.getNode().iterator());
         }
     }
 
@@ -138,8 +130,7 @@ public abstract class View<T> implements Group<T> {
 
         @Override
         protected Iterator<Group.With2<T1, T2>> compositionIterator(Composition composition) {
-            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
-            return composition.select(type1, type2, iterator);
+            return composition.select(type1, type2, composition.getNode().iterator());
         }
     }
 
@@ -158,8 +149,7 @@ public abstract class View<T> implements Group<T> {
 
         @Override
         protected Iterator<Group.With3<T1, T2, T3>> compositionIterator(Composition composition) {
-            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
-            return composition.select(type1, type2, type3, iterator);
+            return composition.select(type1, type2, type3, composition.getNode().iterator());
         }
     }
 
@@ -180,8 +170,7 @@ public abstract class View<T> implements Group<T> {
 
         @Override
         protected Iterator<Group.With4<T1, T2, T3, T4>> compositionIterator(Composition composition) {
-            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
-            return composition.select(type1, type2, type3, type4, iterator);
+            return composition.select(type1, type2, type3, type4, composition.getNode().iterator());
         }
     }
 
@@ -204,8 +193,7 @@ public abstract class View<T> implements Group<T> {
 
         @Override
         protected Iterator<Group.With5<T1, T2, T3, T4, T5>> compositionIterator(Composition composition) {
-            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
-            return composition.select(type1, type2, type3, type4, type5, iterator);
+            return composition.select(type1, type2, type3, type4, type5, composition.getNode().iterator());
         }
     }
 
@@ -230,8 +218,7 @@ public abstract class View<T> implements Group<T> {
 
         @Override
         protected Iterator<Group.With6<T1, T2, T3, T4, T5, T6>> compositionIterator(Composition composition) {
-            Iterator<Entity> iterator = stateKey == null ? composition.getNode().iterator() : composition.entityStateIterator(composition.getStateRootEntity(stateKey));
-            return composition.select(type1, type2, type3, type4, type5, type6, iterator);
+            return composition.select(type1, type2, type3, type4, type5, type6, composition.getNode().iterator());
         }
     }
 }

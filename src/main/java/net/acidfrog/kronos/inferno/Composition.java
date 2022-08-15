@@ -22,8 +22,6 @@ public final class Composition {
     private final IDSchema idSchema;
     private final Class<?>[] componentTypes;
     private final int[] componentIndices;
-    private final Map<IndexKey, Entity> states;
-    private final StampedLock stateLock;
 
     public Composition(Registry repository, ChunkedPool.PooledNode<Entity> pooledNode, ArrayPool arrayPool, ClassIndex classIndex, IDSchema idSchema, Class<?>... componentTypes) {
         this.repository = repository;
@@ -42,16 +40,8 @@ public final class Composition {
         } else {
             this.componentIndices = null;
         }
-        this.states = new ConcurrentHashMap<IndexKey, Entity>();
-        this.stateLock = new StampedLock();
     }
-
-    public static <S extends Enum<S>> IndexKey computeIndexKey(S state, ClassIndex classIndex) {
-        int index = classIndex.getIndex(state.getClass());
-        index = index == 0 ? classIndex.getIndexOrAddClass(state.getClass()) : index;
-        return new IndexKey(new int[] { index, state.ordinal() });
-    }
-
+    
     public boolean isMultiComponent() {
         return componentTypes.length > 1;
     }
@@ -97,9 +87,6 @@ public final class Composition {
         if (components != null && entity.isPooledArray()) {
             arrayPool.push(components);
         }
-        if (entity.getPrevious() != null || entity.getNext() != null) {
-            detachEntityState(entity);
-        }
 
         entity.setData(null);
         return true;
@@ -107,9 +94,9 @@ public final class Composition {
 
     protected Entity attachEntity(Entity entity, boolean prepared, Object... components) {
         entity = pooledNode.register(entity.setID(pooledNode.nextID()), switch (componentTypes.length) {
-            case 00 -> entity.setData(new Entity.Data(this, null, entity.getData()));
-            case 01 -> entity.setData(new Entity.Data(this, components, entity.getData()));
-            default -> entity.setData(new Entity.Data(this, prepared ? components : sortComponentsByIndex(components), entity.getData()));
+            case 00 -> entity.setData(new Entity.ComponentData(this, null));
+            case 01 -> entity.setData(new Entity.ComponentData(this, components));
+            default -> entity.setData(new Entity.ComponentData(this, prepared ? components : sortComponentsByIndex(components)));
         });
 
         return entity;
@@ -123,79 +110,6 @@ public final class Composition {
         pooledNode.freeID(entity.getID());
         entity.flagDetachedID();
         return entity;
-    }
-
-    public <S extends Enum<S>> Entity setEntityState(Entity entity, S state) {
-        detachEntityState(entity);
-        
-        if (state != null) {
-            attachEntityState(entity, state);
-        }
-        return entity;
-    }
-
-    private boolean detachEntityState(Entity entity) {
-        IndexKey key = entity.getData().stateRoot();
-        // if entity is root
-
-        if (key != null) {
-            // if alone
-            if (entity.getPrevious() == null) {
-                if (states.remove(key) != null) {
-                    entity.setData(new Entity.Data(this, entity.getComponents(), (Entity.Data) null));
-                    return true;
-                }
-            } else {
-                Entity prev = (Entity) entity.getPrevious();
-
-                if (states.replace(key, entity, prev)) {
-                    prev.setNext(null);
-                    prev.setData(new Entity.Data(this, prev.getComponents(), entity.getData()));
-                    entity.setPrevious(null);
-                    entity.setData(new Entity.Data(this, entity.getComponents(), (Entity.Data) null));
-                    return true;
-                }
-            }
-        } else if (entity.getNext() != null) {
-            long stamp = stateLock.writeLock();
-
-            try {
-                Entity prev, next;
-
-                if ((next = (Entity) entity.getNext()) != null) {
-                    if ((prev = (Entity) entity.getPrevious()) != null) {
-                        prev.setNext(next);
-                        next.setPrevious(prev);
-                    } else {
-                        next.setPrevious(null);
-                    }
-                }
-
-                entity.setPrevious(null);
-                entity.setNext(null);
-                return true;
-            } finally {
-                stateLock.unlockWrite(stamp);
-            }
-        }
-        return false;
-    }
-
-    private <S extends Enum<S>> void attachEntityState(Entity entity, S state) {
-        IndexKey indexKey = computeIndexKey(state, classIndex);
-        Entity.Data entityData = entity.getData();
-        Entity prev = states.computeIfAbsent(indexKey, k -> entity.setData(new Entity.Data(this, entityData.components(), k)));
-
-        if (prev != entity) {
-            states.computeIfPresent(indexKey, (k, oldEntity) -> {
-                entity.setPrevious(oldEntity);
-                entity.setData(new Entity.Data(this, entityData.components(), k));
-                oldEntity.setNext(entity);
-                Entity.Data oldEntityData = oldEntity.getData();
-                oldEntity.setData(new Entity.Data(this, oldEntityData.components(), (Entity.Data) null));
-                return entity;
-            });
-        }
     }
 
     public int size() {
@@ -212,14 +126,6 @@ public final class Composition {
 
     public ChunkedPool.PooledNode<Entity> getNode() {
         return pooledNode;
-    }
-
-    public Map<IndexKey, Entity> getStates() {
-        return Collections.unmodifiableMap(states);
-    }
-
-    public Entity getStateRootEntity(IndexKey key) {
-        return states.get(key);
     }
 
     public IDSchema getIDSchema() {
@@ -270,31 +176,6 @@ public final class Composition {
         return new IteratorWith6<T1, T2, T3, T4, T5, T6>(getComponentIndex(componentType1), getComponentIndex(componentType2), getComponentIndex(componentType3), getComponentIndex(componentType4), getComponentIndex(componentType5), getComponentIndex(componentType6), iterator, this);
     }
 
-    public Iterator<Entity> entityStateIterator(Entity rootEntity) {
-        return new StateIterator(rootEntity);
-    }
-
-    private class StateIterator implements Iterator<Entity> {
-
-        private Entity next;
-
-        private StateIterator(Entity rootEntity) {
-            this.next = rootEntity;
-        }
-
-        @Override
-        public boolean hasNext() {
-            return next != null;
-        }
-
-        @Override
-        public Entity next() {
-            var current = next;
-            next = (Entity) next.getPrevious();
-            return current;
-        }
-    }
-
     public record IteratorWith1<T>(int index, Iterator<Entity> iterator, Composition composition) implements Iterator<Group.With1<T>> {
 
         @Override
@@ -306,7 +187,7 @@ public final class Composition {
         @SuppressWarnings("unchecked")
         public Group.With1<T> next() {
             Entity intEntity;
-            Entity.Data data;
+            Entity.ComponentData data;
 
             while ((data = (intEntity = iterator.next()).getData()) == null || data.composition() != composition) ;
             
@@ -326,7 +207,7 @@ public final class Composition {
         @SuppressWarnings("unchecked")
         public Group.With2<T1, T2> next() {
             Entity intEntity;
-            Entity.Data data;
+            Entity.ComponentData data;
 
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
 
@@ -346,7 +227,7 @@ public final class Composition {
         @SuppressWarnings("unchecked")
         public Group.With3<T1, T2, T3> next() {
             Entity intEntity;
-            Entity.Data data;
+            Entity.ComponentData data;
 
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
 
@@ -366,7 +247,7 @@ public final class Composition {
         @SuppressWarnings("unchecked")
         public Group.With4<T1, T2, T3, T4> next() {
             Entity intEntity;
-            Entity.Data data;
+            Entity.ComponentData data;
 
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
 
@@ -386,7 +267,7 @@ public final class Composition {
         @SuppressWarnings("unchecked")
         public Group.With5<T1, T2, T3, T4, T5> next() {
             Entity intEntity;
-            Entity.Data data;
+            Entity.ComponentData data;
 
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
             Object[] components = data.components();
@@ -406,7 +287,7 @@ public final class Composition {
         @SuppressWarnings("unchecked")
         public Group.With6<T1, T2, T3, T4, T5, T6> next() {
             Entity intEntity;
-            Entity.Data data;
+            Entity.ComponentData data;
 
             while ((data = (intEntity = iterator.next()).getData()).composition() != composition) ;
 

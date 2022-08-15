@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import net.acidfrog.kronos.scribe.Logger;
 import net.acidfrog.kronos.scribe.LoggerFactory;
+import net.acidfrog.kronos.toolkit.internal.UnsafeSupport;
 
 /**
  * A stack of ints whos capacity is determined in bytes at construction time. The stack is
@@ -19,7 +20,7 @@ public final class IntStack implements AutoCloseable {
     private static final Logger LOGGER = LoggerFactory.get(IntStack.class);
 
     private static final int INT_BYTES = 4;
-    private static final Unsafe UNSAFE = Crates.UNSAFE;
+    private static final Unsafe UNSAFE = UnsafeSupport.getUnsafe();
 
     private final AtomicInteger pointer;
     private final long address;

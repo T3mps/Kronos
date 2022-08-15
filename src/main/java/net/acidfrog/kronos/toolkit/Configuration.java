@@ -17,13 +17,13 @@ import net.acidfrog.kronos.scribe.LoggerFactory;
 
 public final class Configuration implements Closeable {
 
-    private Logger logger;
+    private static final int SUPPORTED_TYPES = new Class<?>[] { String.class, Integer.class, Double.class, Boolean.class }.length;
 
     private static final Pattern[] PATTERNS = new Pattern[] {
         Pattern.compile("^(true|false)$"), // boolean
-        Pattern.compile("^(\\d+)$"), // int
-        Pattern.compile("-?\\d+\\.\\d+"), // double
-        Pattern.compile("^(.*)$"), // string
+        Pattern.compile("^(\\d+)$"),       // int
+        Pattern.compile("-?\\d+\\.\\d+"),  // double
+        Pattern.compile("^(.*)$"),         // string
     };
 
     private static final Map<Pattern, Function<String, Object>> UNMARSHALLERS = Map.of(
@@ -34,7 +34,6 @@ public final class Configuration implements Closeable {
     );
 
     private final String filename;
-
     private final Set<String> keys;
     
     private final Map<String, Boolean> bools;
@@ -44,6 +43,7 @@ public final class Configuration implements Closeable {
 
     private final Map<String, Class<?>> typeCache;
 
+    private Logger logger;
     private boolean logMessages;
 
     private Configuration(String filename) {
@@ -67,73 +67,6 @@ public final class Configuration implements Closeable {
 
     public static final Configuration load(String filename) {
         return new Configuration(filename);
-    }
-
-    public void parse() {
-        Properties props = new Properties();
-        
-        try {
-            props.load(new FileInputStream(filename));
-
-            for (var key : props.stringPropertyNames()) {
-                String value = props.getProperty(key).replace("\"", "");
-                unmarshall(key, value);
-            }
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void unmarshall(String key, String value) {
-        for (var pattern : PATTERNS) {
-            if (pattern.matcher(value).matches()) {
-                var unmarshalled = UNMARSHALLERS.get(pattern).apply(value);
-                var clazz = unmarshalled.getClass();
-
-                if (clazz == Boolean.class) {
-                    bools.put(key, (Boolean) unmarshalled);
-                    keys.add(key);
-                    typeCache.put(key, clazz);
-                    
-                    if (logMessages) {
-                        logger.info("(boolean) '" + key + " = " + value + "' loaded.");
-                    }
-                    return;
-                }
-                if (clazz == Integer.class) {
-                    ints.put(key, (Integer) unmarshalled);
-                    keys.add(key);
-                    typeCache.put(key, clazz);
-                    
-                    if (logMessages) {
-                        logger.info("    (int) '" + key + " = " + value + "' loaded.");
-                    }
-                    return;
-                }
-                if (clazz == Double.class) {
-                    doubles.put(key, (Double) unmarshalled);
-                    keys.add(key);
-                    typeCache.put(key, clazz);
-                    
-                    if (logMessages) {
-                        logger.info(" (double) '" + key + " = " + value + "' loaded.");
-                    }
-                    return;
-                }
-                if (clazz == String.class) {
-                    strings.put(key, (String) unmarshalled);
-                    keys.add(key);
-                    typeCache.put(key, clazz);
-                    
-                    if (logMessages) {
-                        logger.info(" (String) '" + key + " = " + value + "' loaded.");
-                    }
-                    return;
-                }
-                
-                throw new RuntimeException("Unknown type: " + clazz);
-            }
-        }
     }
 
     public Object get(String key) {
@@ -262,6 +195,71 @@ public final class Configuration implements Closeable {
 
         return this;
     }
+
+    private void parse() {
+        Properties props = new Properties();
+        
+        try {
+            props.load(new FileInputStream(filename));
+
+            for (var key : props.stringPropertyNames()) {
+                String value = props.getProperty(key).replace("\"", "");
+                unmarshall(key, value);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void unmarshall(String key, String value) {
+        for (int i = 0; i < SUPPORTED_TYPES; i++) {
+            var pattern = PATTERNS[i];
+
+            if (pattern.matcher(value).matches()) {
+                var unmarshalled = UNMARSHALLERS.get(pattern).apply(value);
+
+                switch (i) {
+                    case 0:
+                        bools.put(key, (Boolean) unmarshalled);
+                        keys.add(key);
+                        typeCache.put(key, unmarshalled.getClass());
+
+                        if (logMessages) {
+                            logger.info("(boolean) '" + key + " = " + value + "' loaded.");
+                        }
+                        return;
+                    case 1:
+                        ints.put(key, (Integer) unmarshalled);
+                        keys.add(key);
+                        typeCache.put(key, unmarshalled.getClass());
+
+                        if (logMessages) {
+                            logger.info("    (int) '" + key + " = " + value + "' loaded.");
+                        }
+                        return;
+                    case 2:
+                        doubles.put(key, (Double) unmarshalled);
+                        keys.add(key);
+                        typeCache.put(key, unmarshalled.getClass());
+
+                        if (logMessages) {
+                            logger.info(" (double) '" + key + " = " + value + "' loaded.");
+                        }
+                        return;
+                    case 3:
+                        strings.put(key, (String) unmarshalled);
+                        keys.add(key);
+                        typeCache.put(key, unmarshalled.getClass());
+
+                        if (logMessages) {
+                            logger.info(" (String) '" + key + " = " + value + "' loaded.");
+                        }
+                        return;
+                    default: throw new RuntimeException("Unknown type: " + unmarshalled.getClass());
+                }
+            }
+        }
+    }    
     
     public Set<String> keySet() {
         return keys;
@@ -272,5 +270,6 @@ public final class Configuration implements Closeable {
         save(filename);
     }
 
-    record Entry<V>(String key, V value) {}
+    private record Entry<V>(String key, V value) {
+    }
 }
