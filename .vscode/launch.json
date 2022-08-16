@@ -3,6 +3,20 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch IntHashFunction",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.crypto.IntHashFunction",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch DJB2a",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.crypto.DJB2a",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch CRC32",
                 "request": "launch",
                 "mainClass": "net.acidfrog.kronos.toolkit.crypto.CRC32",

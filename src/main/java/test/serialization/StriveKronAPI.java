@@ -1,13 +1,46 @@
 package test.serialization;
 
+import java.io.FileOutputStream;
+
 import net.acidfrog.kronos.serialization.Kron;
+import net.acidfrog.kronos.toolkit.internal.UnsafeSupport;
 
 public class StriveKronAPI {
     
     public static void main(String[] args) {
-        Kron kron = new Kron(); // create a new kron instance
+        // Kron kron = new Kron(); // create a new kron instance
 
-        kron.defineNextMemoryLayout(Player.class); // define the memory layout for the target class to be serialized
+        // kron.defineNextMemoryLayout(Player.class); // define the memory layout for the target class to be serialized'
+
+        // Player player = new Player("Temps", 12, 24); // create a new instance of the target class
+        
+        // kron.serialize(player); // serialize the target class
+
+        // kron.write(System.out); // write the serialized data to the console
+        // kron.write(new FileOutputStream("test.kron")); // write the serialized data to a file
+
+        // Player player2 = kron.deserialize(Player.class); // deserialize the data
+
+        // System.out.println(player2); // print the deserialized data to the console
+
+        System.out.println(serializableFieldCount(Player.class));
+    }
+
+    private static int serializableFieldCount(Class<?> clazz) {
+        int count = 0;
+
+        while (clazz != Object.class) {
+            var fields = clazz.getDeclaredFields();
+            for (var field : fields) {
+                if (Kron.isSerializable(field)) {
+                    count++;
+                }
+            }
+
+            clazz = clazz.getSuperclass();
+        }
+
+        return count;
     }
 
     public static class Player {

@@ -529,6 +529,10 @@ public final class CRC32 {
         0x2C8E0FFF, 0xE0240F61, 0x6EAB0882, 0xA201081C,
         0xA8C40105, 0x646E019B, 0xEAE10678, 0x264B06E6,
     };
+
+    public static int hash(final byte[] data) {
+        return hash(data, 0, data.length);
+    }
     
     public static int hash(final byte[] data, int offset, int length) {
         int crc = 0xFFFFFFFF;
@@ -556,16 +560,6 @@ public final class CRC32 {
             default: /* nothing */
         }
 
-        return crc;
-    }
-
-    public static int hash(final byte[] data) {
-        return hash(data, 0, data.length);
-    }
-
-    public static int hash(final int data) {
-        int crc = 0xFFFFFFFF;
-        crc = (crc >>> 0x08) ^ T[((crc ^ data) << 0x18) >>> 0x18];
         return crc;
     }
 
