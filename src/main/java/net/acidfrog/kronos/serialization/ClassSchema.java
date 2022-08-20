@@ -1,7 +1,6 @@
 package net.acidfrog.kronos.serialization;
 
 import net.acidfrog.kronos.toolkit.crypto.CRC32;
-import net.acidfrog.kronos.toolkit.internal.UnsafeSupport;
 
 public class ClassSchema<T> {
 
@@ -53,14 +52,31 @@ public class ClassSchema<T> {
     //     }
     // }
 
-    protected ClassSchema(Class<T> type) {
+    protected ClassSchema(final Class<T> type) {
         this.type = type;
         this.classIndex = CRC32.hash(type.getName());
         this.size = serializableFieldCount(type);
         this.fieldContainerTypes = new ContainerType[size];
         this.dataTypes = new DataType[size];
-        
-        for (int i = 0)
+
+        var fieldsRaw = type.getDeclaredFields();
+        int frLen = fieldsRaw.length;
+        for (int i = 0, j = 0; i < frLen; i++) {
+            var field = fieldsRaw[i];
+            if (!Kron.isSerializable(field)) {
+                continue;
+            }
+
+            var containerType = ContainerType.get(field.getType());
+            var dataType = DataType.get(field.getType());
+
+            if (containerType == null || dataType == null) {
+                throw new IllegalStateException("Unprocessable type present in type");
+            }
+
+            fieldContainerTypes[j] = containerType;
+            dataTypes[j++] = dataType;
+        }
     }
 
     private int serializableFieldCount(Class<? extends Object> clazz) {
@@ -93,10 +109,6 @@ public class ClassSchema<T> {
         return size;
     }
 
-    public int rawSize() {
-        return rawSize;
-    }
-
     public ContainerType[] fieldContainerTypes() {
         return fieldContainerTypes;
     }
@@ -112,7 +124,6 @@ public class ClassSchema<T> {
         sb.append("ClassSchema<").append(type.getSimpleName()).append("> {\n");
         sb.append(tab).append("classIndex: ").append(classIndex).append("\n");
         sb.append(tab).append("size: ").append(size).append("\n");
-        sb.append(tab).append("rawSize: ").append(rawSize).append("\n");
         
         for (int i = 0; i < fieldContainerTypes.length; i++) {
             sb.append(tab).append("field[").append(i).append("]: ");

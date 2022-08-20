@@ -3,6 +3,69 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch ElevevatorFinal",
+                "request": "launch",
+                "mainClass": "test.gamigo.ElevevatorFinal",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Ele",
+                "request": "launch",
+                "mainClass": "test.gamigo.Ele",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Ele$ElevatorMotor",
+                "request": "launch",
+                "mainClass": "test.gamigo.Ele$ElevatorMotor",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Elevator",
+                "request": "launch",
+                "mainClass": "test.gamigo.Elevator",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem4",
+                "request": "launch",
+                "mainClass": "test.gamigo.Problem4",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem3",
+                "request": "launch",
+                "mainClass": "test.gamigo.Problem3",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem2",
+                "request": "launch",
+                "mainClass": "test.gamigo.Problem2",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem1",
+                "request": "launch",
+                "mainClass": "test.gamigo.Problem1",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch RingBuffer",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.crates.array.RingBuffer",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch IntHashFunction",
                 "request": "launch",
                 "mainClass": "net.acidfrog.kronos.toolkit.crypto.IntHashFunction",
