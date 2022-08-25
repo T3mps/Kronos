@@ -2,6 +2,8 @@ package net.acidfrog.kronos.serialization;
 
 import net.acidfrog.kronos.toolkit.crypto.CRC32;
 
+import static net.acidfrog.kronos.serialization.KronWriter.*;
+
 public class ClassSchema<T> {
 
     private final Class<T> type;
@@ -10,47 +12,7 @@ public class ClassSchema<T> {
     private final int size; // non-synthetic non-transient fields
 
     private final ContainerType[] fieldContainerTypes; // primitive, primitive array, object, object array
-    private final DataType[] dataTypes; // boolean, byte, short, char, int, long, float, double, string, object
-
-    // protected ClassSchema(Class<T> type) {
-    //     this.type = type;
-    //     this.classIndex = CRC32.hash(type.getName());
-        
-    //     var fields = type.getDeclaredFields();
-    //     int rawFieldCount = 0;
-    //     int fieldCount = 0;
-    //     for (var field : fields) {
-    //         rawFieldCount++;
-    //         if (!Kron.isSerializable(field)) {
-    //             continue;
-    //         }
-
-    //         fieldCount++;
-    //     }
-
-    //     this.size = fieldCount;
-    //     this.rawSize = rawFieldCount;
-
-    //     this.fieldContainerTypes = new ContainerType[fieldCount];
-    //     this.dataTypes = new DataType[fieldCount];
-
-    //     for (int i = 0, j = 0; i < fields.length; i++) {
-    //         var field = fields[i];
-    //         if (!Kron.isSerializable(field)) {
-    //             continue;
-    //         }
-
-    //         var containerType = ContainerType.get(field.getType());
-    //         var dataType = DataType.get(field.getType());
-
-    //         if (containerType == null || dataType == null) {
-    //             throw new IllegalArgumentException("Field " + field.getName() + " is not serializable");
-    //         }
-
-    //         fieldContainerTypes[j] = containerType;
-    //         dataTypes[j++] = dataType;
-    //     }
-    // }
+    private final DataType[] dataTypes; // boolean, byte, short, char, int, long, float, double, string, object 
 
     protected ClassSchema(final Class<T> type) {
         this.type = type;
@@ -59,7 +21,23 @@ public class ClassSchema<T> {
         this.fieldContainerTypes = new ContainerType[size];
         this.dataTypes = new DataType[size];
 
-        var fieldsRaw = type.getDeclaredFields();
+        computeFields(type);
+    }
+
+    public int getMemoryLayout(final byte[] data, int pointer) {
+        pointer = writeBytes(data, pointer, classIndex);
+        pointer = writeBytes(data, pointer, size);
+
+        for (int i = 0; i < size; i++) {
+            pointer = writeBytes(data, pointer, (byte) fieldContainerTypes[i].ordinal());
+            pointer = writeBytes(data, pointer, (byte) dataTypes[i].ordinal());
+        }
+
+        return pointer;
+    }
+
+    private void computeFields(Class<? extends Object> clazz) {
+        var fieldsRaw = clazz.getDeclaredFields();
         int frLen = fieldsRaw.length;
         for (int i = 0, j = 0; i < frLen; i++) {
             var field = fieldsRaw[i];
@@ -71,7 +49,7 @@ public class ClassSchema<T> {
             var dataType = DataType.get(field.getType());
 
             if (containerType == null || dataType == null) {
-                throw new IllegalStateException("Unprocessable type present in type");
+                throw new IllegalArgumentException("Field " + field.getName() + " is not serializable");
             }
 
             fieldContainerTypes[j] = containerType;

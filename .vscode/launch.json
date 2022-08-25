@@ -3,6 +3,55 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch Ele",
+                "request": "launch",
+                "mainClass": "test.gamigo.problems.Ele",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem4Tests",
+                "request": "launch",
+                "mainClass": "test.gamigo.tests.Problem4Tests",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem3Tests",
+                "request": "launch",
+                "mainClass": "test.gamigo.tests.Problem3Tests",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem1",
+                "request": "launch",
+                "mainClass": "test.gamigo.problems.Problem1",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem2Tests",
+                "request": "launch",
+                "mainClass": "test.gamigo.tests.Problem2Tests",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem2",
+                "request": "launch",
+                "mainClass": "test.gamigo.problems.Problem2",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Problem1Tests",
+                "request": "launch",
+                "mainClass": "test.gamigo.tests.Problem1Tests",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch ElevevatorFinal",
                 "request": "launch",
                 "mainClass": "test.gamigo.ElevevatorFinal",

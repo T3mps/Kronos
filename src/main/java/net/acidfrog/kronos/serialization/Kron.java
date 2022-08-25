@@ -1,12 +1,13 @@
 package net.acidfrog.kronos.serialization;
 
-import static net.acidfrog.kronos.serialization.KronWriter.*;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 
 import net.acidfrog.kronos.toolkit.internal.UnsafeSupport;
 import net.acidfrog.kronos.toolkit.internal.memory.MemoryBlock;
+
+import static net.acidfrog.kronos.serialization.KronWriter.*;
 
 public final class Kron {
     
@@ -32,9 +33,18 @@ public final class Kron {
 
     private byte[] data;
     private int pointer;
+    
+    private ClassSchema<?> currentClassSchema;
 
     public Kron() {
         this.data = new byte[DEFAULT_CAPACITY];
+        this.pointer = 0;
+        this.currentClassSchema = null;
+        
+        writeHeader();
+    }
+
+    private final void writeHeader() {
         this.pointer = writeBytes(data, pointer, HEADER);
         this.pointer = writeBytes(data, pointer, MAJOR_VERSION);
         this.pointer = writeBytes(data, pointer, MINOR_VERSION);
@@ -47,22 +57,8 @@ public final class Kron {
     }
 
     public void defineNextMemoryLayout(Class<?> clazz) {
-        var schema = getSchema(clazz);
-        
-        this.pointer = writeBytes(data, pointer, schema.classIndex());
-        this.pointer = writeBytes(data, pointer, schema.size());
-        
-        int ptr = pointer;
-        for (int i = 0; i < schema.fieldContainerTypes().length; i++) {
-            var containerType = schema.fieldContainerTypes()[i];
-            var dataType = schema.dataTypes()[i];
-
-            pointer = writeBytes(data, pointer, (byte) containerType.ordinal());
-            pointer = writeBytes(data, pointer, (byte) dataType.ordinal());
-        }
-
-        this.pointer = ptr;
-        
+        this.currentClassSchema = getSchema(clazz);
+        pointer = currentClassSchema.getMemoryLayout(data, pointer);
         print();
     }
 

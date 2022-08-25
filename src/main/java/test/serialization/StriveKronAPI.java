@@ -32,14 +32,14 @@ public class StriveKronAPI {
         public double mana;
         public long xp;
 
-        public boolean[] states;
-        public byte[] offsets;
-        public short[] levels;
-        public int[] xs;
-        public int[] ys;
-        public long[] xpPool;
-        public float[] milestones;
-        public double[] manaPool;
+        // public boolean[] states;
+        // public byte[] offsets;
+        // public short[] levels;
+        // public int[] xs;
+        // public int[] ys;
+        // public long[] xpPool;
+        // public float[] milestones;
+        // public double[] manaPool;
 
         public transient String name;
         public transient Item[] inventory;
