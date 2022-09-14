@@ -3,6 +3,13 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch SystemInfo",
+                "request": "launch",
+                "mainClass": "net.acidfrog.kronos.toolkit.internal.SystemInfo",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch Ele",
                 "request": "launch",
                 "mainClass": "test.gamigo.problems.Ele",
