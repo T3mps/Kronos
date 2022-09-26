@@ -3,6 +3,20 @@
         "configurations": [
             {
                 "type": "java",
+                "name": "Launch Game",
+                "request": "launch",
+                "mainClass": "test.detective.Game",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
+                "name": "Launch Test",
+                "request": "launch",
+                "mainClass": "test.perspective.Test",
+                "projectName": "kronos-engine"
+            },
+            {
+                "type": "java",
                 "name": "Launch SystemInfo",
                 "request": "launch",
                 "mainClass": "net.acidfrog.kronos.toolkit.internal.SystemInfo",

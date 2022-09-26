@@ -46,7 +46,6 @@ public class SystemInfo {
         archMapping.put("power_pc", PPC);
         archMapping.put("power_rs", PPC);
 
-        // TODO: PowerPC 64bit mappings
         archMapping.put(PPC64, PPC64);
         archMapping.put("power64", PPC64);
         archMapping.put("powerpc64", PPC64);
@@ -57,35 +56,46 @@ public class SystemInfo {
         archMapping.put("aarch64", ARM64);
     }
 
-    public static String getOSName() {
-        String osName = System.getProperty("os.name");
+    private static String osName = null;
+    private static String osArch;
 
-        return switch (osName) {
-            case "Windows"  -> "windows";
-            case "Mac OS X" -> "macosx";
-            case "Darwin"   -> "macosx";
-            case "Linux"    -> "linux";
-            case "AIX"      -> "aix";
-            default         -> "unknown";
-        };
+    public static String getOSName() {
+        if (osName == null) {
+            String name = System.getProperty("os.name");
+
+            osName = switch (name) {
+                case "Windows"  -> "windows";
+                case "Mac OS X" -> "macosx";
+                case "Darwin"   -> "macosx";
+                case "Linux"    -> "linux";
+                case "AIX"      -> "aix";
+                default         -> "unknown";
+            };
+        }
+
+        return osName;
     }
 
     public static String getOSArch() {
-        String osArch = System.getProperty("os.arch");
-        if (isAndroid()) {
-            return "android-arm";
-        }
-        
-        if (osArch.startsWith("arm")) {
-            return armArch();
-        } else {
-            String lc = osArch.toLowerCase(Locale.US);
-            if (archMapping.containsKey(lc)) {
-                return archMapping.get(lc);
+        if (osArch == null) {
+            String osArch = System.getProperty("os.arch");
+            if (isAndroid()) {
+                return osArch = "android-arm";
             }
+            
+            if (osArch.startsWith("arm")) {
+                return osArch = armArch();
+            } else {
+                String lc = osArch.toLowerCase(Locale.US);
+                if (archMapping.containsKey(lc)) {
+                    return osArch = archMapping.get(lc);
+                }
+            }
+
+            osArch = osArch.replaceAll("\\W", "_");
         }
 
-        return osArch.replaceAll("\\W", "_");
+        return osArch;
     }
 
     private static boolean isAndroid() {
@@ -137,11 +147,5 @@ public class SystemInfo {
         }
 
         return "arm";
-    }
-
-    // test
-    public static void main(String[] args) {
-        System.out.println(getOSName());
-        System.out.println(getOSArch());
     }
 }

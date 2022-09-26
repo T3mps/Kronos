@@ -76,17 +76,14 @@ public class Colors {
         int best_index = Integer.MAX_VALUE;
         
         for (int idx = 0; idx < max; idx++) {
-            double d = cie76(color, colors[idx]);
+            double d = scalar(rgb2cielab(color), rgb2cielab(colors[idx]));
+            
             if (d <= best_distance) {
                 best_index = idx;
                 best_distance = d;
             }
         }
         return best_index;
-    }
-
-    private static double cie76(int c1, int c2) {
-        return scalar(rgb2cielab(c1), rgb2cielab(c2));
     }
 
     private static double scalar(double[] c1, double[] c2) {

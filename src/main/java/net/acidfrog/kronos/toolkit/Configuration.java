@@ -219,43 +219,17 @@ public final class Configuration implements Closeable {
                 var unmarshalled = UNMARSHALLERS.get(pattern).apply(value);
 
                 switch (i) {
-                    case 0:
-                        bools.put(key, (Boolean) unmarshalled);
-                        keys.add(key);
-                        typeCache.put(key, unmarshalled.getClass());
+                    case 0: bools.put(key, (Boolean) unmarshalled);
+                    case 1: ints.put(key, (Integer) unmarshalled);
+                    case 2: doubles.put(key, (Double) unmarshalled);
+                    case 3: strings.put(key, (String) unmarshalled);
 
-                        if (logMessages) {
-                            logger.info("(boolean) '" + key + " = " + value + "' loaded.");
-                        }
-                        return;
-                    case 1:
-                        ints.put(key, (Integer) unmarshalled);
-                        keys.add(key);
-                        typeCache.put(key, unmarshalled.getClass());
+                    keys.add(key);
+                    typeCache.put(key, unmarshalled.getClass());
 
-                        if (logMessages) {
-                            logger.info("    (int) '" + key + " = " + value + "' loaded.");
-                        }
-                        return;
-                    case 2:
-                        doubles.put(key, (Double) unmarshalled);
-                        keys.add(key);
-                        typeCache.put(key, unmarshalled.getClass());
-
-                        if (logMessages) {
-                            logger.info(" (double) '" + key + " = " + value + "' loaded.");
-                        }
-                        return;
-                    case 3:
-                        strings.put(key, (String) unmarshalled);
-                        keys.add(key);
-                        typeCache.put(key, unmarshalled.getClass());
-
-                        if (logMessages) {
-                            logger.info(" (String) '" + key + " = " + value + "' loaded.");
-                        }
-                        return;
-                    default: throw new RuntimeException("Unknown type: " + unmarshalled.getClass());
+                    if (logMessages) {
+                        logger.info(" (String) '" + key + " = " + value + "' loaded.");
+                    }
                 }
             }
         }

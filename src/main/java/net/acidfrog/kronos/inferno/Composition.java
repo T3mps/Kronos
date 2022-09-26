@@ -1,11 +1,7 @@
 package net.acidfrog.kronos.inferno;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.locks.StampedLock;
 
 import net.acidfrog.kronos.crates.pool.ChunkedPool;
 import net.acidfrog.kronos.crates.pool.ArrayPool;
