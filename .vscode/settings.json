@@ -1,3 +1,34 @@
 {
-    "java.configuration.updateBuildConfiguration": "automatic"
+    "java.project.sourcePaths": [
+        "Kronos\\src"
+    ],
+    "java.project.outputPath": "bin",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "Kronos\\vendor\\lwjgl.jar",
+        "Kronos\\vendor\\lwjgl-glfw.jar",
+        "Kronos\\vendor\\lwjgl-glfw-javadoc.jar",
+        "Kronos\\vendor\\lwjgl-glfw-natives-windows.jar",
+        "Kronos\\vendor\\lwjgl-glfw-sources.jar",
+        "Kronos\\vendor\\lwjgl-javadoc.jar",
+        "Kronos\\vendor\\lwjgl-lz4.jar",
+        "Kronos\\vendor\\lwjgl-lz4-javadoc.jar",
+        "Kronos\\vendor\\lwjgl-lz4-natives-windows.jar",
+        "Kronos\\vendor\\lwjgl-lz4-sources.jar",
+        "Kronos\\vendor\\lwjgl-natives-windows.jar",
+        "Kronos\\vendor\\lwjgl-openal.jar",
+        "Kronos\\vendor\\lwjgl-openal-javadoc.jar",
+        "Kronos\\vendor\\lwjgl-openal-natives-windows.jar",
+        "Kronos\\vendor\\lwjgl-openal-sources.jar",
+        "Kronos\\vendor\\lwjgl-opengl.jar",
+        "Kronos\\vendor\\lwjgl-opengl-javadoc.jar",
+        "Kronos\\vendor\\lwjgl-opengl-natives-windows.jar",
+        "Kronos\\vendor\\lwjgl-opengl-sources.jar",
+        "Kronos\\vendor\\lwjgl-sources.jar",
+        "Kronos\\vendor\\lwjgl-stb.jar",
+        "Kronos\\vendor\\lwjgl-stb-javadoc.jar",
+        "Kronos\\vendor\\lwjgl-stb-natives-windows.jar",
+        "Kronos\\vendor\\lwjgl-stb-sources.jar",
+        "Kronos\\vendor\\gson-2.10.jar"
+    ]
 }
