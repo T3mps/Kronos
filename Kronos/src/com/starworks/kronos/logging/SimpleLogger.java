@@ -84,7 +84,7 @@ final class SimpleLogger implements Logger {
         this.parent = parent;
         this.children = new ArrayList<Logger>();
         this.childrenUnmodifiable = Collections.unmodifiableList(children);
-        this.callbacks = List.of(new ConsoleLogCallback());
+        this.callbacks = List.of(new ConsoleLogCallback(false));
         this.listeners = new ArrayList<LoggerListener>();
     }
 

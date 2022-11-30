@@ -2,8 +2,12 @@ package test.inferno;
 
 import com.starworks.kronos.inferno.Registry;
 import com.starworks.kronos.inferno.Scheduler;
+import com.starworks.kronos.logging.Logger;
+import com.starworks.kronos.logging.LoggerFactory;
 
 public class Main {
+
+    private static final Logger LOGGER = LoggerFactory.get(Main.class);
 
     public static void main(String[] args) {
         try (Registry registry = new Registry()) {
@@ -18,7 +22,7 @@ public class Main {
 
                     position.x += velocity.x;
                     position.y += velocity.y;
-                    System.out.printf("Entity %d moved with %s to %s\n", view.entity().getID(), velocity, position);
+                    LOGGER.info(String.format("Entity %d moved with %s to %s\n", view.entity().getID(), velocity, position));
                 });
             };
 

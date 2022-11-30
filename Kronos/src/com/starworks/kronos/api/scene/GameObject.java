@@ -12,12 +12,12 @@ public class GameObject {
     protected final Entity entity;
     protected Reference<Scene> scene;
     
-    public GameObject(Entity entity, Scene scene) {
+    protected GameObject(Entity entity, Scene scene) {
         this.entity = entity;
         this.scene = new WeakReference<Scene>(scene);
     }
 
-    public GameObject(GameObject other) {
+    protected GameObject(GameObject other) {
         this(other.entity, other.scene.get());
     }
 

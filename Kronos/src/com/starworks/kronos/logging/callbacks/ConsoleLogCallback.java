@@ -22,7 +22,7 @@ import com.starworks.kronos.logging.Logger;
 public class ConsoleLogCallback implements LogCallback {
     
     /** Defines the size of the buffer used by the {@link #writer}.  */
-    private static final short SIZE = 512;
+    private static final short SIZE = 1024;
 
     /** The buffer used to write. */
     private byte[] buffer;
@@ -65,15 +65,18 @@ public class ConsoleLogCallback implements LogCallback {
     public void log(Logger.Context ctx) {
         if (buffered) {
             index += ctx.message().length();
+            
             if (index >= SIZE) {
                 logInternal(ctx);
                 index = 0;
             } else {
                 System.arraycopy(ctx.message().getBytes(), 0, buffer, index, ctx.message().length());
             }
-        } else {
-            logInternal(ctx);
+
+            return;
         }
+
+        logInternal(ctx);
     }
 
     private void logInternal(Logger.Context ctx) {
