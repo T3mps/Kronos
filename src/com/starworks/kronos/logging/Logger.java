@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import com.starworks.kronos.logging.appender.Appender;
 
-public interface Logger {
+public interface Logger extends AutoCloseable {
 
 	Context log(Level level, String message);
 
@@ -188,5 +188,9 @@ public interface Logger {
 
 	public static Logger getLogger(Class<?> type) {
 		return LoggerFactory.create(type);
+	}
+	
+	public static Logger getLogger() {
+		return LoggerFactory.create();
 	}
 }

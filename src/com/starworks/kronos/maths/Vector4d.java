@@ -28,10 +28,14 @@ import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 //#ifdef __HAS_NIO__
-import java.nio.*;
+import java.nio.ByteBuffer;
+import java.nio.DoubleBuffer;
+import java.nio.FloatBuffer;
 //#endif
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
+
+import com.starworks.kronos.Configuration;
 
 /**
  * Contains the definition of a Vector comprising 4 doubles and associated transformations.
@@ -681,7 +685,7 @@ public class Vector4d implements Externalizable, Cloneable, Vector4dc {
      * @return this
      */
     public Vector4d setFromAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.get(this, address);
         return this;
@@ -762,7 +766,7 @@ public class Vector4d implements Externalizable, Cloneable, Vector4dc {
 
 //#ifdef __HAS_UNSAFE__
     public Vector4dc getToAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.put(this, address);
         return this;
@@ -1830,7 +1834,7 @@ public class Vector4d implements Externalizable, Cloneable, Vector4dc {
      * @return the string representation
      */
     public String toString() {
-        return Runtime.formatNumbers(toString(Maths.NUMBER_FORMAT));
+        return Runtime.formatNumbers(toString(Configuration.math.numberFormat()));
     }
 
     /**

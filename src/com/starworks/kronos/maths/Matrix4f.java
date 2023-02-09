@@ -34,6 +34,8 @@ import java.nio.FloatBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Contains the definition of a 4x4 matrix of floats, and associated functions to transform
  * it. The matrix is column-major to match OpenGL's interpretation, and it looks like this:
@@ -2444,7 +2446,7 @@ public class Matrix4f implements Externalizable, Cloneable, Matrix4fc {
      * @return this
      */
     public Matrix4f setFromAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.get(this, address);
         return determineProperties();
@@ -2463,7 +2465,7 @@ public class Matrix4f implements Externalizable, Cloneable, Matrix4fc {
      * @return this
      */
     public Matrix4f setTransposedFromAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.getTransposed(this, address);
         return determineProperties();
@@ -3139,7 +3141,7 @@ public class Matrix4f implements Externalizable, Cloneable, Matrix4fc {
      * @return the string representation
      */
     public String toString() {
-        String str = toString(Maths.NUMBER_FORMAT);
+        String str = toString(Configuration.math.numberFormat());
         StringBuffer res = new StringBuffer();
         int eIndex = Integer.MIN_VALUE;
         for (int i = 0; i < str.length(); i++) {
@@ -3345,7 +3347,7 @@ public class Matrix4f implements Externalizable, Cloneable, Matrix4fc {
 //#endif
 //#ifdef __HAS_UNSAFE__
     public Matrix4fc getToAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.put(this, address);
         return this;

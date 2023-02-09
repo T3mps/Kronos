@@ -1,35 +1,109 @@
 package com.starworks.kronos.toolkit;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.starworks.kronos.files.FileHandle;
 import com.starworks.kronos.files.FileSystem;
 import com.ximpleware.AutoPilot;
-import com.ximpleware.VTDException;
+import com.ximpleware.NavException;
 import com.ximpleware.VTDGen;
 import com.ximpleware.VTDNav;
+import com.ximpleware.XPathEvalException;
+import com.ximpleware.XPathParseException;
 
 public class XMLMap implements AutoCloseable {
 
-	private final String m_filename;
+	private static final String MAP_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
+			"<map xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"map.xsd\">\n" + //
+			"\t<entries>\n";
+
+	private static final String ENTRY_TEMPLATE = "\t\t<entry key=\"%s\">%s</entry>\n";
+
+	private static final String MAP_FOOTER = "\t</entries>\n" + //
+			"</map>";
+
+	static {
+		try {
+			FileHandle handle = FileSystem.getFileHandle("map.xsd");
+			if (handle.wasGenerated()) {
+				String xsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
+						"<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" + //
+						"\t<xs:element name=\"map\">\n" + //
+						"\t\t<xs:complexType>\n" + //
+						"\t\t\t<xs:sequence>\n" + //
+						"\t\t\t\t<xs:element name=\"entries\">\n" + //
+						"\t\t\t\t\t<xs:complexType>\n" + //
+						"\t\t\t\t\t\t<xs:sequence>\n" + //
+						"\t\t\t\t\t\t\t<xs:element name=\"entry\" maxOccurs=\"unbounded\">\n" + //
+						"\t\t\t\t\t\t\t\t<xs:complexType>\n" + //
+						"\t\t\t\t\t\t\t\t\t<xs:simpleContent>\n" + //
+						"\t\t\t\t\t\t\t\t\t\t<xs:extension base=\"xs:string\">\n" + //
+						"\t\t\t\t\t\t\t\t\t\t\t<xs:attribute name=\"key\" type=\"xs:string\" use=\"required\" />\n" + //
+						"\t\t\t\t\t\t\t\t\t\t</xs:extension>\n" + //
+						"\t\t\t\t\t\t\t\t\t</xs:simpleContent>\n" + //
+						"\t\t\t\t\t\t\t\t</xs:complexType>\n" + //
+						"\t\t\t\t\t\t\t</xs:element>\n" + //
+						"\t\t\t\t\t\t</xs:sequence>\n" + //
+						"\t\t\t\t\t</xs:complexType>\n" + //
+						"\t\t\t\t</xs:element>\n" + //
+						"\t\t\t</xs:sequence>\n" + //
+						"\t\t</xs:complexType>\n" + //
+						"\t</xs:element>\n" + //
+						"</xs:schema>";
+				handle.write(xsd);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private FileHandle m_handle;
 	private final Map<String, String> m_entries;
 	private boolean m_generated;
 
-	public XMLMap(String filename) {
-		this.m_filename = filename;
+	public XMLMap(String fileName) {
 		this.m_entries = new HashMap<String, String>();
-		load(filename);
+		try {
+			load(fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
-	
-	private void load(String filename) {
+
+	public XMLMap(String fileName, String... defaults) {
+		int size = defaults.length;
+		if (size % 2 != 0) throw new IllegalArgumentException();
+		this.m_entries = new HashMap<String, String>();
+		try {
+			load(fileName);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		if (m_generated) {
+			for (int i = 0; i < size; i += 2) {
+				put(defaults[i], defaults[i + 1]);
+			}
+
+			export();
+		}
+	}
+
+	private void load(String filename) throws IOException {
 		VTDGen vtd = new VTDGen();
-		try (InputStream input = new FileInputStream(filename)) {
+
+		this.m_handle = FileSystem.getFileHandle(filename);
+		if (m_generated = m_handle.wasGenerated()) {
+			try {
+				m_handle.write(MAP_HEADER);
+				m_handle.write(MAP_FOOTER);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		try {
 			if (vtd.parseFile(filename, true)) {
 				VTDNav nav = vtd.getNav();
 				AutoPilot auto = new AutoPilot(nav);
@@ -42,21 +116,7 @@ public class XMLMap implements AutoCloseable {
 					nav.pop();
 				}
 			}
-		} catch (FileNotFoundException handled) {
-			File xmlFile = new File(filename);
-			try {
-				if (xmlFile.createNewFile()) {
-					FileWriter fw = new FileWriter(xmlFile);
-					fw.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<map xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"map.xsd\">\n" + "\t<entries>\n" + "\t</entries>\n" + "</map>");
-					fw.close();
-					m_generated = true;
-				} else {
-					System.err.println("File `" + filename + "' failed to be created, for an unknown reason.");
-				}
-			} catch (IOException e) {
-				System.err.println("File `" + filename + "' failed to be created, for an unknown reason.\n" + e.getLocalizedMessage());
-			}
-		} catch (IOException | VTDException e) {
+		} catch (XPathParseException | XPathEvalException | NavException e) {
 			e.printStackTrace();
 		}
 	}
@@ -68,37 +128,39 @@ public class XMLMap implements AutoCloseable {
 	public String get(String key) {
 		return m_entries.get(key);
 	}
-	
+
 	public void export() {
-	    StringBuilder entryBuilder = new StringBuilder();
-	    StringBuilder mapBuilder = new StringBuilder();
-	    mapBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<map xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"map.xsd\">\n" + "\t<entries>");
-	    for (Map.Entry<String, String> entry : m_entries.entrySet()) {
-	        buildEntry(entry.getKey(), entry.getValue(), entryBuilder);
-	        mapBuilder.append(entryBuilder);
-	    }
-	    mapBuilder.append("\n\t</entries>\n" + "</map>");
+		// StringBuilder entryBuilder = new StringBuilder();
+		// StringBuilder mapBuilder = new StringBuilder();
+		// mapBuilder.append("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + "<map
+		// xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+		// xsi:noNamespaceSchemaLocation=\"map.xsd\">\n" + "\t<entries>");
+		// for (Map.Entry<String, String> entry : m_entries.entrySet()) {
+		// buildEntry(entry.getKey(), entry.getValue(), entryBuilder);
+		// mapBuilder.append(entryBuilder);
+		// }
+		// mapBuilder.append("\n\t</entries>\n" + "</map>");
 
-	    try (FileWriter fw = new FileWriter(m_filename)){
-	        fw.write(mapBuilder.toString());
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-	}
+		// try (FileWriter fw = new FileWriter(m_filename)) {
+		// fw.write(mapBuilder.toString());
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
 
+		try {
+			m_handle.clearContents();
 
-	private static final String FIRST = "\t\t<entry key=\"";
-	private static final String SECOND = "\">";
-	private static final String THIRD = "</entry>";
+			m_handle.write(MAP_HEADER);
 
-	private void buildEntry(String key, String value, StringBuilder sb) {
-		sb.setLength(0);
-		sb.append(System.lineSeparator());
-		sb.append(FIRST);
-		sb.append(key);
-		sb.append(SECOND);
-		sb.append(value);
-		sb.append(THIRD);
+			for (Map.Entry<String, String> entry : m_entries.entrySet()) {
+				String kv = String.format(ENTRY_TEMPLATE, entry.getKey(), entry.getValue());
+				m_handle.write(kv);
+			}
+
+			m_handle.write(MAP_FOOTER);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean wasGenerated() {
@@ -107,6 +169,6 @@ public class XMLMap implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		FileSystem.closeFileHandle(m_filename);
+		m_handle.close();
 	}
 }

@@ -15,11 +15,8 @@ import java.util.concurrent.locks.ReentrantLock;
 import com.starworks.kronos.exception.Exceptions;
 import com.starworks.kronos.logging.Logger;
 
-public class JobManager implements Runnable {
+public class JobManager {
 	Logger LOGGER = Logger.getLogger("Main", JobManager.class);
-
-	private static final int DEFAULT_SHUTDOWN_TIMEOUT_SECONDS = 2;
-	private static final int DEFAULT_UPDATES_PER_SECOND = 60;
 
 	private final JobQueue m_queue;
 	private final int m_updatesPerSecond;
@@ -29,15 +26,7 @@ public class JobManager implements Runnable {
 	private final ScheduledExecutorService m_updateExecutor;
 	private final ReentrantLock m_lock;
 
-	public JobManager(int timeoutSeconds) {
-		this(DEFAULT_UPDATES_PER_SECOND, timeoutSeconds, DEFAULT_SHUTDOWN_TIMEOUT_SECONDS);
-	}
-
-	public JobManager(int updatesPerSecond, int timeoutSeconds) {
-		this(updatesPerSecond, timeoutSeconds, DEFAULT_SHUTDOWN_TIMEOUT_SECONDS);
-	}
-
-	public JobManager(int updatesPerSecond, int timeoutSeconds, int shutdownTimeoutSeconds) {
+	JobManager(int updatesPerSecond, int timeoutSeconds, int shutdownTimeoutSeconds) {
 		this.m_queue = new JobQueue();
 		this.m_updatesPerSecond = updatesPerSecond;
 		this.m_timeoutSeconds = timeoutSeconds;
@@ -55,41 +44,38 @@ public class JobManager implements Runnable {
 		this.m_lock = new ReentrantLock();
 	}
 
-	public void insert(Job<?> job) {
+	public void submit(Job<?> job) {
 		m_queue.offer(job);
 	}
 
 	public void start() {
-		m_updateExecutor.scheduleAtFixedRate(this, 0, 1000 / m_updatesPerSecond, TimeUnit.MILLISECONDS);
-	}
-
-	@Override
-	public void run() {
-		while (!m_updateExecutor.isShutdown()) {
-			m_lock.lock();
-			try {
-				Job<?> job = null;
+		LOGGER.info("Job manager started");
+		m_updateExecutor.scheduleAtFixedRate(() -> {
+			while (!m_updateExecutor.isShutdown()) {
+				m_lock.lock();
 				try {
-					job = m_queue.remove();
-				} catch (CompletionException e) {
-					LOGGER.warn("Job {0} did not complete successfully", e, job);
-					Thread.yield();
-					continue;
+					Job<?> job = null;
+					try {
+						job = m_queue.remove();
+					} catch (CompletionException e) {
+						Thread.yield();
+						continue;
+					}
+					Future<?> future = m_executor.submit(job);
+					try {
+						future.get(m_timeoutSeconds, TimeUnit.SECONDS);
+					} catch (TimeoutException e) {
+						future.cancel(true);
+						LOGGER.warn("Job runtime exceeded the allotted timeout duration.", e);
+					} catch (InterruptedException ignored) {
+					} catch (ExecutionException e) {
+						LOGGER.warn("An unhandled exception was thrown during job execution.", e);
+					}
+				} finally {
+					m_lock.unlock();
 				}
-				Future<?> future = m_executor.submit(job);
-				try {
-					future.get(m_timeoutSeconds, TimeUnit.SECONDS);
-				} catch (TimeoutException e) {
-					future.cancel(true);
-					LOGGER.warn("Job runtime exceeded the allotted timeout duration.", e);
-				} catch (InterruptedException ignored) {
-				} catch (ExecutionException e) {
-					LOGGER.warn("An unhandled exception was thrown during job execution.", e);
-				}
-			} finally {
-				m_lock.unlock();
 			}
-		}
+		}, 0, 1000 / m_updatesPerSecond, TimeUnit.MILLISECONDS);
 	}
 
 	public void shutdown() {
@@ -109,10 +95,10 @@ public class JobManager implements Runnable {
 
 	private static final class JobThread extends Thread {
 
-		private static final AtomicInteger counter = new AtomicInteger(0);
+		private static final AtomicInteger s_counter = new AtomicInteger(0);
 
 		public JobThread(Runnable runnable) {
-			super(runnable, "JobThread" + counter.getAndIncrement());
+			super(runnable, "JobThread" + s_counter.getAndIncrement());
 		}
 	}
 }

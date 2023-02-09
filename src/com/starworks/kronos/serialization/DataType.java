@@ -2,14 +2,14 @@ package com.starworks.kronos.serialization;
 
 public enum DataType {
 
-    BOOLEAN(Kron.BOOLEAN_BYTES),
-    BYTE(Kron.BYTE_BYTES),
-    SHORT(Kron.SHORT_BYTES),
-    CHAR(Kron.CHAR_BYTES),
-    INT(Kron.INT_BYTES),
-    LONG(Kron.LONG_BYTES),
-    FLOAT(Kron.FLOAT_BYTES),
-    DOUBLE(Kron.DOUBLE_BYTES);
+    BOOLEAN(Serial.BOOLEAN_BYTES),
+    BYTE(Serial.BYTE_BYTES),
+    SHORT(Serial.SHORT_BYTES),
+    CHAR(Serial.CHAR_BYTES),
+    INT(Serial.INT_BYTES),
+    LONG(Serial.LONG_BYTES),
+    FLOAT(Serial.FLOAT_BYTES),
+    DOUBLE(Serial.DOUBLE_BYTES);
     // TODO: add support for other objects
 
     private final int size;
@@ -66,8 +66,6 @@ public enum DataType {
             clazz.equals(double[].class) || clazz.equals(Double[].class)) {
             return DOUBLE;
         }
-
-        
 
         return null;
     }

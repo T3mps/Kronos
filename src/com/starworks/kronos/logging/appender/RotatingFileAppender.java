@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.starworks.kronos.Configuration;
 import com.starworks.kronos.files.FileSystem;
-import com.starworks.kronos.logging.Logging;
 
 public sealed class RotatingFileAppender extends FileAppender permits RotatingDateFileAppender {
 
@@ -22,7 +22,7 @@ public sealed class RotatingFileAppender extends FileAppender permits RotatingDa
 		int idx = path.lastIndexOf('.');
 		if (idx == -1) {
 			this.m_baseName = path;
-			this.m_extension = Logging.EXTENSION;
+			this.m_extension = Configuration.logging.extension();
 		} else {
 			this.m_baseName = path.substring(0, idx);
 			this.m_extension = path.substring(idx);

@@ -25,6 +25,8 @@ package com.starworks.kronos.maths;
 
 import java.text.NumberFormat;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Internal class to detect features of the runtime.
  * 
@@ -35,7 +37,7 @@ public final class Runtime {
     public static final boolean HAS_floatToRawIntBits = hasFloatToRawIntBits();
     public static final boolean HAS_doubleToRawLongBits = hasDoubleToRawLongBits();
     public static final boolean HAS_Long_rotateLeft = hasLongRotateLeft();
-    public static final boolean HAS_Math_fma = Maths.USE_MATH_FMA && hasMathFma();
+    public static final boolean HAS_Math_fma = Configuration.math.useMathFMA() && hasMathFma();
 
     private static boolean hasMathFma() {
         try {

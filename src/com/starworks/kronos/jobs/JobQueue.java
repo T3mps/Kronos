@@ -11,7 +11,7 @@ import java.util.concurrent.locks.StampedLock;
 
 public final class JobQueue implements Queue<Job<?>> {
 
-	private static final int DEFAULT_CAPACITY = 16;
+	private static final int DEFAULT_CAPACITY = 1 << 4;
 
 	private Job<?>[] m_heap;
 	private final AtomicInteger m_size;
@@ -340,11 +340,10 @@ public final class JobQueue implements Queue<Job<?>> {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("TaskQueue[");
+		sb.append("JobQueue[");
 		for (int i = 0; i < m_heap.length; i++) {
 			Job<?> job = m_heap[i];
-			if (job == null)
-				continue;
+			if (job == null) continue;
 			if (i > 0) {
 				sb.append(", ");
 			}

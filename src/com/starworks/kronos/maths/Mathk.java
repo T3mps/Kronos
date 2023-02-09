@@ -23,6 +23,8 @@
  */
 package com.starworks.kronos.maths;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Contains fast approximations of some {@link Math} operations.
  * <p>
@@ -57,7 +59,7 @@ public class Mathk {
     static final double PI_4 = PI * 0.25;
     static final double PI_INV = 1.0 / PI;
     public static final double E = 2.7182818284590452354;
-    private static final int lookupBits = Maths.SIN_LOOKUP_BITS;
+    private static final int lookupBits = Configuration.math.sinLookupBits();
     private static final int lookupTableSize = 1 << lookupBits;
     private static final int lookupTableSizeMinus1 = lookupTableSize - 1;
     private static final int lookupTableSizeWithMargin = lookupTableSize + 1;
@@ -65,7 +67,7 @@ public class Mathk {
     private static final float lookupSizeOverPi2 = lookupTableSize / PI2_f;
     private static final float sinTable[];
     static {
-        if (Maths.FASTMATH && Maths.SIN_LOOKUP) {
+        if (Configuration.math.fastmath() && Configuration.math.sinLookup()) {
             sinTable = new float[lookupTableSizeWithMargin];
             for (int i = 0; i < lookupTableSizeWithMargin; i++) {
                 double d = i * pi2OverLookupSize;
@@ -203,16 +205,16 @@ public class Mathk {
     }
 
     public static float sin(float rad) {
-        if (Maths.FASTMATH) {
-            if (Maths.SIN_LOOKUP)
+        if (Configuration.math.fastmath()) {
+            if (Configuration.math.sinLookup())
                 return sin_theagentd_lookup(rad);
             return (float) sin_roquen_newk(rad);
         }
         return (float) Math.sin(rad);
     }
     public static double sin(double rad) {
-        if (Maths.FASTMATH) {
-            if (Maths.SIN_LOOKUP)
+        if (Configuration.math.fastmath()) {
+            if (Configuration.math.sinLookup())
                 return sin_theagentd_lookup((float) rad);
             return sin_roquen_newk(rad);
         }
@@ -220,18 +222,18 @@ public class Mathk {
     }
 
     public static float cos(float rad) {
-        if (Maths.FASTMATH)
+        if (Configuration.math.fastmath())
             return sin(rad + PIHalf_f);
         return (float) Math.cos(rad);
     }
     public static double cos(double rad) {
-        if (Maths.FASTMATH)
+        if (Configuration.math.fastmath())
             return sin(rad + PIHalf);
         return Math.cos(rad);
     }
 
     public static float cosFromSin(float sin, float angle) {
-        if (Maths.FASTMATH)
+        if (Configuration.math.fastmath())
             return sin(angle + PIHalf_f);
         return cosFromSinInternal(sin, angle);
     }
@@ -247,7 +249,7 @@ public class Mathk {
         return cos;
     }
     public static double cosFromSin(double sin, double angle) {
-        if (Maths.FASTMATH)
+        if (Configuration.math.fastmath())
             return sin(angle + PIHalf);
         // sin(x)^2 + cos(x)^2 = 1
         double cos = sqrt(1.0 - sin * sin);
@@ -328,7 +330,7 @@ public class Mathk {
         return (float) Math.atan2(y, x);
     }
     public static double atan2(double y, double x) {
-        if (Maths.FASTMATH)
+        if (Configuration.math.fastmath())
             return fastAtan2(y, x);
         return Math.atan2(y, x);
     }

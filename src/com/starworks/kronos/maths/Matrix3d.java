@@ -35,6 +35,8 @@ import java.nio.FloatBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Contains the definition of a 3x3 matrix of doubles, and associated functions to transform
  * it. The matrix is column-major to match OpenGL's interpretation, and it looks like this:
@@ -1038,7 +1040,7 @@ public class Matrix3d implements Externalizable, Cloneable, Matrix3dc {
      * @return the string representation
      */
     public String toString() {
-        String str = toString(Maths.NUMBER_FORMAT);
+        String str = toString(Configuration.math.numberFormat());
         StringBuffer res = new StringBuffer();
         int eIndex = Integer.MIN_VALUE;
         for (int i = 0; i < str.length(); i++) {
@@ -1183,7 +1185,7 @@ public class Matrix3d implements Externalizable, Cloneable, Matrix3dc {
 
 //#ifdef __HAS_UNSAFE__
     public Matrix3dc getToAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.put(this, address);
         return this;
@@ -1383,7 +1385,7 @@ public class Matrix3d implements Externalizable, Cloneable, Matrix3dc {
      * @return this
      */
     public Matrix3d setFromAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.get(this, address);
         return this;

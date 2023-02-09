@@ -28,6 +28,8 @@ import java.lang.reflect.Field;
 import java.nio.*;
 //#endif
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Helper class to do efficient memory operations on all JOML objects, NIO buffers and primitive arrays.
  * This class is used internally throughout JOML, is undocumented and is subject to change.
@@ -42,14 +44,14 @@ abstract class MemUtil {
         MemUtil accessor;
 //#ifdef __HAS_UNSAFE__
         try {
-            if (Maths.NO_UNSAFE && Maths.FORCE_UNSAFE)
+            if (Configuration.math.noUnsafe() && Configuration.math.forceUnsafe())
                 throw new ConfigurationException("Cannot enable both -Djoml.nounsafe and -Djoml.forceUnsafe", null);
-            else if (Maths.NO_UNSAFE)
+            else if (Configuration.math.noUnsafe())
                 accessor = new MemUtilNIO();
             else
                 accessor = new MemUtilUnsafe();
         } catch (Throwable e) {
-            if (Maths.FORCE_UNSAFE)
+            if (Configuration.math.noUnsafe())
                 throw new ConfigurationException("Unsafe is not supported but its use was forced via -Djoml.forceUnsafe", e);
             accessor = new MemUtilNIO();
         }
@@ -4970,7 +4972,7 @@ abstract class MemUtil {
 
 //#ifdef __HAS_NIO__
         public void putMatrix3f(Quaternionf q, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putMatrix3f(q, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -4978,7 +4980,7 @@ abstract class MemUtil {
         }
 
         public void putMatrix3f(Quaternionf q, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 putMatrix3f(q, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -4993,7 +4995,7 @@ abstract class MemUtil {
         }
 
         public void putMatrix4f(Quaternionf q, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putMatrix4f(q, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5001,7 +5003,7 @@ abstract class MemUtil {
         }
 
         public void putMatrix4f(Quaternionf q, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 putMatrix4f(q, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5009,7 +5011,7 @@ abstract class MemUtil {
         }
 
         public void putMatrix4x3f(Quaternionf q, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putMatrix4x3f(q, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5017,7 +5019,7 @@ abstract class MemUtil {
         }
 
         public void putMatrix4x3f(Quaternionf q, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 putMatrix4x3f(q, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5025,7 +5027,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5033,7 +5035,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5041,7 +5043,7 @@ abstract class MemUtil {
         }
 
         public void put4x3(Matrix4f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x3(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5049,7 +5051,7 @@ abstract class MemUtil {
         }
 
         public void put4x3(Matrix4f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x3(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5057,7 +5059,7 @@ abstract class MemUtil {
         }
 
         public void put3x4(Matrix4f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x4(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5065,7 +5067,7 @@ abstract class MemUtil {
         }
 
         public void put3x4(Matrix4f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x4(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5073,7 +5075,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4x3f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5081,7 +5083,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4x3f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5089,7 +5091,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix4x3f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5097,7 +5099,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix4x3f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5105,7 +5107,7 @@ abstract class MemUtil {
         }
 
         public void put3x4(Matrix4x3f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x4(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5113,7 +5115,7 @@ abstract class MemUtil {
         }
 
         public void put3x4(Matrix4x3f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x4(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5121,7 +5123,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix4x3d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5129,7 +5131,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix4x3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5137,7 +5139,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix3x2f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5145,7 +5147,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix3x2f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5153,7 +5155,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix3x2d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5161,7 +5163,7 @@ abstract class MemUtil {
         }
 
         public void put4x4(Matrix3x2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x4(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5169,7 +5171,7 @@ abstract class MemUtil {
         }
 
         public void put3x3(Matrix3x2f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x3(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5177,7 +5179,7 @@ abstract class MemUtil {
         }
 
         public void put3x3(Matrix3x2f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x3(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5185,7 +5187,7 @@ abstract class MemUtil {
         }
 
         public void put3x3(Matrix3x2d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x3(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5193,7 +5195,7 @@ abstract class MemUtil {
         }
 
         public void put3x3(Matrix3x2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x3(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5201,7 +5203,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5209,7 +5211,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5217,7 +5219,7 @@ abstract class MemUtil {
         }
 
         public void put4x3Transposed(Matrix4f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x3Transposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5225,7 +5227,7 @@ abstract class MemUtil {
         }
 
         public void put4x3Transposed(Matrix4f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x3Transposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5233,7 +5235,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4x3f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5241,7 +5243,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4x3f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5249,7 +5251,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix3f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5257,7 +5259,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix3f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5265,7 +5267,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix3x2f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5273,7 +5275,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix2f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5281,7 +5283,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix2f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5289,7 +5291,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5297,7 +5299,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5305,7 +5307,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4x3d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5313,7 +5315,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix4x3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5321,7 +5323,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix4d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5329,7 +5331,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix4d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5337,7 +5339,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix4x3d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5345,7 +5347,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix4x3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5353,7 +5355,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5361,7 +5363,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5369,7 +5371,7 @@ abstract class MemUtil {
         }
 
         public void put4x3Transposed(Matrix4d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x3Transposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5377,7 +5379,7 @@ abstract class MemUtil {
         }
 
         public void put4x3Transposed(Matrix4d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put4x3Transposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5385,7 +5387,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4x3d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5393,7 +5395,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix4x3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5401,7 +5403,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix3d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5409,7 +5411,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5417,7 +5419,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix3x2d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5425,7 +5427,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix3x2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5433,7 +5435,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix2d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5441,7 +5443,7 @@ abstract class MemUtil {
         }
 
         public void putTransposed(Matrix2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 putTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5449,7 +5451,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix4d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5457,7 +5459,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix4d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 16 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5465,7 +5467,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix4x3d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5473,7 +5475,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix4x3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5481,7 +5483,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix3d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5489,7 +5491,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5497,7 +5499,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix3x2d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5505,7 +5507,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix3x2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5513,7 +5515,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix2d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5521,7 +5523,7 @@ abstract class MemUtil {
         }
 
         public void putfTransposed(Matrix2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putfTransposed(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5529,7 +5531,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5537,7 +5539,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5545,7 +5547,7 @@ abstract class MemUtil {
         }
 
         public void put3x4(Matrix3f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x4(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5553,7 +5555,7 @@ abstract class MemUtil {
         }
 
         public void put3x4(Matrix3f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 12 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put3x4(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5561,7 +5563,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5569,7 +5571,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5577,7 +5579,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3x2f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5585,7 +5587,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3x2f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5593,7 +5595,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3x2d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5601,7 +5603,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix3x2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 6 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5609,7 +5611,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix3d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5617,7 +5619,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix3d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 9 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5625,7 +5627,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix2f m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5633,7 +5635,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix2f m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5641,7 +5643,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix2d m, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5649,7 +5651,7 @@ abstract class MemUtil {
         }
 
         public void put(Matrix2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5657,7 +5659,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix2d m, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5665,7 +5667,7 @@ abstract class MemUtil {
         }
 
         public void putf(Matrix2d m, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(m, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5673,7 +5675,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector4d src, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5681,7 +5683,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector4d src, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5689,7 +5691,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector4d src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5697,7 +5699,7 @@ abstract class MemUtil {
         }
 
         public void putf(Vector4d src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5705,7 +5707,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector4f src, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5713,7 +5715,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector4f src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5721,7 +5723,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector4i src, int offset, IntBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5729,7 +5731,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector4i src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 4 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5737,7 +5739,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector3f src, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5745,7 +5747,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector3f src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5753,7 +5755,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector3d src, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5761,7 +5763,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector3d src, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5769,7 +5771,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector3d src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5777,7 +5779,7 @@ abstract class MemUtil {
         }
 
         public void putf(Vector3d src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 putf(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5785,7 +5787,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector3i src, int offset, IntBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5793,7 +5795,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector3i src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 3 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5801,7 +5803,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector2f src, int offset, FloatBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5809,7 +5811,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector2f src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 2 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 2 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5817,7 +5819,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector2d src, int offset, DoubleBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 3));
             else
@@ -5825,7 +5827,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector2d src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 2 << 3);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 2 << 3);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5833,7 +5835,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector2i src, int offset, IntBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + (offset << 2));
             else
@@ -5841,7 +5843,7 @@ abstract class MemUtil {
         }
 
         public void put(Vector2i src, int offset, ByteBuffer dest) {
-            if (Maths.DEBUG) checkPut(offset, dest.isDirect(), dest.capacity(), 2 << 2);
+            if (Configuration.math.debug()) checkPut(offset, dest.isDirect(), dest.capacity(), 2 << 2);
             if (dest.order() == ByteOrder.nativeOrder())
                 put(src, UNSAFE.getLong(dest, ADDRESS) + offset);
             else
@@ -5849,7 +5851,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4f m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 16);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 16);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -5857,7 +5859,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4f m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 16 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -5901,7 +5903,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4x3f m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 12);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 12);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -5909,7 +5911,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4x3f m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 12 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -5917,7 +5919,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4d m, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 16);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 16);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -5925,7 +5927,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 16 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 16 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -5933,7 +5935,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4x3d m, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 12);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 12);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -5941,7 +5943,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix4x3d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 12 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 12 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -5949,7 +5951,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix4d m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 16);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 16);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -5957,7 +5959,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix4d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 16 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 16 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -5965,7 +5967,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix4x3d m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 12);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 12);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -5980,7 +5982,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix4x3d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 12 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 12 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -5988,7 +5990,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3f m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 9);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 9);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -5996,7 +5998,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3f m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 9 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6004,7 +6006,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3d m, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 9);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 9);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -6012,7 +6014,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 9 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 9 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6020,7 +6022,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3x2f m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 6);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 6);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6028,7 +6030,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3x2f m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 6 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 6 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6036,7 +6038,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3x2d m, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 6);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 6);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -6044,7 +6046,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix3x2d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 6 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 6 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6052,7 +6054,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix3d m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 9);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 9);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6060,7 +6062,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix3d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 9 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 9 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6068,7 +6070,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix2f m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6076,7 +6078,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix2f m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6084,7 +6086,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix2d m, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -6092,7 +6094,7 @@ abstract class MemUtil {
         }
 
         public void get(Matrix2d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6100,7 +6102,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix2d m, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6108,7 +6110,7 @@ abstract class MemUtil {
         }
 
         public void getf(Matrix2d m, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 getf(m, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6116,7 +6118,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector4d dst, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -6124,7 +6126,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector4d dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6132,7 +6134,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector4f dst, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6140,7 +6142,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector4f dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6148,7 +6150,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector4i dst, int offset, IntBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6156,7 +6158,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector4i dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 4 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6164,7 +6166,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector3f dst, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6172,7 +6174,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector3f dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 3 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 3 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6180,7 +6182,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector3d dst, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -6188,7 +6190,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector3d dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 3 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 3 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6196,7 +6198,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector3i dst, int offset, IntBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6204,7 +6206,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector3i dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 3 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 3 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6212,7 +6214,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector2f dst, int offset, FloatBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6220,7 +6222,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector2f dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 2 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 2 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6228,7 +6230,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector2d dst, int offset, DoubleBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 3));
             else
@@ -6236,7 +6238,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector2d dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 2 << 3);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 2 << 3);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else
@@ -6244,7 +6246,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector2i dst, int offset, IntBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + (offset << 2));
             else
@@ -6252,7 +6254,7 @@ abstract class MemUtil {
         }
 
         public void get(Vector2i dst, int offset, ByteBuffer src) {
-            if (Maths.DEBUG) checkGet(offset, src.isDirect(), src.capacity(), 2 << 2);
+            if (Configuration.math.debug()) checkGet(offset, src.isDirect(), src.capacity(), 2 << 2);
             if (src.order() == ByteOrder.nativeOrder())
                 get(dst, UNSAFE.getLong(src, ADDRESS) + offset);
             else

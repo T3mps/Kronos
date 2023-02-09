@@ -34,6 +34,8 @@ import java.nio.IntBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Contains the definition of a Vector comprising 3 ints and associated
  * transformations.
@@ -546,7 +548,7 @@ public class Vector3i implements Externalizable, Cloneable, Vector3ic {
      * @return this
      */
     public Vector3i setFromAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.get(this, address);
         return this;
@@ -617,7 +619,7 @@ public class Vector3i implements Externalizable, Cloneable, Vector3ic {
 
 //#ifdef __HAS_UNSAFE__
     public Vector3ic getToAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.put(this, address);
         return this;
@@ -964,7 +966,7 @@ public class Vector3i implements Externalizable, Cloneable, Vector3ic {
      * @return the string representation
      */
     public String toString() {
-        return Runtime.formatNumbers(toString(Maths.NUMBER_FORMAT));
+        return Runtime.formatNumbers(toString(Configuration.math.numberFormat()));
     }
 
     /**

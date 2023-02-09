@@ -5,12 +5,16 @@ import java.util.function.Predicate;
 
 public final class RetryPolicy {
 
+	private static final RetryPolicy BASIC				 	=	 new RetryPolicy().withMaxRetries(0);
+	private static final RetryPolicy LINEAR_BACKOFF 		=	 new RetryPolicy().withMaxRetries(3).withRetryDelay(1000, TimeUnit.MILLISECONDS).retryOn(t -> true);
+	private static final RetryPolicy EXPONENTIAL_BACKOFF 	=	 new RetryPolicy().withMaxRetries(3).withRetryDelay(1000, TimeUnit.MILLISECONDS).withExponentialBackoff().retryOn(t -> true);
+
 	private int m_maxRetries;
 	private long m_retryDelay;
 	private TimeUnit m_retryDelayUnit;
 	private boolean m_exponentialBackoff;
 	private Predicate<Throwable> m_retryOn;
-	
+
 	private RetryPolicy() {
 		this.m_maxRetries = 0;
 		this.m_retryDelay = 0;
@@ -19,18 +23,30 @@ public final class RetryPolicy {
 		this.m_retryOn = t -> false;
 	}
 
+	RetryPolicy(int maxRetries, long retryDelay, TimeUnit retryDelayUnit, boolean exponentialBackoff, Predicate<Throwable> retryOn) {
+		this.m_maxRetries = maxRetries;
+		this.m_retryDelay = retryDelay;
+		this.m_retryDelayUnit = retryDelayUnit;
+		this.m_exponentialBackoff = exponentialBackoff;
+		this.m_retryOn = retryOn;
+	}
+
+	private RetryPolicy(RetryPolicy retryPolicy) {
+		this(retryPolicy.m_maxRetries, retryPolicy.m_retryDelay, retryPolicy.m_retryDelayUnit, retryPolicy.m_exponentialBackoff, retryPolicy.m_retryOn);
+	}
+
 	public static RetryPolicy basic() {
-		return new RetryPolicy().withMaxRetries(0);
+		return new RetryPolicy(BASIC);
 	}
 
 	public static RetryPolicy linearBackoff() {
-		return new RetryPolicy().withMaxRetries(3).withRetryDelay(1000, TimeUnit.MILLISECONDS).retryOn(t -> true);
+		return new RetryPolicy(LINEAR_BACKOFF);
 	}
 
 	public static RetryPolicy exponentialBackoff() {
-		return new RetryPolicy().withMaxRetries(3).withRetryDelay(1000, TimeUnit.MILLISECONDS).withExponentialBackoff().retryOn(t -> true);
+		return new RetryPolicy(EXPONENTIAL_BACKOFF);
 	}
-	
+
 	public RetryPolicy withMaxRetries(int maxRetries) {
 		this.m_maxRetries = maxRetries;
 		return this;

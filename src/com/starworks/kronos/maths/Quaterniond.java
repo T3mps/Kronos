@@ -30,6 +30,8 @@ import java.io.ObjectOutput;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Quaternion of 4 double-precision floats which can represent rotation and uniform scaling.
  *
@@ -2139,7 +2141,7 @@ public class Quaterniond implements Externalizable, Cloneable, Quaterniondc {
      * @return the string representation
      */
     public String toString() {
-        return Runtime.formatNumbers(toString(Maths.NUMBER_FORMAT));
+        return Runtime.formatNumbers(toString(Configuration.math.numberFormat()));
     }
 
     /**

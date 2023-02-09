@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import com.starworks.kronos.Configuration;
 import com.starworks.kronos.exception.Exceptions;
 import com.starworks.kronos.exception.KronosRuntimeException;
 import com.starworks.kronos.logging.appender.Appender;
@@ -23,12 +24,12 @@ public final class LoggerBuilder implements Builder<Logger> {
 	}
 	
 	public LoggerBuilder(final Class<?> type) {
-		this.m_name = Logging.DEFAULT_NAME;
+		this.m_name = Configuration.logging.name();
 		this.m_type = type;
-		this.m_level = Logging.DEFAULT_LEVEL;
+		this.m_level = Configuration.logging.level();
 		this.m_appenders = new ArrayList<Appender>();
-		this.m_layout = Logging.DEFAULT_LAYOUT;
-		this.m_ansiFormatting = Logging.DEFAULT_ANSI_FLAG;
+		this.m_layout = Configuration.logging.layout();
+		this.m_ansiFormatting = Configuration.logging.ansiFormatting();
 	}
 
 	@Override

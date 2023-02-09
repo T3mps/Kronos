@@ -23,10 +23,13 @@ public class Reflections {
 			System.err.println("Public parameterless constructor not found: " + fqn);
 		} catch (IllegalAccessException e) {
 			System.err.println("Illegal access: " + fqn);
+			e.printStackTrace(System.err);
 		} catch (InstantiationException e) {
 			System.err.println("Instantiation exception: " + fqn);
+			e.printStackTrace(System.err);
 		} catch (InvocationTargetException e) {
 			System.err.println("Invocation target exception: " + fqn);
+			e.printStackTrace(System.err);
 		}
 		
 		return null;

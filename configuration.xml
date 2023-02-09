@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application implementation="com.starworks.kronos.sandbox.Sandbox" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="kronos.xsd">
+	<runtime>
+		<updatesPerSecond>60</updatesPerSecond>
+		<fixedUpdatesPerSecond>60</fixedUpdatesPerSecond>
+		<debug>true</debug>
+	</runtime>
+	<window>
+		<title>Kronos</title>
+		<width>800</width>
+		<height>600</height>
+		<fullscreen>false</fullscreen>
+		<vsync>true</vsync>
+	</window>
+	<logging implementation="com.starworks.kronos.logging.ConcurrentLogger">
+		<name>Main</name>
+		<level>ALL</level>
+		<layout>full</layout>
+		<directory>logs/</directory>
+		<extension>.log</extension>
+		<backupExtension>.bak</backupExtension>
+		<maxRotatingFileLineCount>10000</maxRotatingFileLineCount>
+		<logToConsole>true</logToConsole>
+		<logToFile>true</logToFile>
+		<ansiFormatting>true</ansiFormatting>
+	</logging>
+	<jobs>
+		<timeoutSeconds>5</timeoutSeconds>
+		<shutdownTimeoutSeconds>2</shutdownTimeoutSeconds>
+		<updatesPerSecond>60</updatesPerSecond>
+	</jobs>
+	<math>
+		<debug>false</debug>
+		<noUnsafe>false</noUnsafe>
+		<forceUnsafe>true</forceUnsafe>
+		<fastmath>false</fastmath>
+		<sinLookup>false</sinLookup>
+		<sinLookupBits>14</sinLookupBits>
+		<useNumberFormat>true</useNumberFormat>
+		<useMathFMA>true</useMathFMA>
+		<numberFormatBigDecimals>3</numberFormatBigDecimals>
+	</math>
+</application>

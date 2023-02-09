@@ -34,6 +34,8 @@ import java.nio.FloatBuffer;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Represents a 2D vector with single-precision.
  *
@@ -394,7 +396,7 @@ public class Vector2f implements Externalizable, Cloneable, Vector2fc {
      * @return this
      */
     public Vector2f setFromAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.get(this, address);
         return this;
@@ -478,7 +480,7 @@ public class Vector2f implements Externalizable, Cloneable, Vector2fc {
 
 //#ifdef __HAS_UNSAFE__
     public Vector2fc getToAddress(long address) {
-        if (Maths.NO_UNSAFE)
+        if (Configuration.math.noUnsafe())
             throw new UnsupportedOperationException("Not supported when using joml.nounsafe");
         MemUtil.MemUtilUnsafe.put(this, address);
         return this;
@@ -1072,7 +1074,7 @@ public class Vector2f implements Externalizable, Cloneable, Vector2fc {
      * @return the string representation
      */
     public String toString() {
-        return Runtime.formatNumbers(toString(Maths.NUMBER_FORMAT));
+        return Runtime.formatNumbers(toString(Configuration.math.numberFormat()));
     }
 
     /**

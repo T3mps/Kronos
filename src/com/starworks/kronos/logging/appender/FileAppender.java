@@ -6,11 +6,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.concurrent.atomic.AtomicLong;
 
+import com.starworks.kronos.Configuration;
 import com.starworks.kronos.exception.Exceptions;
 import com.starworks.kronos.exception.KronosRuntimeException;
 import com.starworks.kronos.files.FileHandle;
 import com.starworks.kronos.files.FileSystem;
-import com.starworks.kronos.logging.Logging;
 
 public sealed class FileAppender implements Appender permits RotatingFileAppender {
 
@@ -27,7 +27,7 @@ public sealed class FileAppender implements Appender permits RotatingFileAppende
 
 	public FileAppender(String path) {
 		try {
-			String p = path + (path.endsWith(Logging.EXTENSION) ? "" : Logging.EXTENSION);
+			String p = path + (path.endsWith(Configuration.logging.extension()) ? "" : Configuration.logging.extension());
 			this.m_handle = FileSystem.getFileHandle(p);
 			this.m_lines = new AtomicLong(lines(p));
 		} catch (IOException e) {

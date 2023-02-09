@@ -16,13 +16,13 @@ public final class ArchetypeList implements Closeable {
 	private final Registry m_registry;
 	private final ClassMap m_classMap;
 	private final Map<ClassIndex, Node> m_nodes;
-	private final Archetype m_baserchetype;
+	private final Archetype m_baseArchetype;
 
 	public ArchetypeList(Registry registry) {
 		this.m_registry = registry;
 		this.m_classMap = new ClassMap();
 		this.m_nodes = new ConcurrentHashMap<ClassIndex, Node>();
-		this.m_baserchetype = new Archetype(this, registry.getEntityPool().newAllocator());
+		this.m_baseArchetype = new Archetype(this, registry.getEntityPool().newAllocator());
 	}
 
 	public Archetype getOrCreateArchetype(Object[] components) {
@@ -30,7 +30,7 @@ public final class ArchetypeList implements Closeable {
 		Node node;
 		switch (componentsLength) {
 		case 0:
-			return m_baserchetype;
+			return m_baseArchetype;
 		case 1:
 			Class<?> componentType = components[0].getClass();
 			node = m_nodes.get(m_classMap.getClassIndex(m_classMap.indexOf(componentType)));
@@ -150,7 +150,7 @@ public final class ArchetypeList implements Closeable {
 	}
 
 	protected Archetype getBaseArchetype() {
-		return m_baserchetype;
+		return m_baseArchetype;
 	}
 
 	@Override

@@ -18,7 +18,7 @@ import com.starworks.kronos.scene.component.TagComponent;
 import com.starworks.kronos.scene.component.TransformComponent;
 
 public final class Scene implements Closeable {
-	private final Logger m_logger = Logger.getLogger(Scene.class);
+	private final Logger LOGGER = Logger.getLogger(Scene.class);
 
 	private double m_time;
 	private double m_fixedTime;
@@ -37,9 +37,9 @@ public final class Scene implements Closeable {
 
 	public Scene() {
 		this.m_time = 0.0;
-		this.m_updateRate = Configuration.UPDATE_RATE;
+		this.m_updateRate = Configuration.runtime.updateRate();
 		this.m_fixedTime = 0.0;
-		this.m_fixedUpdateRate = Configuration.FIXED_UPDATE_RATE;
+		this.m_fixedUpdateRate = Configuration.runtime.fixedUpdateRate();
 		this.m_steps = 0;
 		this.m_isRunning = false;
 		this.m_isPaused = false;
@@ -51,14 +51,14 @@ public final class Scene implements Closeable {
 	}
 
 	private void initialize() {
-	    eventSink().connect(ListenerType.ON_COMPONENT_ADD, EventSink.ANY, (entity, component) -> {
-			m_logger.debug("Added {0} to {1}", component.getClass().getSimpleName(), entity.getFormattedID());
+		eventSink().connect(ListenerType.ON_COMPONENT_ADD, EventSink.ANY, (entity, component) -> {
+			LOGGER.debug("Added {0} to {1}", component.getClass().getSimpleName(), entity.getFormattedID());
 		});
-	    eventSink().connect(ListenerType.ON_COMPONENT_REPLACE, EventSink.ANY, (entity, component) -> {
-			m_logger.debug("Replaced {0} on {1}", component.getClass().getSimpleName(), entity.getFormattedID());
+		eventSink().connect(ListenerType.ON_COMPONENT_REPLACE, EventSink.ANY, (entity, component) -> {
+			LOGGER.debug("Replaced {0} on {1}", component.getClass().getSimpleName(), entity.getFormattedID());
 		});
-	    eventSink().connect(ListenerType.ON_COMPONENT_REMOVE, EventSink.ANY, (entity, component) -> {
-			m_logger.debug("Removed {0} from {1}", component.getClass().getSimpleName(), entity.getFormattedID());
+		eventSink().connect(ListenerType.ON_COMPONENT_REMOVE, EventSink.ANY, (entity, component) -> {
+			LOGGER.debug("Removed {0} from {1}", component.getClass().getSimpleName(), entity.getFormattedID());
 		});
 	}
 
@@ -77,9 +77,8 @@ public final class Scene implements Closeable {
 		return entity;
 	}
 
-	@SuppressWarnings("unlikely-arg-type")
 	public void destroyEntity(Entity entity) {
-		m_entityMap.remove(entity.get(IDComponent.class));
+		m_entityMap.remove(entity.get(IDComponent.class).uuid());
 		m_registry.destroy(entity);
 	}
 
@@ -119,26 +118,26 @@ public final class Scene implements Closeable {
 		m_scheduler.scheduleParallel(systems);
 		return systems;
 	}
-	
+
 	public void suspendSystem(GameSystem system) {
 		m_scheduler.suspend(system);
 	}
-	
+
 	public void resumeSystem(GameSystem system) {
 		m_scheduler.resume(system);
 	}
-	
+
 	@Override
 	public void close() {
-		m_logger.info("Scene stepped {0} times", m_steps);
-		m_logger.info("Scene fix-stepped {0} times", m_fixedSteps);
+		LOGGER.info("Scene stepped {0} times", m_steps);
+		LOGGER.info("Scene fix-stepped {0} times", m_fixedSteps);
 		m_registry.close();
 	}
-	
+
 	public Registry registry() {
 		return m_registry;
 	}
-	
+
 	public EventSink eventSink() {
 		return m_registry.eventSink();
 	}

@@ -53,11 +53,11 @@ public class LayerStack {
 			var layer = it.next();
 			if (layer.isEnabled()) {
 				if (layer.onEvent(event)) {
-					return true;
+					return true; // return true if layer consumes event
 				}
 			}
 		}
-		return false;
+		return false; // false otherwise
 	}
 
 	public void clear() {

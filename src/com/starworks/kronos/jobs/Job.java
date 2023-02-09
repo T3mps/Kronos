@@ -14,7 +14,7 @@ import com.starworks.kronos.exception.Exceptions;
 import com.starworks.kronos.logging.Logger;
 
 public final class Job<T> implements Runnable {
-	Logger LOGGER = Logger.getLogger(Job.class);
+	private final Logger LOGGER = Logger.getLogger(Job.class);
 
 	private final String m_name;
 	private final CountDownLatch m_latch;
@@ -147,8 +147,8 @@ public final class Job<T> implements Runnable {
 	}
 
 	public void cancel() {
-		m_latch.countDown();
 		m_future.cancel(true);
+		m_latch.countDown();
 	}
 
 	public boolean isCancelled() {

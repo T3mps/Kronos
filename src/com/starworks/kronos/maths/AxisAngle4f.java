@@ -30,6 +30,8 @@ import java.io.ObjectOutput;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 
+import com.starworks.kronos.Configuration;
+
 /**
  * Represents a 3D rotation of a given radians about an axis represented as an
  * unit 3D vector.
@@ -760,7 +762,7 @@ public class AxisAngle4f implements Externalizable, Cloneable {
      * @return the string representation
      */
     public String toString() {
-        return Runtime.formatNumbers(toString(Maths.NUMBER_FORMAT));
+        return Runtime.formatNumbers(toString(Configuration.math.numberFormat()));
     }
 
     /**

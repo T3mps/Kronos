@@ -2,8 +2,12 @@ package com.starworks.kronos.core;
 
 import com.starworks.kronos.Configuration;
 import com.starworks.kronos.event.Event;
+import com.starworks.kronos.event.EventCallback;
 import com.starworks.kronos.event.EventManager;
 import com.starworks.kronos.files.FileSystem;
+import com.starworks.kronos.jobs.Job;
+import com.starworks.kronos.jobs.JobManager;
+import com.starworks.kronos.jobs.Jobs;
 import com.starworks.kronos.logging.Logger;
 
 public abstract class Application implements AutoCloseable {
@@ -11,37 +15,62 @@ public abstract class Application implements AutoCloseable {
 
 	private static final double NANOS_PER_SECOND = 1e9;
 
-	protected String m_workingDirectory;
 	protected EventManager m_events;
 	protected Window m_window;
 	protected LayerStack m_layers;
-	protected boolean m_running;
+	protected JobManager m_jobs;
 	private final TimeStep m_timeStep;
 	private final TimeStep m_fixedTimeStep;
 	private final double m_fixedUpdateRate;
 	private long m_currentTime;
 	private double m_deltaTime;
 	private long m_lastTime;
+	protected boolean m_running;
 
 	public Application() {
-		int width = Configuration.WINDOW_WIDTH;
-		int height = Configuration.WINDOW_HEIGHT;
-		String title = Configuration.WINDOW_TITLE;
-		double updateRate = Configuration.UPDATE_RATE;
-		double fixedUpdateRate = Configuration.FIXED_UPDATE_RATE;
-		this.m_workingDirectory = Configuration.WORKING_DIRECTORY;
+		int width = Configuration.window.width();
+		int height = Configuration.window.height();
+		String title = Configuration.window.title();
+		double updateRate = Configuration.runtime.updateRate();
+		double fixedUpdateRate = Configuration.runtime.fixedUpdateRate();
 		this.m_events = new EventManager();
 		this.m_window = Window.create(width, height, title, e -> onEvent(e));
 		this.m_layers = new LayerStack();
-		this.m_running = false;
+		this.m_jobs = Jobs.newManager();
 		this.m_timeStep = new TimeStep(updateRate);
 		this.m_fixedTimeStep = new TimeStep(fixedUpdateRate);
-		this.m_fixedUpdateRate = Configuration.FIXED_UPDATE_RATE;
+		this.m_fixedUpdateRate = fixedUpdateRate;
 		this.m_lastTime = 0;
+		this.m_running = false;
 
-		m_events.register(Event.WindowClosed.class, e -> stop());
+		registerEvents();
+		m_jobs.start();
+	}
+	
+	protected void registerEvents() {
+		registerEventListener(Event.WindowClosed.class, e -> stop());
 	}
 
+	public final <E extends Event> void registerEventListener(final Class<E> eventType, final EventCallback<E> callback) {
+		m_events.register(eventType, callback);
+	}
+	
+	public final <E extends Event> void unregisterEventListener(final Class<E> eventType, final EventCallback<E> callback) {
+		m_events.unregister(eventType, callback);
+	}
+	
+	public final void addLayer(final Layer layer) {
+		m_layers.pushLayer(layer);
+	}
+	
+	public final void addOverlay(final Layer overlay) {
+		m_layers.pushOverlay(overlay);
+	}
+	
+	public final void submitJob(final Job<?> job) {
+		m_jobs.submit(job);
+	}
+	
 	protected abstract void initialize();
 
 	protected final void start() {
@@ -56,7 +85,7 @@ public abstract class Application implements AutoCloseable {
 		m_running = false;
 	}
 
-	protected final boolean onEvent(Event event) {
+	private final boolean onEvent(final Event event) {
 		if (m_layers.onEvent(event)) {
 			return true;
 		}
@@ -65,28 +94,33 @@ public abstract class Application implements AutoCloseable {
 	}
 
 	public final void loop() {
-		for (; m_running ;) {
-			m_currentTime = System.nanoTime();
-			m_deltaTime = (m_currentTime - m_lastTime) / NANOS_PER_SECOND;
-			m_lastTime = m_currentTime;
-			m_timeStep.update(m_deltaTime);
-			m_fixedTimeStep.update(m_fixedUpdateRate);
-			m_window.update();
-			update(m_timeStep);
-			fixedUpdate(m_fixedTimeStep);
-			render();
+		try {
+			for (; m_running ;) {
+				m_currentTime = System.nanoTime();
+				m_deltaTime = (m_currentTime - m_lastTime) / NANOS_PER_SECOND;
+				m_lastTime = m_currentTime;
+				m_timeStep.update(m_deltaTime);
+				m_fixedTimeStep.update(m_fixedUpdateRate);
+				m_window.update();
+				update(m_timeStep);
+				fixedUpdate(m_fixedTimeStep);
+				render();
+			}
+		} catch (Exception e) {
+			LOGGER.error("Unhandeled exception propagated to main loop: ", e);
 		}
 	}
 
-	protected abstract void update(TimeStep timestep);
+	protected abstract void update(final TimeStep timestep);
 
-	protected abstract void fixedUpdate(TimeStep timeStep);
+	protected abstract void fixedUpdate(final TimeStep timeStep);
 
 	protected abstract void render();
 
 	@Override
 	public void close() {
 		m_window.close();
+		m_jobs.shutdown();
 		LOGGER.close();
 		FileSystem.shutdown();
 	}

@@ -1,6 +1,7 @@
 package com.starworks.kronos.files;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Iterator;
 
 public class FileSystem {
@@ -50,5 +51,14 @@ public class FileSystem {
 				}
 			}
 		}
+	}
+	
+	public static void writeTree(OutputStream stream) throws IOException {
+		stream.write(stringify().getBytes());
+		stream.flush();
+	}
+	
+	public static String stringify() {
+		return s_tree.toString();
 	}
 }
