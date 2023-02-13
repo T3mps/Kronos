@@ -8,33 +8,17 @@
 
 ## Features
 **Kronos is a open source, cross-platform game development library with a robust ecosystem.** Listed below are current and planned (\*) features:
-- Assertions and logger
-- Math Library (JOML+)
-  - Math functions
-  - Vector2
-  - Vector3
-  - Vector4
-  - Matrix2
-  - Matrix3
-  - Matrix4
-  - Quaternion
-  - MT19937
-  - Xorshift128
-- Standard Library (STD)
-  - String Utils
-  - Array Utils
-  - Boolean Utils
-  - Tuples (2-5)
-- Serialization
-- [Entity Component System (ECS)](https://github.com/Tempsies/Apollo)
-- Scene System
-- Collision Detection Library
-  - Dynamic AABB Tree Broadphase
-  - Separating Axis Theorem Narrowphase
-  - GJK Raycast & Distance Algorithm
-  - Dynamic Manifold Solving (\*)
-  - Warm Starting (\*)
-  - Iterative Impulse Resolution (\*)
+- Highly customaizable, concurrent logging framework
+- Math library (JOML)
+- File system/tree
+- Serialization (GSON)
+- XML parsing [(VTD-XML)](https://github.com/dryade/vtd-xml)
+- Shunting Yard parsing
+- Archetypal ECS
+- Application layer
+- Window, key and mouse event handling
+- Robust jobs system
+- Toolkit API included
 
 ## Preview
 ![](.githubassets/screenshot_1.gif)
