@@ -26,7 +26,7 @@
 ## Creating an application with Kronos
 The only required implementations are a class which holds the main method (Entry Point), and a class which extends the `Application` base class.
 
-``
+```
 import com.starworks.kronos.core.EntryPoint;
 
 public class Main {
@@ -35,8 +35,8 @@ public class Main {
 		new EntryPoint();
 	}
 }
-``
-``
+```
+```
 public class MyApplication extends Application {
 
 	public MyApplication() {
@@ -59,7 +59,7 @@ public class MyApplication extends Application {
 	public void render() {
 	}
 }
-``
+```
 
 [![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)](https://twitter.com/AcidFrogLLC)
 [![Forks](https://img.shields.io/github/forks/tempsies/kronos?style=social)](https://github.com/Tempsies/Kronos)
