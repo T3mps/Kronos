@@ -25,7 +25,7 @@
 
 ## Creating an application with Kronos
 #### 1)
-The only required implementations are `Main` class, and a one which extends the `Application` base class.
+The only required implementations are a `Main` class, and a one which extends the `Application` base class.
 
 ```java
 import com.starworks.kronos.core.EntryPoint;
