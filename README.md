@@ -23,8 +23,12 @@
 - ImGui integration* [WIP]
 - Physics engine* [WIP]
 
-## Preview
-![](.githubassets/screenshot_1.gif)
+## Creating an application with Kronos
+The only required implementations are a class which holds the main method (Entry Point), and a class which extends the `Application` base class.
+
+``
+asd
+``
 
 [![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)](https://twitter.com/AcidFrogLLC)
 [![Forks](https://img.shields.io/github/forks/tempsies/kronos?style=social)](https://github.com/Tempsies/Kronos)
