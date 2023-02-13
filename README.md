@@ -9,10 +9,10 @@
 ## Features
 **Kronos is a open source, cross-platform game development library with a robust ecosystem.** Listed below are current and planned (\*) features:
 - Highly customaizable, concurrent logging framework
-- Math library ([JOML])(https://github.com/JOML-CI/JOML)
+- Math library ([JOML](https://github.com/JOML-CI/JOML))
 - File system/tree
-- JSON parsing ([GSON])(https://github.com/google/gson)
-- XML parsing ([VTD-XML])(https://github.com/dryade/vtd-xml)
+- JSON parsing ([GSON](https://github.com/google/gson))
+- XML parsing ([VTD-XML](https://github.com/dryade/vtd-xml))
 - Numerical parsing
 - Archetypal ECS
 - Application layer
