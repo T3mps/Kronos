@@ -6,15 +6,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
-public final class FileHandle implements AutoCloseable {
+public final class FileHandle {
 
 	private final File m_file;
-	private final FileInputStream m_fis;
-	private final FileOutputStream m_fos;
-	private final FileChannel m_fileChannel;
+	private FileInputStream m_fis;
+	private FileOutputStream m_fos;
+	private FileChannel m_fileChannel;
 	private FileLock m_fileLock;
 	private final String m_fileDirectory;
 	private final String m_fileName;
@@ -22,7 +21,6 @@ public final class FileHandle implements AutoCloseable {
 	private boolean m_closed;
 	private final StampedLock m_lock;
 	private boolean m_generated;
-	final AtomicInteger m_consumers;
 
 	FileHandle(String fileName) throws IOException {
 		this.m_file = new File(fileName);
@@ -37,22 +35,20 @@ public final class FileHandle implements AutoCloseable {
 		if (m_generated = !m_file.exists()) {
 			m_file.createNewFile();
 		}
-		this.m_fis = new FileInputStream(m_file);
-		this.m_fos = new FileOutputStream(m_file, true);
 		this.m_fileDirectory = parent.replace(File.separator, FileSystem.separator) + FileSystem.separator;
 		this.m_fileName = m_file.getName().substring(0, m_file.getName().lastIndexOf("."));
 		int lastIndex = fileName.lastIndexOf(".");
 		this.m_fileExtension = (lastIndex == -1) ? "" : fileName.substring(lastIndex);
-		this.m_fileChannel = m_fos.getChannel();
 		this.m_fileLock = null;
 		this.m_closed = false;
 		this.m_lock = new StampedLock();
-		this.m_consumers = new AtomicInteger(0);
 	}
 
 	public void write(String message) throws IOException {
 		long stamp = m_lock.writeLock();
 		try {
+			m_fos = new FileOutputStream(m_file, true);
+			m_fileChannel = m_fos.getChannel();
 			try {
 				m_fileLock = m_fileChannel.lock();
 				m_fos.write(message.getBytes());
@@ -61,6 +57,7 @@ public final class FileHandle implements AutoCloseable {
 				if (m_fileLock != null) {
 					m_fileLock.release();
 				}
+				m_fos.close();
 			}
 		} finally {
 			m_lock.unlockWrite(stamp);
@@ -70,6 +67,8 @@ public final class FileHandle implements AutoCloseable {
 	public void write(FileHandle handle) throws IOException {
 		long stamp = m_lock.writeLock();
 		try {
+			m_fos = new FileOutputStream(m_file, true);
+			m_fileChannel = m_fos.getChannel();
 			try {
 				m_fileLock = m_fileChannel.lock();
 				m_fos.write(handle.readContents());
@@ -78,6 +77,7 @@ public final class FileHandle implements AutoCloseable {
 				if (m_fileLock != null) {
 					m_fileLock.release();
 				}
+				m_fos.close();
 			}
 		} finally {
 			m_lock.unlockWrite(stamp);
@@ -86,6 +86,7 @@ public final class FileHandle implements AutoCloseable {
 
 	private byte[] readContents() throws IOException {
 		byte[] data = new byte[(int) m_file.length()];
+		m_fis = new FileInputStream(m_file);
 		m_fis.read(data);
 		m_fis.close();
 		return data;
@@ -94,37 +95,18 @@ public final class FileHandle implements AutoCloseable {
 	public void clearContents() throws IOException {
 		long stamp = m_lock.writeLock();
 		try {
-			FileOutputStream temp = new FileOutputStream(m_file);
-			FileLock lock = temp.getChannel().lock();
-			if (lock != null) {
-				lock.release();
-				temp.close();
-			}
+			m_fos = new FileOutputStream(m_file);
+			m_fos.close();
 		} finally {
 			m_lock.unlock(stamp);
 		}
 	}
 
 	public void delete() throws IOException {
-		m_consumers.set(0);
-		m_fos.close();
 		m_file.delete();
 	}
 
-	public void close() throws IOException {
-		long stamp = m_lock.writeLock();
-		try {
-			if (m_consumers.getAndDecrement() == 0) {
-				m_fos.close();
-				m_closed = true;
-			}
-		} finally {
-			m_lock.unlock(stamp);
-		}
-	}
-
 	void shutdown() throws IOException {
-		m_consumers.set(0);
 		m_fos.close();
 		m_closed = true;
 	}

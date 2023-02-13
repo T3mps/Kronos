@@ -169,6 +169,5 @@ public class XMLMap implements AutoCloseable {
 
 	@Override
 	public void close() throws Exception {
-		m_handle.close();
 	}
 }

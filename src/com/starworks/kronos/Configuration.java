@@ -331,7 +331,7 @@ public final class Configuration {
 			FileHandle handle = FileSystem.getFileHandle(path);
 			if (handle.wasGenerated()) {
 				String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
-						"<application implementation=\"com.starworks.kronos.sandbox.Sandbox\" version=\"" + Version.getVersion() + "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"" + xsdPath + "\">\n" + //
+						"<application implementation=\"\" version=\"" + Version.getVersion() + "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"" + xsdPath + "\">\n" + //
 						"\t<runtime>\n" + //
 						"\t\t<updatesPerSecond>60</updatesPerSecond>\n" + //
 						"\t\t<fixedUpdatesPerSecond>60</fixedUpdatesPerSecond>\n" + //

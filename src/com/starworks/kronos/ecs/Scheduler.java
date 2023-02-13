@@ -48,7 +48,6 @@ public class Scheduler implements Closeable {
 		this.m_taskMap = new HashMap<Runnable, Single>();
 		this.m_mainTasks = new ArrayList<Task>();
 		var threadFactory = new ThreadFactory() {
-
 			@Override
 			public Thread newThread(Runnable r) {
 				SchedulerThread schedulerThread = new SchedulerThread(r);

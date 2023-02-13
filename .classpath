@@ -32,5 +32,14 @@
 	<classpathentry kind="lib" path="vendor/lwjgl-stb-natives-windows.jar"/>
 	<classpathentry kind="lib" path="vendor/lwjgl-stb-sources.jar"/>
 	<classpathentry kind="lib" path="vendor/vtd-xml_2.13_4.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-app-1.86.7.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-app-1.86.7-javadoc.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-app-1.86.7-sources.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-binding-1.86.7.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-binding-1.86.7-javadoc.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-binding-1.86.7-sources.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7-javadoc.jar"/>
+	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

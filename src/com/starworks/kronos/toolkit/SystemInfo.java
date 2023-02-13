@@ -5,7 +5,7 @@ import java.lang.management.ManagementFactory;
 public class SystemInfo {
 
     public static String getOSName() {
-        return System.getProperty("os.name");
+        return System.getProperty("os.name", "generic").toLowerCase();
     }
 
     public static String getOSArchitecture() {

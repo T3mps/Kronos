@@ -12,34 +12,19 @@ import com.starworks.kronos.logging.appender.RotatingDateFileAppender;
 
 final class LoggerFactory {
 
-	private static final String IMPL = Configuration.logging.implementation();
-	private static final String NAME = Configuration.logging.name();
-	private static final Level LEVEL = Configuration.logging.level();
-	private static final Layout LAYOUT = Configuration.logging.layout();
-	private static final String DIRECTORY = Configuration.logging.directory();
-	private static final int MAX_ROTATING_FILE_LINE_COUNT = Configuration.logging.maxRotatingFileLineCount();
-	private static final boolean LOG_TO_CONSOLE = Configuration.logging.logToConsole();
-	private static final boolean LOG_TO_FILE = Configuration.logging.logToFile();
-	private static final boolean ANSI_FORMATTING = Configuration.logging.ansiFormatting();
+	private static final String IMPL 						= 	Configuration.logging.implementation();
+	private static final String NAME 						= 	Configuration.logging.name();
+	private static final Level LEVEL 						= 	Configuration.logging.level();
+	private static final Layout LAYOUT 						= 	Configuration.logging.layout();
+	private static final String DIRECTORY 					= 	Configuration.logging.directory();
+	private static final int MAX_ROTATING_FILE_LINE_COUNT	=	Configuration.logging.maxRotatingFileLineCount();
+	private static final boolean LOG_TO_CONSOLE 			= 	Configuration.logging.logToConsole();
+	private static final boolean LOG_TO_FILE 				= 	Configuration.logging.logToFile();
+	private static final boolean ANSI_FORMATTING 			= 	Configuration.logging.ansiFormatting();
 	
 	private static final List<Appender> s_reusableAppenderList = new ArrayList<Appender>(2);
 	
 	private LoggerFactory() {}
-
-	static Logger create() {
-		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
-		for (int i = 2; i < stackTraceElements.length; i++) {
-			String className = stackTraceElements[i].getClassName();
-			try {
-				Class<?> callingClass = Class.forName(className);
-				if (callingClass != LoggerFactory.class) {
-					return createFromImplementation(NAME, callingClass, LEVEL, LAYOUT, compileAppenders(), ANSI_FORMATTING);
-				}
-			} catch (ClassNotFoundException ignored) {
-			}
-		}
-		return null;
-	}
 
 	static Logger create(String name, Class<?> type, Level level, Layout layout, List<Appender> appenders, boolean ansiFormatting) {
 		return createFromImplementation(name, type, level, layout, compileAppenders(appenders.toArray(new Appender[appenders.size()])), ansiFormatting);
@@ -60,6 +45,10 @@ final class LoggerFactory {
 	static Logger create(String name, Class<?> type, Level level) {
 		return createFromImplementation(name, type, level, LAYOUT, compileAppenders(), ANSI_FORMATTING);
 	}
+	
+	static Logger create(Class<?> type, Level level) {
+		return createFromImplementation(NAME, type, level, LAYOUT, compileAppenders(), ANSI_FORMATTING);
+	}
 
 	static Logger create(String name, Class<?> type) {
 		return createFromImplementation(name, type, LEVEL, LAYOUT, compileAppenders(), ANSI_FORMATTING);
@@ -69,6 +58,23 @@ final class LoggerFactory {
 		return createFromImplementation(NAME, type, LEVEL, LAYOUT, compileAppenders(), ANSI_FORMATTING);
 	}
 
+	static Logger create() {
+		StackTraceElement[] stackTraceElements = Thread.currentThread().getStackTrace();
+		for (int i = 2; i < stackTraceElements.length; i++) {
+			String className = stackTraceElements[i].getClassName();
+			Class<?> callingClass = null;
+			try {
+				callingClass = Class.forName(className);
+				if (callingClass != LoggerFactory.class) {
+					return createFromImplementation(NAME, callingClass, LEVEL, LAYOUT, compileAppenders(), ANSI_FORMATTING);
+				}
+			} catch (ClassNotFoundException ignored) {
+				System.err.println("Class " + callingClass + " was not found.");
+			}
+		}
+		return null;
+	}
+	
 	static Logger createFromImplementation(String name, Class<?> type, Level level, Layout layout, List<Appender> appenders, boolean ansiFormatting) {
 		try {
 			Class<?> loggerClass = Class.forName(IMPL);

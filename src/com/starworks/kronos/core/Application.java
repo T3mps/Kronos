@@ -1,6 +1,7 @@
 package com.starworks.kronos.core;
 
 import com.starworks.kronos.Configuration;
+import com.starworks.kronos.core.Window.WindowLayer;
 import com.starworks.kronos.event.Event;
 import com.starworks.kronos.event.EventCallback;
 import com.starworks.kronos.event.EventManager;
@@ -9,6 +10,8 @@ import com.starworks.kronos.jobs.Job;
 import com.starworks.kronos.jobs.JobManager;
 import com.starworks.kronos.jobs.Jobs;
 import com.starworks.kronos.logging.Logger;
+
+import imgui.ImGui;
 
 public abstract class Application implements AutoCloseable {
 	private final Logger LOGGER = Logger.getLogger(Application.class);
@@ -34,7 +37,13 @@ public abstract class Application implements AutoCloseable {
 		double updateRate = Configuration.runtime.updateRate();
 		double fixedUpdateRate = Configuration.runtime.fixedUpdateRate();
 		this.m_events = new EventManager();
-		this.m_window = Window.create(width, height, title, e -> onEvent(e));
+		this.m_window = Window.create(width, height, title).onEvent(e -> onEvent(e)).addWindowLayer(new WindowLayer() {
+			
+			@Override
+			public void onUpdate() {
+				ImGui.showDemoWindow();
+			}
+		});
 		this.m_layers = new LayerStack();
 		this.m_jobs = Jobs.newManager();
 		this.m_timeStep = new TimeStep(updateRate);

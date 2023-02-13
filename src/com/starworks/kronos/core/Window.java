@@ -4,9 +4,6 @@ import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
 import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
 import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
-import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_CORE_PROFILE;
-import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_FORWARD_COMPAT;
-import static org.lwjgl.glfw.GLFW.GLFW_OPENGL_PROFILE;
 import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
 import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
 import static org.lwjgl.glfw.GLFW.GLFW_REPEAT;
@@ -40,12 +37,17 @@ import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
 import static org.lwjgl.glfw.GLFW.glfwWindowHint;
 import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
 import static org.lwjgl.system.MemoryUtil.NULL;
+import static org.lwjgl.opengl.GL.*;
+import static org.lwjgl.opengl.GL11.*;
 
 import java.nio.IntBuffer;
+import java.util.Deque;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.system.MemoryStack;
 
@@ -53,6 +55,11 @@ import com.starworks.kronos.event.Event;
 import com.starworks.kronos.exception.Exceptions;
 import com.starworks.kronos.exception.KronosRuntimeException;
 import com.starworks.kronos.logging.Logger;
+
+import imgui.ImGui;
+import imgui.flag.ImGuiConfigFlags;
+import imgui.gl3.ImGuiImplGl3;
+import imgui.glfw.ImGuiImplGlfw;
 
 public final class Window implements AutoCloseable {
 	private static final Logger LOGGER = Logger.getLogger(Window.class);
@@ -65,6 +72,11 @@ public final class Window implements AutoCloseable {
 	private final Lock m_destructionLock;
 	private long m_pointer;
 	private Consumer<Event> m_onEvent;
+	
+	private final ImGuiImplGlfw m_imguiImplGlfw;
+	private final ImGuiImplGl3 m_imguiImplGl3;
+
+	private final Deque<WindowLayer> m_layers;
 
 	private Window(int width, int height, String title) {
 		this.m_width = width;
@@ -73,6 +85,9 @@ public final class Window implements AutoCloseable {
 		this.m_updateLock = new ReentrantLock();
 		this.m_destructionLock = new ReentrantLock();
 		this.m_onEvent = null;
+		this.m_imguiImplGlfw = new ImGuiImplGlfw();
+		this.m_imguiImplGl3 = new ImGuiImplGl3();
+		this.m_layers = new ConcurrentLinkedDeque<WindowLayer>();
 	}
 
 	public static Window create(int width, int height, String title) {
@@ -85,23 +100,20 @@ public final class Window implements AutoCloseable {
 		return window;
 	}
 	
-	public static Window create(int width, int height, String title, Consumer<Event> onEvent) {
-		if (width <= 0) throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidWidth"));
-		if (height <= 0) throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidHeight"));
-		if (title == null) throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidTitle"));
-		Window window = new Window(width, height, title);
-		LOGGER.info("Window[{2}] created; width: {0}, height: {1}", width, height, title);
-		window.initialize();
-		window.onEvent(onEvent);
-		return window;
-	}
-	
 	public Window onEvent(Consumer<Event> onEvent) {
 		if (onEvent == null) {
 			throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidEventCallback"));
 		}
 		m_onEvent = onEvent;
 		registerEvents();
+		return this;
+	}
+
+	public Window addWindowLayer(WindowLayer layer) {
+		if (layer == null) {
+			throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidLayer"));
+		}
+		m_layers.add(layer);
 		return this;
 	}
 
@@ -123,6 +135,10 @@ public final class Window implements AutoCloseable {
 		glfwMakeContextCurrent(m_pointer);
 		LOGGER.info("Window[{0}] context made current", m_title);
 		setVSync(true);
+
+		createCapabilities();
+
+		initializeImGui();
 
 		glfwShowWindow(m_pointer);
 		LOGGER.info("Window[{0}] shown", m_title);
@@ -191,6 +207,24 @@ public final class Window implements AutoCloseable {
 	public void update() {
 		m_updateLock.lock();
 		try {
+			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+			m_imguiImplGlfw.newFrame();
+			ImGui.newFrame();
+
+			m_layers.forEach(WindowLayer::onUpdate);
+			
+			ImGui.render();
+			m_imguiImplGl3.renderDrawData(ImGui.getDrawData());
+			
+			if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
+				long backupCurrentContext = GLFW.glfwGetCurrentContext();
+				ImGui.updatePlatformWindows();
+				ImGui.renderPlatformWindowsDefault();
+				glfwMakeContextCurrent(backupCurrentContext);
+			}
+
 			glfwSwapBuffers(m_pointer);
 			glfwPollEvents();
 		} finally {
@@ -209,14 +243,15 @@ public final class Window implements AutoCloseable {
 		LOGGER.debug("Set GLFW window hint 'GLFW_VISIBLE' to `GLFW_FALSE`");
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		LOGGER.debug("Set GLFW window hint 'GLFW_RESIZABLE' to `GLFW_TRUE`");
+		
 		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-		LOGGER.debug("Set GLFW window hint 'GLFW_CONTEXT_VERSION_MAJOR' to `3`");
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 2);
-		LOGGER.debug("Set GLFW window hint 'GLFW_CONTEXT_VERSION_MINOR' to `2`");
-		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-		LOGGER.debug("Set GLFW window hint 'GLFW_OPENGL_PROFILE' to `GLFW_OPENGL_CORE_PROFILE`");
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-		LOGGER.debug("Set GLFW window hint 'GLFW_OPENGL_FORWARD_COMPAT' to `GLFW_TRUE`");
+		LOGGER.debug("Set GLFW window hint 'GLFW_CONTEXT_VERSION_MAJOR' to `{0}`", 3);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+		LOGGER.debug("Set GLFW window hint 'GLFW_CONTEXT_VERSION_MINOR' to `{0}`", 0);
+//		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//		LOGGER.debug("Set GLFW window hint 'GLFW_OPENGL_PROFILE' to `GLFW_OPENGL_CORE_PROFILE`");
+//		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+//		LOGGER.debug("Set GLFW window hint 'GLFW_OPENGL_FORWARD_COMPAT' to `GLFW_TRUE`");
 	}
 
 	private void setWindowPosition() {
@@ -232,14 +267,40 @@ public final class Window implements AutoCloseable {
 		}
 	}
 
+	private void initializeImGui() {
+		// Setup Dear ImGui context
+		ImGui.createContext();
+//		ImGuiIO io = ImGui.getIO();
+		LOGGER.debug("Created Dear ImGui context");
+		
+		// Setup Dear ImGui style
+		ImGui.styleColorsDark();
+		// ImGui.styleColorsClassic();
+		
+		m_imguiImplGlfw.init(m_pointer, true);
+
+		String glslVersion = "#version 130";
+//		if (SystemInfo.getOSName().contains("mac") || SystemInfo.getOSName().contains("darwin")) {
+//			glslVersion = "#version 150";
+//		} else {
+//			glslVersion = "#version 330";
+//		}
+
+		m_imguiImplGl3.init(glslVersion);
+	}
+
 	@Override
 	public void close() {
 		m_destructionLock.lock();
 		try {
-			LOGGER.info("Window[{0}] closed", m_title);
-			LOGGER.close();
+			m_imguiImplGlfw.dispose();
+			m_imguiImplGl3.dispose();
+			ImGui.destroyContext();
 			glfwFreeCallbacks(m_pointer);
 			glfwDestroyWindow(m_pointer);
+			GLFWContext.terminate();
+			LOGGER.info("Window[{0}] closed", m_title);
+			LOGGER.close();
 		} finally {
 			m_destructionLock.unlock();
 		}
@@ -253,5 +314,11 @@ public final class Window implements AutoCloseable {
 
 	public boolean isVSync() {
 		return m_vsync;
+	}
+
+	@FunctionalInterface
+	public interface WindowLayer {
+
+		void onUpdate();
 	}
 }

@@ -163,7 +163,7 @@ public interface Logger extends AutoCloseable {
 	void close();
 
 	public record Context(LocalDateTime timestamp, String name, Level level, String message, Throwable throwable, int line, String method, Thread thread) {
-		static final Context POISION_PILL = new Context(null, "", Level.ALL, "", null, -1, "", null);
+		static final Context POISION_PILL = new Context(null, "", Level.OFF, "", null, -1, "", null);
 	}
 
 	public static Logger getLogger(String name, Class<?> type, Level level, Appender... appenders) {
@@ -180,6 +180,10 @@ public interface Logger extends AutoCloseable {
 
 	public static Logger getLogger(String name, Class<?> type, Level level) {
 		return LoggerFactory.create(name, type, level);
+	}
+	
+	public static Logger getLogger(Class<?> type, Level level) {
+		return LoggerFactory.create(type, level);
 	}
 
 	public static Logger getLogger(String name, Class<?> type) {

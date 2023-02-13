@@ -11,7 +11,9 @@ import java.util.function.BiConsumer;
 public final class EventSink {
 
 	public static enum ListenerType {
-		ON_COMPONENT_ADD, ON_COMPONENT_REPLACE, ON_COMPONENT_REMOVE;
+		ON_COMPONENT_ADD,
+		ON_COMPONENT_REPLACE,
+		ON_COMPONENT_REMOVE;
 	}
 
 	public static final class Any {

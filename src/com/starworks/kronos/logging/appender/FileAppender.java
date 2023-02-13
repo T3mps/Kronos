@@ -26,13 +26,13 @@ public sealed class FileAppender implements Appender permits RotatingFileAppende
 	}
 
 	public FileAppender(String path) {
+		String p = path + (path.endsWith(Configuration.logging.extension()) ? "" : Configuration.logging.extension());
 		try {
-			String p = path + (path.endsWith(Configuration.logging.extension()) ? "" : Configuration.logging.extension());
 			this.m_handle = FileSystem.getFileHandle(p);
-			this.m_lines = new AtomicLong(lines(p));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		this.m_lines = new AtomicLong(lines(p));
 	}
 
 	protected final long lines(String filename) {
@@ -54,7 +54,6 @@ public sealed class FileAppender implements Appender permits RotatingFileAppende
 
 	@Override
 	public void close() throws IOException {
-		m_handle.close();
 	}
 
 	public FileHandle getFileHandle() {

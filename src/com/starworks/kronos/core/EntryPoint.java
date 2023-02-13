@@ -88,7 +88,6 @@ public final class EntryPoint {
 	private void exit(int status) {
 		Thread.yield();
 		LOGGER.close();
-		if (status >= 0) GLFWContext.terminate();
 		System.exit(status);
 	}
 }

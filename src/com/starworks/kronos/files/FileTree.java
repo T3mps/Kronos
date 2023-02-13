@@ -20,7 +20,7 @@ public class FileTree implements Iterable<FileHandle> {
 		String[] dirs = fileHandle.getFileDirectory().split(FileSystem.separator);
 
 		Node current = m_root;
-		for (String dir : dirs) {
+		for (var dir : dirs) {
 			Node child = current.getChild(dir);
 			if (child == null) {
 				child = current.add(dir);
@@ -59,7 +59,7 @@ public class FileTree implements Iterable<FileHandle> {
 	private Node findNode(String path) {
 		String[] dirs = path.split(FileSystem.separator);
 		Node current = m_root;
-		for (String dir : dirs) {
+		for (var dir : dirs) {
 			Node child = current.getChild(dir);
 			if (child == null) {
 				return null;
@@ -85,7 +85,7 @@ public class FileTree implements Iterable<FileHandle> {
 	}
 
 	private void removeAllChildren(Node node) throws IOException {
-		for (Node child : node.m_children.values()) {
+		for (var child : node.m_children.values()) {
 			if (child instanceof Leaf) {
 				((Leaf) child).m_fileHandle.delete();
 			} else {
@@ -114,7 +114,7 @@ public class FileTree implements Iterable<FileHandle> {
 
 	private void toString(Node node, String indent, StringBuilder sb) {
 		sb.append(indent).append(node.m_name).append("/\n");
-		for (Node child : node.m_children.values()) {
+		for (var child : node.m_children.values()) {
 			if (child instanceof Leaf) {
 				sb.append(indent).append("  ").append(child.m_name).append("/\n");
 			} else {

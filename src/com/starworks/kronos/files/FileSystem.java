@@ -10,23 +10,19 @@ public class FileSystem {
 	public static final String separator = "" + separatorChar;
 
 	private static final FileTree s_tree = new FileTree();
-	
+
 	private FileSystem() {}
-	
+
 	public static FileHandle getFileHandle(String fileName) throws IOException {
 		FileHandle handle = s_tree.findOrCreate(fileName);
-		handle.m_consumers.incrementAndGet();
 		return handle;
 	}
 
 	public static boolean removeFileHandle(String fileName) throws IOException {
 		FileHandle fileHandle = s_tree.find(fileName);
 		if (fileHandle != null) {
-			if (fileHandle.m_consumers.decrementAndGet() == 0) {
-				fileHandle.close();
-				s_tree.remove(fileName);
-				return true;
-			}
+			s_tree.remove(fileName);
+			return true;
 		}
 		return false;
 	}
@@ -34,7 +30,6 @@ public class FileSystem {
 	public static void closeFileHandle(String fileName) throws IOException {
 		FileHandle fileHandle = s_tree.find(fileName);
 		if (fileHandle != null && !fileHandle.isClosed()) {
-			fileHandle.close();
 			s_tree.remove(fileName);
 		}
 	}
@@ -52,12 +47,12 @@ public class FileSystem {
 			}
 		}
 	}
-	
+
 	public static void writeTree(OutputStream stream) throws IOException {
 		stream.write(stringify().getBytes());
 		stream.flush();
 	}
-	
+
 	public static String stringify() {
 		return s_tree.toString();
 	}

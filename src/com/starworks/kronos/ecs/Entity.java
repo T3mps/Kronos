@@ -6,7 +6,7 @@ import com.starworks.kronos.toolkit.concurrent.AtomicUpdater;
 
 public final class Entity implements Identifiable {
 
-	private static final AtomicUpdater<Entity, Integer> idUpdater = AtomicUpdater.forInteger(Entity.class, "m_id");
+	private static final AtomicUpdater<Entity, Integer> s_idUpdater = AtomicUpdater.forInteger(Entity.class, "m_id");
 
 	private volatile int m_id;
 	private Registry m_registry;
@@ -79,7 +79,7 @@ public final class Entity implements Identifiable {
 	@Override
 	public int setID(int id) {
 		int prev = m_id;
-		return idUpdater.compareAndSet(this, prev, id | (m_id & IDFactory.FLAG_BIT)) ? m_id : prev;
+		return s_idUpdater.compareAndSet(this, prev, id | (m_id & IDFactory.FLAG_BIT)) ? m_id : prev;
 	}
 
 	public String getFormattedID() {

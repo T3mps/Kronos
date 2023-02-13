@@ -60,7 +60,6 @@ public sealed class RotatingFileAppender extends FileAppender permits RotatingDa
 	}
 
 	protected void rotate() throws IOException {
-		m_handle.close();
 		String path = buildName();
 		m_handle = FileSystem.getFileHandle(path);
 		m_lines.set(lines(path));
