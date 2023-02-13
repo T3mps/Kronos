@@ -26,9 +26,40 @@
 ## Creating an application with Kronos
 The only required implementations are a class which holds the main method (Entry Point), and a class which extends the `Application` base class.
 
-``
-asd
-``
+```
+import com.starworks.kronos.core.EntryPoint;
+
+public class Main {
+
+	public static void main(String[] args) {
+		new EntryPoint();
+	}
+}
+```
+```
+public class MyApplication extends Application {
+
+	public MyApplication() {
+		super();
+	}
+
+	@Override
+	public void initialize() {
+	}
+
+	@Override
+	public void update(TimeStep timestep) {
+	}
+
+	@Override
+	public void fixedUpdate(TimeStep timestep) {
+	}
+
+	@Override
+	public void render() {
+	}
+}
+```
 
 [![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)](https://twitter.com/AcidFrogLLC)
 [![Forks](https://img.shields.io/github/forks/tempsies/kronos?style=social)](https://github.com/Tempsies/Kronos)
