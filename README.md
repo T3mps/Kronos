@@ -19,6 +19,9 @@
 - Window, key and mouse event handling
 - Robust jobs system
 - Toolkit API included
+- Abstract rendering layer*
+- ImGui integration* [WIP]
+- Physics engine* [WIP]
 
 ## Preview
 ![](.githubassets/screenshot_1.gif)
