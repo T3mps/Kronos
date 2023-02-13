@@ -24,7 +24,6 @@
 - Physics engine* [WIP]
 
 ## Creating an application with Kronos
-#### 1)
 The only required implementations are a `Main` class, and a one which extends the `Application` base class.
 
 ```java
@@ -62,8 +61,7 @@ public class MyApplication extends Application {
 }
 ```
 
-#### 2)
-Go ahead and run the main class, which will result in a crash. Thereafter, two files, `configuration.xml` and `configuration.xsd`, will be generated. Inside of the `configuration.xml` file, there is an attribute of the root element which specifies the target implementation of `Application`; left blank by default.
+Go ahead and run the main class, which will result in a crash. Thereafter, two files, `configuration.xml` and `configuration.xsd`, will be generated. Inside of the `configuration.xml` file, there is an attribute of the root element which specifies the target implementation of `Application`; left blank by default. Go ahead and fill in the FQN (fully-qualified name) of your `Application` implementation and run the project again.
 
 [![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)](https://twitter.com/AcidFrogLLC)
 [![Forks](https://img.shields.io/github/forks/tempsies/kronos?style=social)](https://github.com/Tempsies/Kronos)
