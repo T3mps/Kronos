@@ -65,7 +65,7 @@ public class Scheduler implements Closeable {
 		this.m_elapsedTime = 1;
 	}
 
-	public Runnable schedule(Runnable system) {
+	public Runnable submit(Runnable system) {
 		long stamp = m_scheduleLock.writeLock();
 		try {
 			m_taskMap.computeIfAbsent(system, sys -> {
@@ -87,7 +87,7 @@ public class Scheduler implements Closeable {
 			case 0:
 				return systems;
 			case 1:
-				schedule(systems[0]);
+				submit(systems[0]);
 			default: {
 				var cluster = new Cluster(systems);
 				m_mainTasks.add(cluster);

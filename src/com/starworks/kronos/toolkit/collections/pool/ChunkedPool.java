@@ -33,7 +33,7 @@ import com.starworks.kronos.toolkit.collections.stack.IntStack;
  * @author Ethan Temprovich
  * @see ChunkedPool.Allocator
  */
-public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Closeable {
+public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closeable {
 
 	/**
 	 * 
@@ -234,7 +234,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Cl
 	 * @see IDFactory
 	 * @apiNote An `Allocator` is associated with a specific `ChunkedPool`
 	 */
-	public static final class Allocator<T extends Identifiable> implements Closeable {
+	public static final class Allocator<T extends Poolable> implements Closeable {
 
 		private final ChunkedPool<T> m_owner;
 		private final IntStack m_idStack;
@@ -399,7 +399,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Cl
 	 * @author Ethan Temprovich
 	 * @see Allocator
 	 */
-	public static final class Chunk<T extends Identifiable> {
+	public static final class Chunk<T extends Poolable> {
 
 		private final T[] m_data;
 		private final int m_id;
@@ -416,7 +416,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Cl
 		 */
 		@SuppressWarnings("unchecked")
 		public Chunk(int id, IDFactory idFactory) {
-			this.m_data = (T[]) new Identifiable[idFactory.getChunkCapacity()];
+			this.m_data = (T[]) new Poolable[idFactory.getChunkCapacity()];
 			this.m_id = id;
 			this.m_next = null;
 			this.m_index = new AtomicInteger(-1);
@@ -549,7 +549,7 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Cl
 	 * @param <T> the type of elements in the chunked pool.
 	 * @author Ethan Temprovich
 	 */
-	public static class ChunkedPoolIterator<T extends Identifiable> implements Iterator<T> {
+	public static class ChunkedPoolIterator<T extends Poolable> implements Iterator<T> {
 
 		private int m_next;
 		private Chunk<T> m_currentChunk;
@@ -589,11 +589,11 @@ public final class ChunkedPool<T extends ChunkedPool.Identifiable> implements Cl
 	}
 
 	/**
-	 * An interface for objects that have a unique identifier.
+	 * An interface for objects which have a unique identifier, allowing for pooling.
 	 *
 	 * @author Ethan Temprovich
 	 */
-	public interface Identifiable {
+	public interface Poolable {
 
 		/**
 		 * Returns the unique identifier for this object.

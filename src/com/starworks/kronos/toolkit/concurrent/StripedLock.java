@@ -127,8 +127,8 @@ public sealed class StripedLock permits StripedLock.StripedReadWriteLock {
 		}
 		int count = m_counts.decrementAndGet(stripe);
 		if (count == 0) {
-			m_owners[stripe] = null;
 			LockSupport.unpark(m_owners[stripe]);
+			m_owners[stripe] = null;
 		}
 	}
 
@@ -179,7 +179,7 @@ public sealed class StripedLock permits StripedLock.StripedReadWriteLock {
 		h *= 0xc2b2ae35;
 		h ^= h >>> 16;
 		// Return the absolute value of h modulo the concurrency level
-		return Math.abs(h % m_concurrencyLevel);
+		return Math.abs(h % m_concurrencyLevel); 
 	}
 
 	/**

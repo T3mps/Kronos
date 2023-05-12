@@ -2,19 +2,18 @@ package com.starworks.kronos.files;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.URI;
 import java.util.concurrent.locks.StampedLock;
 
 public final class FileHandle {
 
 	private final File m_file;
-	private FileInputStream m_fis;
-	private FileOutputStream m_fos;
-	private FileChannel m_fileChannel;
-	private FileLock m_fileLock;
+	private final URI m_fileURI;
 	private final String m_fileDirectory;
 	private final String m_fileName;
 	private final String m_fileExtension;
@@ -22,24 +21,26 @@ public final class FileHandle {
 	private final StampedLock m_lock;
 	private boolean m_generated;
 
-	FileHandle(String fileName) throws IOException {
+	FileHandle(String fileName, boolean generateIfNotExist) throws IOException {
 		this.m_file = new File(fileName);
+		this.m_fileURI = m_file.toURI();
+		if (generateIfNotExist) {
+			try {
+				this.m_generated = m_file.createNewFile();
+			} catch (IOException e) {
+				this.m_generated = false;
+			}
+		}
 		String parent = m_file.getParent();
-		if (parent == null) {
-			parent = "";
+		this.m_fileDirectory = (parent != null ? parent.replace(File.separator, FileSystem.separator) + FileSystem.separator : "");
+		int lastIndex = m_file.getName().lastIndexOf(".");
+		if (lastIndex == -1) {
+			this.m_fileName = m_file.getName();
+			this.m_fileExtension = "";
+		} else {
+			this.m_fileName = m_file.getName().substring(0, lastIndex);
+			this.m_fileExtension = m_file.getName().substring(lastIndex);
 		}
-		File directory = new File(parent);
-		if (!directory.exists()) {
-			directory.mkdirs();
-		}
-		if (m_generated = !m_file.exists()) {
-			m_file.createNewFile();
-		}
-		this.m_fileDirectory = parent.replace(File.separator, FileSystem.separator) + FileSystem.separator;
-		this.m_fileName = m_file.getName().substring(0, m_file.getName().lastIndexOf("."));
-		int lastIndex = fileName.lastIndexOf(".");
-		this.m_fileExtension = (lastIndex == -1) ? "" : fileName.substring(lastIndex);
-		this.m_fileLock = null;
 		this.m_closed = false;
 		this.m_lock = new StampedLock();
 	}
@@ -47,17 +48,9 @@ public final class FileHandle {
 	public void write(String message) throws IOException {
 		long stamp = m_lock.writeLock();
 		try {
-			m_fos = new FileOutputStream(m_file, true);
-			m_fileChannel = m_fos.getChannel();
-			try {
-				m_fileLock = m_fileChannel.lock();
-				m_fos.write(message.getBytes());
-				m_fos.flush();
-			} finally {
-				if (m_fileLock != null) {
-					m_fileLock.release();
-				}
-				m_fos.close();
+			try (FileOutputStream fos = new FileOutputStream(m_file, true)) {
+				fos.write(message.getBytes());
+				fos.flush();
 			}
 		} finally {
 			m_lock.unlockWrite(stamp);
@@ -67,17 +60,9 @@ public final class FileHandle {
 	public void write(FileHandle handle) throws IOException {
 		long stamp = m_lock.writeLock();
 		try {
-			m_fos = new FileOutputStream(m_file, true);
-			m_fileChannel = m_fos.getChannel();
-			try {
-				m_fileLock = m_fileChannel.lock();
-				m_fos.write(handle.readContents());
-				m_fos.flush();
-			} finally {
-				if (m_fileLock != null) {
-					m_fileLock.release();
-				}
-				m_fos.close();
+			try (FileOutputStream fos = new FileOutputStream(m_file, true)) {
+				fos.write(handle.readContents());
+				fos.flush();
 			}
 		} finally {
 			m_lock.unlockWrite(stamp);
@@ -85,32 +70,58 @@ public final class FileHandle {
 	}
 
 	private byte[] readContents() throws IOException {
-		byte[] data = new byte[(int) m_file.length()];
-		m_fis = new FileInputStream(m_file);
-		m_fis.read(data);
-		m_fis.close();
-		return data;
+		long stamp = m_lock.readLock();
+		try {
+			try (FileInputStream fis = new FileInputStream(m_file)) {
+				byte[] data = new byte[(int) m_file.length()];
+				fis.read(data);
+				return data;
+			}
+		} finally {
+			m_lock.unlockRead(stamp);
+		}
+	}
+
+	public OutputStream writeStream(boolean append) throws FileNotFoundException {
+		if (m_closed) {
+			throw new IllegalStateException("FileHandle is closed");
+		}
+		return new FileOutputStream(m_file, append);
+	}
+
+	public InputStream readStream() throws FileNotFoundException {
+		if (m_closed) {
+			throw new IllegalStateException("FileHandle is closed");
+		}
+		long stamp = m_lock.readLock();
+		try {
+			return new FileInputStream(m_file);
+		} finally {
+			m_lock.unlockRead(stamp);
+		}
 	}
 
 	public void clearContents() throws IOException {
 		long stamp = m_lock.writeLock();
 		try {
-			m_fos = new FileOutputStream(m_file);
-			m_fos.close();
+			try (FileOutputStream fos = new FileOutputStream(m_file)) {
+				// do nothing here, just overwriting the file with an empty one
+			}
 		} finally {
 			m_lock.unlock(stamp);
 		}
 	}
 
 	public void delete() throws IOException {
-		m_file.delete();
+		if (!m_file.delete()) {
+			throw new IOException("File '" + m_fileName + m_fileExtension + "' failed to delete");
+		}
 	}
 
 	void shutdown() throws IOException {
-		m_fos.close();
 		m_closed = true;
 	}
-	
+
 	public File getFile() {
 		return m_file;
 	}
@@ -122,6 +133,10 @@ public final class FileHandle {
 		return sb.toString();
 	}
 
+	public URI getFileURI() {
+		return m_fileURI;
+	}
+	
 	public String getFileDirectory() {
 		return m_fileDirectory;
 	}
@@ -137,7 +152,7 @@ public final class FileHandle {
 	public boolean isClosed() {
 		return m_closed;
 	}
-	
+
 	public boolean wasGenerated() {
 		return m_generated;
 	}

@@ -12,11 +12,16 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.starworks.kronos.Configuration;
 import com.starworks.kronos.exception.Exceptions;
 import com.starworks.kronos.logging.Logger;
 
 public class JobManager {
-	Logger LOGGER = Logger.getLogger("Main", JobManager.class);
+	Logger LOGGER = Logger.getLogger(JobManager.class);
+
+	private static final int UPDATES_PER_SECOND = Configuration.jobs.updatesPerSecond();
+	private static final int TIMEOUT_SECONDS = Configuration.jobs.timeoutSeconds();
+	private static final int SHUTDOWN_TIMEOUT_SECONDS = Configuration.jobs.shutdownTimeoutSeconds();
 
 	private final JobQueue m_queue;
 	private final int m_updatesPerSecond;
@@ -44,7 +49,23 @@ public class JobManager {
 		this.m_lock = new ReentrantLock();
 	}
 
-	public void submit(Job<?> job) {
+	public static JobManager create() {
+		return create(UPDATES_PER_SECOND, TIMEOUT_SECONDS, SHUTDOWN_TIMEOUT_SECONDS);
+	}
+
+	public static JobManager create(int updatesPerSecond) {
+		return create(updatesPerSecond, TIMEOUT_SECONDS, SHUTDOWN_TIMEOUT_SECONDS);
+	}
+
+	public static JobManager create(int updatesPerSecond, int timeoutSeconds) {
+		return create(updatesPerSecond, timeoutSeconds, SHUTDOWN_TIMEOUT_SECONDS);
+	}
+
+	public static JobManager create(int updatesPerSecond, int timeoutSeconds, int shutdownTimeoutSeconds) {
+		return new JobManager(updatesPerSecond, timeoutSeconds, shutdownTimeoutSeconds);
+	}
+	
+	public void submit(final Job<?> job) {
 		m_queue.offer(job);
 	}
 

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<application implementation="com.starworks.kronos.sandbox.Sandbox" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="configuration.xsd">
+<application implementation="" version="16777216" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="configuration.xsd">
 	<runtime>
 		<updatesPerSecond>60</updatesPerSecond>
 		<fixedUpdatesPerSecond>60</fixedUpdatesPerSecond>
@@ -7,8 +7,8 @@
 	</runtime>
 	<window>
 		<title>Kronos</title>
-		<width>800</width>
-		<height>600</height>
+		<width>1280</width>
+		<height>720</height>
 		<fullscreen>false</fullscreen>
 		<vsync>true</vsync>
 	</window>

@@ -57,23 +57,23 @@ public class ClassSchema<T> {
     }
     
     public static void main(String[] args) {
+    	class TestClass {
+            boolean m_flag;
+            byte m_byteValue;
+            short m_shortValue;
+            char m_charValue;
+            int m_intValue;
+            long m_longValue;
+            float m_floatValue;
+            double m_doubleValue;
+        }
+    	
         DataType booleanType = DataType.get(boolean.class);
         System.out.println("Data type for boolean: " + booleanType);
 
         ClassSchema<TestClass> schema = new ClassSchema<TestClass>(new TestClass());
         System.out.println("Class index: " + schema.getClassIndex());
         System.out.println("Class size: " + schema.getSize());
-    }
-
-    private static class TestClass {
-        private boolean m_flag;
-        private byte m_byteValue;
-        private short m_shortValue;
-        private char m_charValue;
-        private int m_intValue;
-        private long m_longValue;
-        private float m_floatValue;
-        private double m_doubleValue;
     }
 }
 

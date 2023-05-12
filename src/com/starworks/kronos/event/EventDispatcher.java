@@ -11,18 +11,23 @@ final class EventDispatcher<E extends Event> {
 		this.m_callbacks = new CopyOnWriteArrayList<EventCallback<E>>();
 	}
 
-	public <C extends EventCallback<E>>void add(C callback) {
-		m_callbacks.add(callback);
+	@SuppressWarnings("unchecked")
+	public void add(EventCallback<? extends Event> callback) {
+		m_callbacks.add((EventCallback<E>) callback);
 	}
 
-	public void remove(EventCallback<E> callback) {
+	public void remove(EventCallback<? extends Event> callback) {
 		m_callbacks.remove(callback);
 	}
 
-	public void dispatch(E event) {
+	@SuppressWarnings("unchecked")
+	public boolean dispatch(Event event) {
 		for (var callback : m_callbacks) {
-			callback.accept(event);
+			if (callback.accept((E) event)) {
+				return true;
+			}
 		}
+		return false;
 	}
 
 	public void clear() {

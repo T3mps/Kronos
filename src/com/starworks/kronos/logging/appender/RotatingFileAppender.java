@@ -30,7 +30,7 @@ public sealed class RotatingFileAppender extends FileAppender permits RotatingDa
 		this.m_currentFileCount = new AtomicInteger(countFiles());
 		try {
 			String p = buildName();
-			this.m_handle = FileSystem.getFileHandle(p);
+			this.m_handle = FileSystem.getFileHandle(p, true, true);
 			this.m_lines = new AtomicLong(lines(p));
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -61,7 +61,7 @@ public sealed class RotatingFileAppender extends FileAppender permits RotatingDa
 
 	protected void rotate() throws IOException {
 		String path = buildName();
-		m_handle = FileSystem.getFileHandle(path);
+		m_handle = FileSystem.getFileHandle(path, true, true);
 		m_lines.set(lines(path));
 		;
 	}

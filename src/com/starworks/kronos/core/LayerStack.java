@@ -2,10 +2,11 @@ package com.starworks.kronos.core;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Iterator;
 
 import com.starworks.kronos.event.Event;
 
-public class LayerStack {
+public class LayerStack implements Iterable<Layer> {
 
 	private final Deque<Layer> m_layers;
 
@@ -50,17 +51,21 @@ public class LayerStack {
 
 	public boolean onEvent(Event event) {
 		for (var it = m_layers.descendingIterator(); it.hasNext();) {
+			if (event.wasHandled()) break;
 			var layer = it.next();
 			if (layer.isEnabled()) {
-				if (layer.onEvent(event)) {
-					return true; // return true if layer consumes event
-				}
+				layer.onEvent(event);
 			}
 		}
-		return false; // false otherwise
+		return event.wasHandled();
 	}
 
 	public void clear() {
 		m_layers.clear();
+	}
+
+	@Override
+	public Iterator<Layer> iterator() {
+		return m_layers.iterator();
 	}
 }

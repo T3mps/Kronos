@@ -10,6 +10,7 @@
 				<xs:element name="math" type="mathType" />
 			</xs:sequence>
 			<xs:attribute name="implementation" type="xs:string" use="required" />
+			<xs:attribute name="version" type="xs:integer" use="required" />
 		</xs:complexType>
 	</xs:element>
 	<xs:complexType name="runtimeType">

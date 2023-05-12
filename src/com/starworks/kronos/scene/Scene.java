@@ -9,9 +9,10 @@ import com.starworks.kronos.Configuration;
 import com.starworks.kronos.core.TimeStep;
 import com.starworks.kronos.ecs.Entity;
 import com.starworks.kronos.ecs.EventSink;
-import com.starworks.kronos.ecs.EventSink.ListenerType;
 import com.starworks.kronos.ecs.Registry;
 import com.starworks.kronos.ecs.Scheduler;
+import com.starworks.kronos.ecs.scripting.ScriptEngine;
+import com.starworks.kronos.ecs.scripting.lua.LuaEngine;
 import com.starworks.kronos.logging.Logger;
 import com.starworks.kronos.scene.component.IDComponent;
 import com.starworks.kronos.scene.component.TagComponent;
@@ -32,6 +33,7 @@ public final class Scene implements Closeable {
 
 	private final Registry m_registry;
 	private final Scheduler m_scheduler;
+	private final ScriptEngine m_scriptEngine;
 
 	private final Map<UUID, Entity> m_entityMap;
 
@@ -45,23 +47,27 @@ public final class Scene implements Closeable {
 		this.m_isPaused = false;
 		this.m_registry = new Registry();
 		this.m_scheduler = m_registry.createScheduler();
+		this.m_scriptEngine = new LuaEngine(m_registry);
+		((LuaEngine) m_scriptEngine).bind(m_scheduler, "com.starworks.kronos.scene.component");
 		this.m_entityMap = new HashMap<UUID, Entity>();
 
 		initialize();
 	}
 
 	private void initialize() {
-		eventSink().connect(ListenerType.ON_COMPONENT_ADD, EventSink.ANY, (entity, component) -> {
-			LOGGER.debug("Added {0} to {1}", component.getClass().getSimpleName(), entity.getFormattedID());
-		});
-		eventSink().connect(ListenerType.ON_COMPONENT_REPLACE, EventSink.ANY, (entity, component) -> {
-			LOGGER.debug("Replaced {0} on {1}", component.getClass().getSimpleName(), entity.getFormattedID());
-		});
-		eventSink().connect(ListenerType.ON_COMPONENT_REMOVE, EventSink.ANY, (entity, component) -> {
-			LOGGER.debug("Removed {0} from {1}", component.getClass().getSimpleName(), entity.getFormattedID());
-		});
+//		eventSink().connect(ListenerType.ON_COMPONENT_ADD, EventSink.ANY, (entity, component) -> {
+//			LOGGER.debug("Added {0} to {1}", component.getClass().getSimpleName(), entity.getFormattedID());
+//		});
+//		eventSink().connect(ListenerType.ON_COMPONENT_REPLACE, EventSink.ANY, (entity, component) -> {
+//			LOGGER.debug("Replaced {0} on {1}", component.getClass().getSimpleName(), entity.getFormattedID());
+//		});
+//		eventSink().connect(ListenerType.ON_COMPONENT_REMOVE, EventSink.ANY, (entity, component) -> {
+//			LOGGER.debug("Removed {0} from {1}", component.getClass().getSimpleName(), entity.getFormattedID());
+//		});
+		
+		m_isRunning = true;
 	}
-
+	
 	private static long s_unnamedEntityCount = 0;
 
 	public Entity createEntity(String name) {
@@ -93,37 +99,44 @@ public final class Scene implements Closeable {
 	}
 
 	public void onUpdate(TimeStep timestep) {
-		m_time += timestep.getDeltaTime();
+		if (isActive()) {
+			m_time += timestep.getDeltaTime();
 
-		if (m_time >= m_updateRate) {
-			m_scheduler.update();
-			++m_steps;
+			if (m_time >= m_updateRate) {
+				m_scheduler.update();
+				++m_steps;
+			}
 		}
 	}
 
 	public void onFixedUpdate(TimeStep timestep) {
-		m_fixedTime += timestep.getDeltaTime();
+		if (isActive()) {
+			m_fixedTime += timestep.getDeltaTime();
 
-		if (m_fixedTime >= m_fixedUpdateRate) {
-			++m_fixedSteps;
+			if (m_fixedTime >= m_fixedUpdateRate) {
+				++m_fixedSteps;
+			}
 		}
 	}
 
-	public GameSystem scheduleSystem(GameSystem system) {
-		m_scheduler.schedule(system);
+	public void onRender() {
+	}
+
+	public Runnable scheduleSystem(Runnable system) {
+		m_scheduler.submit(system);
 		return system;
 	}
 
-	public GameSystem[] scheduleParallelSystems(GameSystem... systems) {
+	public Runnable[] scheduleParallelSystems(Runnable... systems) {
 		m_scheduler.scheduleParallel(systems);
 		return systems;
 	}
 
-	public void suspendSystem(GameSystem system) {
+	public void suspendSystem(Runnable system) {
 		m_scheduler.suspend(system);
 	}
 
-	public void resumeSystem(GameSystem system) {
+	public void resumeSystem(Runnable system) {
 		m_scheduler.resume(system);
 	}
 
@@ -134,11 +147,23 @@ public final class Scene implements Closeable {
 		m_registry.close();
 	}
 
-	public Registry registry() {
+	public Registry getRegistry() {
 		return m_registry;
 	}
 
-	public EventSink eventSink() {
+	public EventSink getEventSink() {
 		return m_registry.eventSink();
+	}
+	
+	public boolean isActive() {
+		return m_isRunning && !m_isPaused;
+	}
+	
+	public boolean isRunning() {
+		return m_isRunning;
+	}
+
+	public boolean isPaused() {
+		return m_isPaused;
 	}
 }

@@ -41,11 +41,11 @@ public class FileTree implements Iterable<FileHandle> {
 			throw new IllegalArgumentException("The path does not correspond to a file: " + path);
 		}
 	}
-
-	public FileHandle findOrCreate(String path) throws IOException {
+	
+	public FileHandle find(String path, boolean create) throws IOException {
 		Node target = findNode(path);
 		if (target == null) {
-			FileHandle fileHandle = new FileHandle(path);
+			FileHandle fileHandle = new FileHandle(path, create);
 			insert(fileHandle);
 			return fileHandle;
 		}
@@ -56,6 +56,10 @@ public class FileTree implements Iterable<FileHandle> {
 		}
 	}
 
+	public FileHandle findOrCreate(String path) throws IOException {
+		return find(path, true);
+	}
+	
 	private Node findNode(String path) {
 		String[] dirs = path.split(FileSystem.separator);
 		Node current = m_root;

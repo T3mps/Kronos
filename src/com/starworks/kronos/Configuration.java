@@ -252,7 +252,7 @@ public final class Configuration {
 	private static void tryConfiguration(String path) {
 		String xsdPath = path.substring(0, path.lastIndexOf(".")) + ".xsd";
 		try {
-			FileHandle handle = FileSystem.getFileHandle(xsdPath);
+			FileHandle handle = FileSystem.getFileHandle(xsdPath, true, true);
 			if (handle.wasGenerated()) {
 				String xsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
 						"<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" + //
@@ -328,7 +328,7 @@ public final class Configuration {
 		}
 
 		try {
-			FileHandle handle = FileSystem.getFileHandle(path);
+			FileHandle handle = FileSystem.getFileHandle(path, true, true);
 			if (handle.wasGenerated()) {
 				String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
 						"<application implementation=\"\" version=\"" + Version.getVersion() + "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"" + xsdPath + "\">\n" + //

@@ -1,10 +1,10 @@
 package com.starworks.kronos.ecs;
 
 import com.starworks.kronos.toolkit.collections.pool.ChunkedPool.IDFactory;
-import com.starworks.kronos.toolkit.collections.pool.ChunkedPool.Identifiable;
+import com.starworks.kronos.toolkit.collections.pool.ChunkedPool.Poolable;
 import com.starworks.kronos.toolkit.concurrent.AtomicUpdater;
 
-public final class Entity implements Identifiable {
+public final class Entity implements Poolable {
 
 	private static final AtomicUpdater<Entity, Integer> s_idUpdater = AtomicUpdater.forInteger(Entity.class, "m_id");
 

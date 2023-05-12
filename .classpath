@@ -41,5 +41,11 @@
 	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7.jar"/>
 	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7-javadoc.jar"/>
 	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7-sources.jar"/>
+	<classpathentry kind="lib" path="vendor/luaj-jse-3.0.2.jar"/>
+	<classpathentry kind="src" path=".apt_generated">
+		<attributes>
+			<attribute name="optional" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

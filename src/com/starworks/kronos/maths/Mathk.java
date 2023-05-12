@@ -556,7 +556,7 @@ public class Mathk {
     public static double random() {
         return Math.random();
     }
-
+    
     public static double signum(double v) {
         return Math.signum(v);
     }

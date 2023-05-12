@@ -8,4 +8,7 @@ public class Hash {
 	public static final MurmurHash2 MURMUR2 = new MurmurHash2();
 	public static final MurmurHash3 MURMUR3 = new MurmurHash3();
 	public static final CityHash CITYHASH = new CityHash();
+	
+	private Hash() {
+	}
 }

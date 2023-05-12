@@ -1,5 +1,6 @@
 package com.starworks.kronos.files;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
@@ -13,8 +14,19 @@ public class FileSystem {
 
 	private FileSystem() {}
 
-	public static FileHandle getFileHandle(String fileName) throws IOException {
-		FileHandle handle = s_tree.findOrCreate(fileName);
+	public static FileHandle getFileHandle(String fileName, boolean createDirectories, boolean generateIfNotExist) throws IOException {
+		if (createDirectories) {
+			File file = new File(fileName);
+			String parent = file.getParent();
+			if (parent == null) {
+				parent = "";
+			}
+			File directory = new File(parent);
+			if (!directory.exists()) {
+				directory.mkdirs();
+			}
+		}
+		FileHandle handle = s_tree.find(fileName, generateIfNotExist);
 		return handle;
 	}
 

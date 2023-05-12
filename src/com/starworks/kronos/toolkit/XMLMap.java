@@ -26,7 +26,7 @@ public class XMLMap implements AutoCloseable {
 
 	static {
 		try {
-			FileHandle handle = FileSystem.getFileHandle("map.xsd");
+			FileHandle handle = FileSystem.getFileHandle("map.xsd", true, true);
 			if (handle.wasGenerated()) {
 				String xsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
 						"<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">\n" + //
@@ -93,7 +93,7 @@ public class XMLMap implements AutoCloseable {
 	private void load(String filename) throws IOException {
 		VTDGen vtd = new VTDGen();
 
-		this.m_handle = FileSystem.getFileHandle(filename);
+		this.m_handle = FileSystem.getFileHandle(filename, true, true);
 		if (m_generated = m_handle.wasGenerated()) {
 			try {
 				m_handle.write(MAP_HEADER);

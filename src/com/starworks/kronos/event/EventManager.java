@@ -18,19 +18,16 @@ public final class EventManager {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	public <E extends Event> void register(Class<E> eventClass, EventCallback<E> callback) {
-		((EventDispatcher<E>) m_dispatch.get(eventClass)).add(callback);
+		m_dispatch.get(eventClass).add(callback);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <E extends Event> void unregister(Class<E> eventClass, EventCallback<E> callback) {
-		((EventDispatcher<E>) m_dispatch.get(eventClass)).remove(callback);
+		m_dispatch.get(eventClass).remove(callback);
 	}
 
-	@SuppressWarnings("unchecked")
-	public <E extends Event> void post(E event) {
-		((EventDispatcher<E>) m_dispatch.get(event.getClass())).dispatch(event);
+	public boolean post(Event event) {
+		return m_dispatch.get(event.getClass()).dispatch(event);
 	}
 
 	public void clear() {

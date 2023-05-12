@@ -1,65 +1,28 @@
 package com.starworks.kronos.core;
 
-import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
-import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MAJOR;
-import static org.lwjgl.glfw.GLFW.GLFW_CONTEXT_VERSION_MINOR;
-import static org.lwjgl.glfw.GLFW.GLFW_FALSE;
-import static org.lwjgl.glfw.GLFW.GLFW_PRESS;
-import static org.lwjgl.glfw.GLFW.GLFW_RELEASE;
-import static org.lwjgl.glfw.GLFW.GLFW_REPEAT;
-import static org.lwjgl.glfw.GLFW.GLFW_RESIZABLE;
-import static org.lwjgl.glfw.GLFW.GLFW_TRUE;
-import static org.lwjgl.glfw.GLFW.GLFW_VISIBLE;
-import static org.lwjgl.glfw.GLFW.glfwCreateWindow;
-import static org.lwjgl.glfw.GLFW.glfwDefaultWindowHints;
-import static org.lwjgl.glfw.GLFW.glfwDestroyWindow;
-import static org.lwjgl.glfw.GLFW.glfwGetPrimaryMonitor;
-import static org.lwjgl.glfw.GLFW.glfwGetVideoMode;
-import static org.lwjgl.glfw.GLFW.glfwGetWindowSize;
-import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
-import static org.lwjgl.glfw.GLFW.glfwPollEvents;
-import static org.lwjgl.glfw.GLFW.glfwSetCharModsCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetCursorPosCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetKeyCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetMouseButtonCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetScrollCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowCloseCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowFocusCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowIconifyCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowMaximizeCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowPos;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowPosCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowRefreshCallback;
-import static org.lwjgl.glfw.GLFW.glfwSetWindowSizeCallback;
-import static org.lwjgl.glfw.GLFW.glfwShowWindow;
-import static org.lwjgl.glfw.GLFW.glfwSwapBuffers;
-import static org.lwjgl.glfw.GLFW.glfwSwapInterval;
-import static org.lwjgl.glfw.GLFW.glfwWindowHint;
-import static org.lwjgl.glfw.GLFW.glfwWindowShouldClose;
-import static org.lwjgl.system.MemoryUtil.NULL;
-import static org.lwjgl.opengl.GL.*;
-import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.glfw.GLFW.glfwInit;
+import static org.lwjgl.glfw.GLFW.glfwSetErrorCallback;
+import static org.lwjgl.glfw.GLFW.glfwTerminate;
 
 import java.nio.IntBuffer;
-import java.util.Deque;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.Objects;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
 
+import org.lwjgl.glfw.Callbacks;
 import org.lwjgl.glfw.GLFW;
+import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.glfw.GLFWVidMode;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
 import com.starworks.kronos.event.Event;
 import com.starworks.kronos.exception.Exceptions;
 import com.starworks.kronos.exception.KronosRuntimeException;
 import com.starworks.kronos.logging.Logger;
-
-import imgui.ImGui;
-import imgui.flag.ImGuiConfigFlags;
-import imgui.gl3.ImGuiImplGl3;
-import imgui.glfw.ImGuiImplGlfw;
+import com.starworks.kronos.rendering.platform.OpenGLContext;
+import com.starworks.kronos.rendering.platform.RenderingContext;
 
 public final class Window implements AutoCloseable {
 	private static final Logger LOGGER = Logger.getLogger(Window.class);
@@ -68,26 +31,17 @@ public final class Window implements AutoCloseable {
 	private int m_height;
 	private String m_title;
 	private boolean m_vsync;
-	private final Lock m_updateLock;
-	private final Lock m_destructionLock;
-	private long m_pointer;
+	private final Lock m_lock;
+	private long m_windowPointer;
+	private RenderingContext m_context;
 	private Consumer<Event> m_onEvent;
-	
-	private final ImGuiImplGlfw m_imguiImplGlfw;
-	private final ImGuiImplGl3 m_imguiImplGl3;
-
-	private final Deque<WindowLayer> m_layers;
 
 	private Window(int width, int height, String title) {
 		this.m_width = width;
 		this.m_height = height;
 		this.m_title = title;
-		this.m_updateLock = new ReentrantLock();
-		this.m_destructionLock = new ReentrantLock();
+		this.m_lock = new ReentrantLock();
 		this.m_onEvent = null;
-		this.m_imguiImplGlfw = new ImGuiImplGlfw();
-		this.m_imguiImplGl3 = new ImGuiImplGl3();
-		this.m_layers = new ConcurrentLinkedDeque<WindowLayer>();
 	}
 
 	public static Window create(int width, int height, String title) {
@@ -99,7 +53,39 @@ public final class Window implements AutoCloseable {
 		window.initialize();
 		return window;
 	}
-	
+
+	private void initialize() {
+		GLFWErrorCallback callback = GLFWErrorCallback.create((int error, long description) -> {
+		    LOGGER.error("GLFW error [" + error + "]: " + GLFWErrorCallback.getDescription(description));
+		});
+		glfwSetErrorCallback(callback);
+		if (!glfwInit()) {
+			throw new KronosRuntimeException(Exceptions.getMessage("core.window.initializationFailed"));
+		}
+		LOGGER.info("GLFW initialized");
+		
+		setWindowHints();
+		LOGGER.info("Window[{0}] hints set", m_title);
+
+		m_windowPointer = GLFW.glfwCreateWindow(m_width, m_height, m_title, MemoryUtil.NULL, MemoryUtil.NULL);
+		if (m_windowPointer == MemoryUtil.NULL) {
+			throw new KronosRuntimeException(Exceptions.getMessage("core.window.creationFailed"));
+		}
+
+		m_context = new OpenGLContext(m_windowPointer);
+		m_context.initialize();
+
+		LOGGER.info("Window[{0}] assigned to pointer '{1}L'", m_title, m_windowPointer);
+
+		setWindowPosition();
+		LOGGER.info("Window[{0}] centered", m_title);
+
+		setVSync(true);
+
+		GLFW.glfwShowWindow(m_windowPointer);
+		LOGGER.info("Window[{0}] shown", m_title);
+	}
+
 	public Window onEvent(Consumer<Event> onEvent) {
 		if (onEvent == null) {
 			throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidEventCallback"));
@@ -109,149 +95,86 @@ public final class Window implements AutoCloseable {
 		return this;
 	}
 
-	public Window addWindowLayer(WindowLayer layer) {
-		if (layer == null) {
-			throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidLayer"));
-		}
-		m_layers.add(layer);
-		return this;
-	}
-
-	private void initialize() {
-		GLFWContext.init();
-		LOGGER.info("GLFWContext initialized");
-		setWindowHints();
-		LOGGER.info("Window[{0}] hints set", m_title);
-
-		m_pointer = glfwCreateWindow(m_width, m_height, m_title, NULL, NULL);
-		if (m_pointer == NULL) {
-			throw new KronosRuntimeException(Exceptions.getMessage("core.window.creationFailed"));
-		}
-		LOGGER.info("Window[{0}] assigned to pointer '{1}L'", m_title, m_pointer);
-
-		setWindowPosition();
-		LOGGER.info("Window[{0}] centered", m_title);
-
-		glfwMakeContextCurrent(m_pointer);
-		LOGGER.info("Window[{0}] context made current", m_title);
-		setVSync(true);
-
-		createCapabilities();
-
-		initializeImGui();
-
-		glfwShowWindow(m_pointer);
-		LOGGER.info("Window[{0}] shown", m_title);
-	}
-	
 	private void registerEvents() {
-		glfwSetKeyCallback(m_pointer, (window, key, scancode, action, mods) -> {
+		GLFW.glfwSetKeyCallback(m_windowPointer, (window, key, scancode, action, mods) -> {
 			m_onEvent.accept(switch (action) {
-			case GLFW_PRESS -> new Event.KeyPressed(key, scancode, mods, System.nanoTime());
-			case GLFW_RELEASE -> new Event.KeyReleased(key, scancode, mods, System.nanoTime());
-			case GLFW_REPEAT -> new Event.KeyRepeated(key, scancode, mods, System.nanoTime());
+			case GLFW.GLFW_PRESS -> new Event.KeyPressed(key, scancode, mods, System.nanoTime());
+			case GLFW.GLFW_RELEASE -> new Event.KeyReleased(key, scancode, mods, System.nanoTime());
+			case GLFW.GLFW_REPEAT -> new Event.KeyRepeated(key, scancode, mods, System.nanoTime());
 			default -> throw new IllegalArgumentException(Exceptions.getMessage("core.window.invalidEvent"));
 			});
 		});
-		glfwSetCharModsCallback(m_pointer, (window, codepoint, mods) -> {
-			m_onEvent.accept(new Event.KeyTyped(codepoint, mods, System.nanoTime()));
-		});
-		glfwSetMouseButtonCallback(m_pointer, (window, button, action, mods) -> {
+		GLFW.glfwSetMouseButtonCallback(m_windowPointer, (window, button, action, mods) -> {
 			m_onEvent.accept(switch (action) {
-			case GLFW_PRESS -> new Event.MouseButtonPressed(button, mods, System.nanoTime());
-			case GLFW_RELEASE -> new Event.MouseButtonReleased(button, mods, System.nanoTime());
+			case GLFW.GLFW_PRESS -> new Event.MouseButtonPressed(button, mods, System.nanoTime());
+			case GLFW.GLFW_RELEASE -> new Event.MouseButtonReleased(button, mods, System.nanoTime());
 			default -> throw new IllegalArgumentException(Exceptions.getMessage("core.window.invalidEvent"));
 			});
 		});
-		glfwSetCursorPosCallback(m_pointer, (window, xpos, ypos) -> {
+		GLFW.glfwSetCursorPosCallback(m_windowPointer, (window, xpos, ypos) -> {
 			m_onEvent.accept(new Event.MouseMoved(xpos, ypos, System.nanoTime()));
 		});
-		glfwSetScrollCallback(m_pointer, (window, xoffset, yoffset) -> {
-			m_onEvent.accept(new Event.MouseWheel(xoffset, yoffset, System.nanoTime()));
+		GLFW.glfwSetScrollCallback(m_windowPointer, (window, xoffset, yoffset) -> {
+			m_onEvent.accept(new Event.MouseScrolled(xoffset, yoffset, System.nanoTime()));
 		});
-		glfwSetWindowSizeCallback(m_pointer, (window, width, height) -> {
+		GLFW.glfwSetWindowSizeCallback(m_windowPointer, (window, width, height) -> {
 			m_onEvent.accept(new Event.WindowResized(width, height, System.nanoTime()));
 		});
-		glfwSetWindowCloseCallback(m_pointer, (window) -> {
+		GLFW.glfwSetWindowCloseCallback(m_windowPointer, (window) -> {
 			m_onEvent.accept(new Event.WindowClosed(System.nanoTime()));
 		});
-		glfwSetWindowPosCallback(m_pointer, (window, xpos, ypos) -> {
+		GLFW.glfwSetWindowPosCallback(m_windowPointer, (window, xpos, ypos) -> {
 			m_onEvent.accept(new Event.WindowMoved(xpos, ypos, System.nanoTime()));
 		});
-		glfwSetWindowFocusCallback(m_pointer, (window, focused) -> {
+		GLFW.glfwSetWindowFocusCallback(m_windowPointer, (window, focused) -> {
 			if (focused) {
 				m_onEvent.accept(new Event.WindowFocusGained(System.nanoTime()));
 			} else {
 				m_onEvent.accept(new Event.WindowFocusLost(System.nanoTime()));
 			}
 		});
-		glfwSetWindowIconifyCallback(m_pointer, (window, iconified) -> {
+		GLFW.glfwSetWindowIconifyCallback(m_windowPointer, (window, iconified) -> {
 			if (iconified) {
 				m_onEvent.accept(new Event.WindowMinimized(System.nanoTime()));
 			} else {
 				m_onEvent.accept(new Event.WindowRestored(System.nanoTime()));
 			}
 		});
-		glfwSetWindowMaximizeCallback(m_pointer, (window, maximized) -> {
+		GLFW.glfwSetWindowMaximizeCallback(m_windowPointer, (window, maximized) -> {
 			if (maximized) {
 				m_onEvent.accept(new Event.WindowMaximized(System.nanoTime()));
 			} else {
 				m_onEvent.accept(new Event.WindowUnmaximized(System.nanoTime()));
 			}
 		});
-		glfwSetWindowRefreshCallback(m_pointer, (window) -> {
+		GLFW.glfwSetWindowRefreshCallback(m_windowPointer, (window) -> {
 			m_onEvent.accept(new Event.WindowRefreshed(System.nanoTime()));
 		});
 	}
 
 	public void update() {
-		m_updateLock.lock();
-		try {
-			glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-			m_imguiImplGlfw.newFrame();
-			ImGui.newFrame();
-
-			m_layers.forEach(WindowLayer::onUpdate);
-			
-			ImGui.render();
-			m_imguiImplGl3.renderDrawData(ImGui.getDrawData());
-			
-			if (ImGui.getIO().hasConfigFlags(ImGuiConfigFlags.ViewportsEnable)) {
-				long backupCurrentContext = GLFW.glfwGetCurrentContext();
-				ImGui.updatePlatformWindows();
-				ImGui.renderPlatformWindowsDefault();
-				glfwMakeContextCurrent(backupCurrentContext);
-			}
-
-			glfwSwapBuffers(m_pointer);
-			glfwPollEvents();
-		} finally {
-			m_updateLock.unlock();
-		}
+		GLFW.glfwPollEvents();
+		m_context.swapBuffers();
 	}
 
 	public boolean shouldClose() {
-		return glfwWindowShouldClose(m_pointer);
+		return GLFW.glfwWindowShouldClose(m_windowPointer);
 	}
 
 	private void setWindowHints() {
-		glfwDefaultWindowHints();
+		GLFW.glfwDefaultWindowHints();
 		LOGGER.debug("Set default GLFW window hints");
-		glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE);
+		GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
 		LOGGER.debug("Set GLFW window hint 'GLFW_VISIBLE' to `GLFW_FALSE`");
-		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
 		LOGGER.debug("Set GLFW window hint 'GLFW_RESIZABLE' to `GLFW_TRUE`");
-		
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
 		LOGGER.debug("Set GLFW window hint 'GLFW_CONTEXT_VERSION_MAJOR' to `{0}`", 3);
-		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 0);
 		LOGGER.debug("Set GLFW window hint 'GLFW_CONTEXT_VERSION_MINOR' to `{0}`", 0);
-//		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-//		LOGGER.debug("Set GLFW window hint 'GLFW_OPENGL_PROFILE' to `GLFW_OPENGL_CORE_PROFILE`");
-//		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
-//		LOGGER.debug("Set GLFW window hint 'GLFW_OPENGL_FORWARD_COMPAT' to `GLFW_TRUE`");
+		GLFW.glfwWindowHint(GLFW.GLFW_OPENGL_FORWARD_COMPAT, GLFW.GLFW_TRUE);
+		LOGGER.debug("Set GLFW window hint 'GLFW_OPENGL_FORWARD_COMPAT' to `GLFW_TRUE`");
 	}
 
 	private void setWindowPosition() {
@@ -259,55 +182,39 @@ public final class Window implements AutoCloseable {
 			IntBuffer pWidth = stack.mallocInt(1);
 			IntBuffer pHeight = stack.mallocInt(1);
 
-			glfwGetWindowSize(m_pointer, pWidth, pHeight);
+			GLFW.glfwGetWindowSize(m_windowPointer, pWidth, pHeight);
 
-			GLFWVidMode vidmode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+			GLFWVidMode vidmode = GLFW.glfwGetVideoMode(GLFW.glfwGetPrimaryMonitor());
 
-			glfwSetWindowPos(m_pointer, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
+			GLFW.glfwSetWindowPos(m_windowPointer, (vidmode.width() - pWidth.get(0)) / 2, (vidmode.height() - pHeight.get(0)) / 2);
 		}
-	}
-
-	private void initializeImGui() {
-		// Setup Dear ImGui context
-		ImGui.createContext();
-//		ImGuiIO io = ImGui.getIO();
-		LOGGER.debug("Created Dear ImGui context");
-		
-		// Setup Dear ImGui style
-		ImGui.styleColorsDark();
-		// ImGui.styleColorsClassic();
-		
-		m_imguiImplGlfw.init(m_pointer, true);
-
-		String glslVersion = "#version 130";
-//		if (SystemInfo.getOSName().contains("mac") || SystemInfo.getOSName().contains("darwin")) {
-//			glslVersion = "#version 150";
-//		} else {
-//			glslVersion = "#version 330";
-//		}
-
-		m_imguiImplGl3.init(glslVersion);
 	}
 
 	@Override
 	public void close() {
-		m_destructionLock.lock();
+		m_lock.lock();
 		try {
-			m_imguiImplGlfw.dispose();
-			m_imguiImplGl3.dispose();
-			ImGui.destroyContext();
-			glfwFreeCallbacks(m_pointer);
-			glfwDestroyWindow(m_pointer);
-			GLFWContext.terminate();
+			Callbacks.glfwFreeCallbacks(m_windowPointer);
+			GLFW.glfwDestroyWindow(m_windowPointer);
+			glfwTerminate();
+			Objects.requireNonNull(glfwSetErrorCallback(null)).free();
 			LOGGER.info("Window[{0}] closed", m_title);
 			LOGGER.close();
 		} finally {
-			m_destructionLock.unlock();
+			m_lock.unlock();
 		}
 	}
 
+	public int getWidth() {
+		return m_width;
+	}
+
+	public int getHeight() {
+		return m_height;
+	}
+
 	public Window setVSync(boolean vsync) {
-		glfwSwapInterval((m_vsync = vsync) ? 1 : 0);
+		GLFW.glfwSwapInterval((m_vsync = vsync) ? 1 : 0);
 		LOGGER.info("Window[{0}] vsync {1}", m_title, vsync ? "enabled" : "disabled");
 		return this;
 	}
@@ -316,9 +223,7 @@ public final class Window implements AutoCloseable {
 		return m_vsync;
 	}
 
-	@FunctionalInterface
-	public interface WindowLayer {
-
-		void onUpdate();
+	public long getWindowPointer() {
+		return m_windowPointer;
 	}
 }
