@@ -14,6 +14,7 @@ import com.starworks.kronos.jobs.Job;
 import com.starworks.kronos.jobs.JobManager;
 import com.starworks.kronos.logging.Logger;
 import com.starworks.kronos.scene.Scene;
+import com.starworks.kronos.scene.SceneManager;
 import com.starworks.kronos.toolkit.concurrent.ArrivalGate;
 
 import imgui.ImGui;
@@ -21,7 +22,7 @@ import imgui.ImGui;
 public abstract class Application implements AutoCloseable {
 	private final Logger LOGGER = Logger.getLogger(Application.class);
 	
-	private static ArrivalGate s_gate = new ArrivalGate(1);
+	private static final ArrivalGate s_gate = new ArrivalGate(1);
 	private static volatile Application s_instance = null;
 
 	private static final double NANOS_PER_SECOND = 1e9;
@@ -32,7 +33,7 @@ public abstract class Application implements AutoCloseable {
 	protected ImGuiLayer m_imGuiLayer;
 	protected JobManager m_jobManager;
 	protected InputManager m_inputManager;
-	protected Scene m_scene; // TODO: temporary
+	protected Scene m_scene;
 	private final TimeStep m_timeStep;
 	private final TimeStep m_fixedTimeStep;
 	private final double m_fixedUpdateRate;
@@ -60,7 +61,7 @@ public abstract class Application implements AutoCloseable {
 		this.m_imGuiLayer = new ImGuiLayer();
 		this.m_jobManager = JobManager.create();
 		this.m_inputManager = new InputManager(m_eventManager);
-		this.m_scene = new Scene();
+		this.m_scene = SceneManager.get().getCurrentScene();
 		this.m_timeStep = new TimeStep(updateRate);
 		this.m_fixedTimeStep = new TimeStep(fixedUpdateRate);
 		this.m_fixedUpdateRate = fixedUpdateRate;
@@ -141,9 +142,7 @@ public abstract class Application implements AutoCloseable {
 				m_layerStack.update(m_timeStep);
 				
 				m_imGuiLayer.begin();
-				for (var layer : m_layerStack) {
-					layer.onImGuiRender();
-				}
+				m_layerStack.imGuiRender();
 				m_imGuiLayer.end();
 				
 				m_window.update();

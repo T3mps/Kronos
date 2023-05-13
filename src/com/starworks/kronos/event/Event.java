@@ -15,19 +15,38 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final int CATEGORY_WINDOW = 8;
 
 	protected final EventType m_type;
-	protected final int m_category;
 	protected final long m_timestamp;
 	protected boolean m_handled;
 
-	protected Event(EventType type, int category, long timestamp) {
+	protected Event(EventType type, long timestamp) {
 		this.m_type = type;
-		this.m_category = category;
 		this.m_timestamp = timestamp;
 	}
 
-	public final boolean isInCategory(int category)
-	{
-		return (m_category & category) > 0;
+	public static int getCategory(Class<? extends Event> eventType) {
+		if (eventType == KeyPressed.class) return CATEGORY_INPUT | CATEGORY_KEYBOARD;
+		else if (eventType == KeyReleased.class) return CATEGORY_INPUT | CATEGORY_KEYBOARD;
+		else if (eventType == KeyRepeated.class) return CATEGORY_INPUT | CATEGORY_KEYBOARD;
+		else if (eventType == KeyTyped.class) return CATEGORY_INPUT | CATEGORY_KEYBOARD;
+		else if (eventType == MouseButtonPressed.class) return CATEGORY_INPUT | CATEGORY_MOUSE;
+		else if (eventType == MouseButtonReleased.class) return CATEGORY_INPUT | CATEGORY_MOUSE;
+		else if (eventType == MouseMoved.class) return CATEGORY_INPUT | CATEGORY_MOUSE;
+		else if (eventType == MouseScrolled.class) return CATEGORY_INPUT | CATEGORY_MOUSE;
+		else if (eventType == WindowResized.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowClosed.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowMoved.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowFocusGained.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowFocusLost.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowMinimized.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowRestored.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowMaximized.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowUnmaximized.class) return CATEGORY_WINDOW;
+		else if (eventType == WindowRefreshed.class) return CATEGORY_WINDOW;
+		return CATEGORY_NONE;
+	}
+	
+	public final boolean isInCategory(int category) {
+		return (getCategory() & category) > 0;
 	}
 	
 	public final EventType getType() {
@@ -35,7 +54,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	}
 
 	public final int getCategory() {
-		return m_category;
+		return getCategory(this.getClass());
 	}
 
 	public final long getTimestamp() {
@@ -46,8 +65,8 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		return m_handled;
 	}
 
-	public final void setHandled(boolean handled) {
-		this.m_handled = handled;
+	public final boolean setHandled(boolean handled) {
+		return m_handled = handled;
 	}
 
 	@Override
@@ -60,7 +79,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_mods;
 
 		public KeyPressed(int keyCode, int scancode, int mods, long timestamp) {
-			super(EventType.KEY_PRESSED, CATEGORY_INPUT | CATEGORY_KEYBOARD, timestamp);
+			super(EventType.KEY_PRESSED, timestamp);
 			this.m_keyCode = keyCode;
 			this.m_scancode = scancode;
 			this.m_mods = mods;
@@ -91,7 +110,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_mods;
 
 		public KeyReleased(int keyCode, int scancode, int mods, long timestamp) {
-			super(EventType.KEY_RELEASED, Event.CATEGORY_INPUT | Event.CATEGORY_KEYBOARD, timestamp);
+			super(EventType.KEY_RELEASED, timestamp);
 			this.m_keyCode = keyCode;
 			this.m_scancode = scancode;
 			this.m_mods = mods;
@@ -122,7 +141,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_mods;
 
 		public KeyRepeated(int keyCode, int scancode, int mods, long timestamp) {
-			super(EventType.KEY_REPEATED, CATEGORY_INPUT | CATEGORY_KEYBOARD, timestamp);
+			super(EventType.KEY_REPEATED, timestamp);
 			this.m_keyCode = keyCode;
 			this.m_scancode = scancode;
 			this.m_mods = mods;
@@ -152,7 +171,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_mods;
 
 		public KeyTyped(int keyCode, int mods, long timestamp) {
-			super(EventType.KEY_TYPED, CATEGORY_INPUT | CATEGORY_KEYBOARD, timestamp);
+			super(EventType.KEY_TYPED, timestamp);
 			this.m_keyCode = keyCode;
 			this.m_mods = mods;
 		}
@@ -177,7 +196,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_mods;
 
 		public MouseButtonPressed(int button, int mods, long timestamp) {
-			super(EventType.MOUSE_PRESSED, CATEGORY_INPUT | CATEGORY_MOUSE, timestamp);
+			super(EventType.MOUSE_PRESSED, timestamp);
 			this.m_button = button;
 			this.m_mods = mods;
 		}
@@ -202,7 +221,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_mods;
 
 		public MouseButtonReleased(int button, int mods, long timestamp) {
-			super(EventType.MOUSE_RELEASED, CATEGORY_INPUT | CATEGORY_MOUSE, timestamp);
+			super(EventType.MOUSE_RELEASED, timestamp);
 			this.m_button = button;
 			this.m_mods = mods;
 		}
@@ -227,7 +246,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final double m_yPosition;
 
 		public MouseMoved(double xPosition, double yPosition, long timestamp) {
-			super(EventType.MOUSE_MOVED, CATEGORY_INPUT | CATEGORY_MOUSE, timestamp);
+			super(EventType.MOUSE_MOVED, timestamp);
 			this.m_xPosition = xPosition;
 			this.m_yPosition = yPosition;
 		}
@@ -252,7 +271,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final double m_yOffset;
 
 		public MouseScrolled(double xOffset, double yOffset, long timestamp) {
-			super(EventType.MOUSE_SCROLLED, CATEGORY_INPUT | CATEGORY_MOUSE, timestamp);
+			super(EventType.MOUSE_SCROLLED, timestamp);
 			this.m_xOffset = xOffset;
 			this.m_yOffset = yOffset;
 		}
@@ -277,7 +296,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_height;
 
 		public WindowResized(int width, int height, long timestamp) {
-			super(EventType.WINDOW_RESIZED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_RESIZED, timestamp);
 			this.m_width = width;
 			this.m_height = height;
 		}
@@ -299,7 +318,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowClosed extends Event {
 
 		public WindowClosed(long timestamp) {
-			super(EventType.WINDOW_CLOSED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_CLOSED, timestamp);
 		}
 
 		@Override
@@ -314,7 +333,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 		private final int m_yPosition;
 
 		public WindowMoved(int xPosition, int yPosition, long timestamp) {
-			super(EventType.WINDOW_MOVED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_MOVED, timestamp);
 			this.m_xPosition = xPosition;
 			this.m_yPosition = yPosition;
 		}
@@ -336,7 +355,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowFocusGained extends Event {
 
 		public WindowFocusGained(long timestamp) {
-			super(EventType.WINDOW_FOCUS_GAINED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_FOCUS_GAINED, timestamp);
 		}
 
 		@Override
@@ -348,7 +367,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowFocusLost extends Event {
 
 		public WindowFocusLost(long timestamp) {
-			super(EventType.WINDOW_FOCUS_LOST, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_FOCUS_LOST, timestamp);
 		}
 
 		@Override
@@ -360,7 +379,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowMinimized extends Event {
 
 		public WindowMinimized(long timestamp) {
-			super(EventType.WINDOW_MINIMIZED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_MINIMIZED, timestamp);
 		}
 
 		@Override
@@ -372,7 +391,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowRestored extends Event {
 
 		public WindowRestored(long timestamp) {
-			super(EventType.WINDOW_RESTORED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_RESTORED, timestamp);
 		}
 
 		@Override
@@ -384,7 +403,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowMaximized extends Event {
 
 		public WindowMaximized(long timestamp) {
-			super(EventType.WINDOW_MAXIMIZED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_MAXIMIZED, timestamp);
 		}
 
 		@Override
@@ -396,7 +415,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowUnmaximized extends Event {
 
 		public WindowUnmaximized(long timestamp) {
-			super(EventType.WINDOW_UNMAXIMIZED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_UNMAXIMIZED, timestamp);
 		}
 
 		@Override
@@ -408,7 +427,7 @@ public sealed abstract class Event permits Event.KeyPressed, Event.KeyReleased, 
 	public static final class WindowRefreshed extends Event {
 
 		public WindowRefreshed(long timestamp) {
-			super(EventType.WINDOW_REFRESHED, CATEGORY_WINDOW, timestamp);
+			super(EventType.WINDOW_REFRESHED, timestamp);
 		}
 
 		@Override

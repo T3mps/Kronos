@@ -1,36 +1,38 @@
 package com.starworks.kronos.event;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 final class EventDispatcher<E extends Event> {
 
-	private final List<EventCallback<E>> m_callbacks;
+	private final List<PriorityEventCallback<E>> m_callbacks;
 
-	public EventDispatcher() {
-		this.m_callbacks = new CopyOnWriteArrayList<EventCallback<E>>();
+	EventDispatcher() {
+		this.m_callbacks = new CopyOnWriteArrayList<PriorityEventCallback<E>>();
 	}
 
 	@SuppressWarnings("unchecked")
-	public void add(EventCallback<? extends Event> callback) {
-		m_callbacks.add((EventCallback<E>) callback);
-	}
+	void add(PriorityEventCallback<? extends Event> callback) {
+        m_callbacks.add((PriorityEventCallback<E>) callback);
+        m_callbacks.sort(Comparator.comparingInt(PriorityEventCallback<E>::priority).reversed());
+    }
 
-	public void remove(EventCallback<? extends Event> callback) {
-		m_callbacks.remove(callback);
+	void remove(EventCallback<? extends Event> callback) {
+		m_callbacks.removeIf(wrapper -> wrapper.callback().equals(callback));
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean dispatch(Event event) {
-		for (var callback : m_callbacks) {
-			if (callback.accept((E) event)) {
+	boolean dispatch(Event event) {
+		for (var wrapper : m_callbacks) {
+			if (wrapper.callback().accept((E) event)) {
 				return true;
 			}
 		}
 		return false;
 	}
 
-	public void clear() {
+	void clear() {
 		m_callbacks.clear();
 	}
 }

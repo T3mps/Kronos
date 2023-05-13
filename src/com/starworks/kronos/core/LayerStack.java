@@ -24,6 +24,11 @@ public class LayerStack implements Iterable<Layer> {
 		overlay.onAttach();
 	}
 
+	public void popLayer(Layer layer) {
+		m_layers.remove(layer);
+		layer.onDetach();
+	}
+	
 	public Layer popLayer() {
 		var layer = m_layers.pop();
 		layer.onDetach();
@@ -35,11 +40,6 @@ public class LayerStack implements Iterable<Layer> {
 		overlay.onDetach();
 		return overlay;
 	}
-	
-	public void popLayer(Layer layer) {
-		m_layers.remove(layer);
-		layer.onDetach();
-	}
 
 	public void update(TimeStep timestep) {
 		for (var layer : m_layers) {
@@ -49,12 +49,19 @@ public class LayerStack implements Iterable<Layer> {
 		}
 	}
 
-	public boolean onEvent(Event event) {
-		for (var it = m_layers.descendingIterator(); it.hasNext();) {
-			if (event.wasHandled()) break;
-			var layer = it.next();
+	public void imGuiRender() {
+		for (var layer : m_layers) {
 			if (layer.isEnabled()) {
-				layer.onEvent(event);
+				layer.onImGuiRender();
+			}
+		}
+	}
+	
+	public boolean onEvent(Event event) {
+		for (var layer : m_layers) {
+			if (event.wasHandled()) break;
+			if (layer.isEnabled()) {
+				event.setHandled(layer.onEvent(event));
 			}
 		}
 		return event.wasHandled();

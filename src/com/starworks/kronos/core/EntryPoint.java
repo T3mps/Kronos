@@ -28,7 +28,7 @@ public final class EntryPoint {
 
 	static {
 		try {
-			Configuration.load("configuration.xml");
+			Configuration.load("data/configuration.xml");
 		} catch (InstanceAlreadyExistsException e) {
 			System.exit(CONFIGURATION_ALREADY_LOADED);
 		} catch (IllegalStateException e) {
@@ -71,6 +71,16 @@ public final class EntryPoint {
 		}
 
 		String applicationClass = Configuration.runtime.implementation();
+		if (applicationClass == "") {
+			// first time run
+			LOGGER.warn("\n\n\t###########################  IMPORTANT  ###########################"
+					+ "\n\n\tApplication implementation not set. Open working directory"
+					+ "\n\t(default ../AppData/Roaming/Kronos) and open configuration.xml."
+					+ "\n\tSet the implementation attribute on the application element to the"
+					+ "\n\tfully qualified name of your class."
+					+ "\n\n\t###################################################################");
+			exit(NORMAL);
+		}
 		try (var application = (Application) Reflections.newInstance(applicationClass)) {
 			application.initialize();
 			application.start();

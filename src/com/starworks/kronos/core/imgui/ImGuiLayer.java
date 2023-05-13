@@ -2,11 +2,17 @@ package com.starworks.kronos.core.imgui;
 
 import static org.lwjgl.glfw.GLFW.glfwMakeContextCurrent;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.starworks.kronos.core.Application;
 import com.starworks.kronos.core.Layer;
 import com.starworks.kronos.event.Event;
+import com.starworks.kronos.files.FileSystem;
 import com.starworks.kronos.logging.Logger;
 import com.starworks.kronos.toolkit.SystemInfo;
 
@@ -39,18 +45,29 @@ public class ImGuiLayer extends Layer {
 		LOGGER.debug("Created Dear ImGui context");
 
 		m_io = ImGui.getIO();
+		Path dirPath = Paths.get(FileSystem.get("data"));
+		if (!Files.exists(dirPath)) {
+		    try {
+		        Files.createDirectories(dirPath);
+		    } catch (IOException e) {
+		    	LOGGER.error("Unsuccessfully attempted to generated data folder");
+		    }
+		}
+
+		m_io.setIniFilename(dirPath.resolve("imgui.ini").toString());
+		
 		m_io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);
 		m_io.addConfigFlags(ImGuiConfigFlags.DockingEnable);
 		m_io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 
 		float fontSize = 18;
-		m_io.getFonts().addFontFromFileTTF("assets/fonts/OpenSans-Bold.ttf", fontSize);
-		m_io.setFontDefault(m_io.getFonts().addFontFromFileTTF("assets/fonts/OpenSans-Regular.ttf", fontSize));
+		m_io.getFonts().addFontFromFileTTF(FileSystem.get("assets/fonts/OpenSans-Bold.ttf"), fontSize);
+		m_io.setFontDefault(m_io.getFonts().addFontFromFileTTF(FileSystem.get("assets/fonts/OpenSans-Bold.ttf"), fontSize));
 
 		ImGui.styleColorsDark();
 
 		ImGuiStyle style = ImGui.getStyle();
-		if ((m_io.getConfigFlags() & ImGuiConfigFlags.ViewportsEnable) == 0) {
+		if ((m_io.getConfigFlags() & ImGuiConfigFlags.ViewportsEnable) > 0) {
 			style.setWindowRounding(0f);
 			style.setColor(ImGuiCol.WindowBg, 1);
 		}
@@ -73,11 +90,13 @@ public class ImGuiLayer extends Layer {
 	}
 
 	@Override
-	public void onEvent(Event event) {
+	public boolean onEvent(Event event) {
 		if (m_consumeEvents) {
 			m_io = ImGui.getIO();
-			event.setHandled((event.isInCategory(Event.CATEGORY_KEYBOARD) && m_io.getWantCaptureKeyboard()) || (event.isInCategory(Event.CATEGORY_MOUSE) && m_io.getWantCaptureMouse()));
+			return (event.isInCategory(Event.CATEGORY_KEYBOARD) && m_io.getWantCaptureKeyboard()) ||
+				   (event.isInCategory(Event.CATEGORY_MOUSE) && m_io.getWantCaptureMouse());
 		}
+		return false;
 	}
 	
 	public void begin() {

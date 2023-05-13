@@ -27,6 +27,7 @@ public sealed class FileAppender implements Appender permits RotatingFileAppende
 
 	public FileAppender(String path) {
 		String p = path + (path.endsWith(Configuration.logging.extension()) ? "" : Configuration.logging.extension());
+		p = FileSystem.get(p);
 		try {
 			this.m_handle = FileSystem.getFileHandle(p, true, true);
 		} catch (IOException e) {

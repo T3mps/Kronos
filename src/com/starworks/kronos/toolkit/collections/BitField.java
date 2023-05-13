@@ -6,7 +6,7 @@ import com.starworks.kronos.toolkit.memory.UnsafeSupport;
 
 import sun.misc.Unsafe;
 
-public class BitField implements Closeable {
+public final class BitField implements Closeable {
 
 	private static final Unsafe unsafe = UnsafeSupport.getUnsafe();
 

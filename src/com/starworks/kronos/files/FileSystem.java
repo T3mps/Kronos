@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Iterator;
 
+import com.starworks.kronos.toolkit.SystemInfo;
+
 public class FileSystem {
 
 	public static final char separatorChar = '/';
@@ -12,6 +14,8 @@ public class FileSystem {
 
 	private static final FileTree s_tree = new FileTree();
 
+	private static String s_workingDirectory = defaultWorkingDirectory();
+	
 	private FileSystem() {}
 
 	public static FileHandle getFileHandle(String fileName, boolean createDirectories, boolean generateIfNotExist) throws IOException {
@@ -67,5 +71,22 @@ public class FileSystem {
 
 	public static String stringify() {
 		return s_tree.toString();
+	}
+	
+	public static String get(String filepath) {
+		return s_workingDirectory + separator + filepath;
+	}
+	
+	public static String defaultWorkingDirectory() {
+		String wkdir = SystemInfo.getUserHome() + "\\AppData\\Roaming\\Kronos";
+		return wkdir.replace("\\\\", separator).replace("\\", separator);
+	}
+	
+	public static String getWorkingDirectory() {
+		return s_workingDirectory;
+	}
+	
+	public static void setWorkingDirectory(String workingDirectory) {
+		if (workingDirectory != null) s_workingDirectory = workingDirectory.replace("\\\\", separator).replace("\\", separator);
 	}
 }

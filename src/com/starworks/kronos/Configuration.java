@@ -33,12 +33,14 @@ public final class Configuration {
 		} catch (InterruptedException e) {
 			throw new InstanceAlreadyExistsException();
 		}
+		
+		String absolutePath = FileSystem.get(path);
 
-		tryConfiguration(path);
+		tryConfiguration(absolutePath);
 
 		try {
 			VTDGen vg = new VTDGen();
-			if (vg.parseFile(path, true)) {
+			if (vg.parseFile(absolutePath, true)) {
 				VTDNav vn = vg.getNav();
 				AutoPilot ap = new AutoPilot(vn);
 
@@ -59,6 +61,7 @@ public final class Configuration {
 				int fixedUpdatesPerSecond = 60;
 				double fixedUpdateRate = 1.0 / (double) fixedUpdatesPerSecond;
 				boolean debug = false;
+				String workingDirectory = "";
 				String applicationImplementation = null;
 				ap.selectXPath("//application/runtime/updatesPerSecond");
 				if (ap.evalXPath() != -1) {
@@ -74,11 +77,16 @@ public final class Configuration {
 				if (ap.evalXPath() != -1) {
 					debug = Boolean.parseBoolean(vn.toString(vn.getText()));
 				}
+				ap.selectXPath("//application/runtime/workingDirectory");
+				if (ap.evalXPath() != -1) {
+					workingDirectory = vn.toString(vn.getText());
+					FileSystem.setWorkingDirectory(workingDirectory);
+				}
 				ap.selectXPath("//application/@implementation");
 				if (ap.evalXPath() != -1) {
 					applicationImplementation = vn.toString(vn.getAttrVal("implementation"));
 				}
-				runtime = new RuntimeData(applicationImplementation, updatesPerSecond, updateRate, fixedUpdatesPerSecond, fixedUpdateRate, debug);
+				runtime = new RuntimeData(applicationImplementation, updatesPerSecond, updateRate, fixedUpdatesPerSecond, fixedUpdateRate, debug, workingDirectory);
 
 				// window
 				String windowTitle = null;
@@ -274,6 +282,7 @@ public final class Configuration {
 						"\t\t\t<xs:element name=\"updatesPerSecond\" type=\"xs:integer\" />\n" + //
 						"\t\t\t<xs:element name=\"fixedUpdatesPerSecond\" type=\"xs:integer\" />\n" + //
 						"\t\t\t<xs:element name=\"debug\" type=\"xs:boolean\" />\n" + //
+						"\t\t\t<xs:element name=\"workingDirectory\" type=\"xs:string\" />\n" + //
 						"\t\t</xs:sequence>\n" + //
 						"\t</xs:complexType>\n" + //
 						"\t<xs:complexType name=\"windowType\">\n" + //
@@ -336,6 +345,7 @@ public final class Configuration {
 						"\t\t<updatesPerSecond>60</updatesPerSecond>\n" + //
 						"\t\t<fixedUpdatesPerSecond>60</fixedUpdatesPerSecond>\n" + //
 						"\t\t<debug>true</debug>\n" + //
+						"\t\t<workingDirectory>" + FileSystem.defaultWorkingDirectory() + "</workingDirectory>\n" + //
 						"\t</runtime>\n" + //
 						"\t<window>\n" + //
 						"\t\t<title>Kronos</title>\n" + //
@@ -380,7 +390,7 @@ public final class Configuration {
 		}
 	}
 
-	public final record RuntimeData(String implementation, int updatesPerSecond, double updateRate, int fixedUpdatesPerSecond, double fixedUpdateRate, boolean debug) {
+	public final record RuntimeData(String implementation, int updatesPerSecond, double updateRate, int fixedUpdatesPerSecond, double fixedUpdateRate, boolean debug, String workingDirectory) {
 	}
 
 	public final record WindowData(String title, int width, int height, boolean fullscreen, boolean vsync) {

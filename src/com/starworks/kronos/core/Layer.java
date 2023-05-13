@@ -26,9 +26,10 @@ public abstract class Layer {
 		// Called during ImGui render phase
 	}
 	
-	public void onEvent(Event event) {
+	public boolean onEvent(Event event) {
 		// Called when an event is posted and passed to the layer
 		// Should return true if the event is consumed, false otherwise
+		return false;
 	}
 
 	public boolean isEnabled() {
@@ -37,9 +38,5 @@ public abstract class Layer {
 
 	public void setEnabled(boolean enabled) {
 		m_enabled = enabled;
-	}
-	
-	public void onClose() {
-		// Called when window is closed
 	}
 }

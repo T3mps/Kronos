@@ -21,10 +21,6 @@ import com.starworks.kronos.event.Event;
  *	public ActionType getType() {
  *		return m_type;
  *	}
- *
- *	public ActionProcessor getProcessor() {
- *		return null;
- *	}
  *	
  *	public int[] getKeyCodes() {
  *		return m_keyCodes;
@@ -42,7 +38,9 @@ public interface ActionMap {
 	
     public ActionType getType();
     
-    public ActionProcessor getProcessor();
+    public default ActionProcessor[] getProcessors() {
+    	return null;
+    }
     
     public int[] getBindings();
     

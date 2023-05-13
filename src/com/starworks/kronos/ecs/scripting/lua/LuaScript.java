@@ -41,7 +41,7 @@ public final class LuaScript implements Script {
 	}
 	
 	public static LuaScript attach(LuaEngine engine, Entity entity, String fileName) {
-		LuaScript script = new LuaScript(engine, fileName);
+		LuaScript script = new LuaScript(engine, FileSystem.get(fileName));
 		entity.add(script);
 		script.m_initializeFunction.call(CoerceJavaToLua.coerce(entity));
 		return script;

@@ -1,6 +1,6 @@
 package com.starworks.kronos.input.action;
 
-public interface ActionCallback<T> {
+public interface ActionCallback {
 
-	public void accept(T value);
+	public void accept(Object value);
 }

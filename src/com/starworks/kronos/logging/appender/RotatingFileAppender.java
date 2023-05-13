@@ -10,7 +10,7 @@ import com.starworks.kronos.files.FileSystem;
 
 public sealed class RotatingFileAppender extends FileAppender permits RotatingDateFileAppender {
 
-	private final String SEPARATOR = "_";
+	private static final String SEPARATOR = "_";
 	
 	protected String m_baseName;
 	protected String m_extension;
@@ -18,18 +18,19 @@ public sealed class RotatingFileAppender extends FileAppender permits RotatingDa
 	protected AtomicInteger m_currentFileCount;
 
 	public RotatingFileAppender(String path, int maxLines) {
+		String p = FileSystem.get(path);
 		this.m_maxLines = maxLines;
-		int idx = path.lastIndexOf('.');
+		int idx = p.lastIndexOf('.');
 		if (idx == -1) {
-			this.m_baseName = path;
+			this.m_baseName = p;
 			this.m_extension = Configuration.logging.extension();
 		} else {
-			this.m_baseName = path.substring(0, idx);
-			this.m_extension = path.substring(idx);
+			this.m_baseName = p.substring(0, idx);
+			this.m_extension = p.substring(idx);
 		}
 		this.m_currentFileCount = new AtomicInteger(countFiles());
 		try {
-			String p = buildName();
+			p = buildName();
 			this.m_handle = FileSystem.getFileHandle(p, true, true);
 			this.m_lines = new AtomicLong(lines(p));
 		} catch (IOException e) {

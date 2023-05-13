@@ -13,7 +13,7 @@ public class FileTree implements Iterable<FileHandle> {
 	private final Node m_root;
 
 	public FileTree() {
-		this.m_root = new Node("", null);
+		this.m_root = new Node(FileSystem.getWorkingDirectory(), null);
 	}
 
 	public void insert(FileHandle fileHandle) {

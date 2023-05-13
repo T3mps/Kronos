@@ -18,8 +18,12 @@ public final class EventManager {
 		}
 	}
 
+	public <E extends Event> void register(Class<E> eventClass, EventCallback<E> callback, int priority) {
+	    m_dispatch.get(eventClass).add(new PriorityEventCallback<E>(callback, priority));
+	}
+
 	public <E extends Event> void register(Class<E> eventClass, EventCallback<E> callback) {
-		m_dispatch.get(eventClass).add(callback);
+	    register(eventClass, callback, PriorityEventCallback.DEFAULT_PRIORITY);
 	}
 
 	public <E extends Event> void unregister(Class<E> eventClass, EventCallback<E> callback) {
@@ -27,7 +31,7 @@ public final class EventManager {
 	}
 
 	public boolean post(Event event) {
-		return m_dispatch.get(event.getClass()).dispatch(event);
+		return event.setHandled(m_dispatch.get(event.getClass()).dispatch(event));
 	}
 
 	public void clear() {
