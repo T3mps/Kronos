@@ -34,7 +34,7 @@ public final class Configuration {
 			throw new InstanceAlreadyExistsException();
 		}
 		
-		String absolutePath = FileSystem.get(path);
+		String absolutePath = FileSystem.INSTANCE.get(path);
 
 		tryConfiguration(absolutePath);
 
@@ -80,7 +80,7 @@ public final class Configuration {
 				ap.selectXPath("//application/runtime/workingDirectory");
 				if (ap.evalXPath() != -1) {
 					workingDirectory = vn.toString(vn.getText());
-					FileSystem.setWorkingDirectory(workingDirectory);
+					FileSystem.INSTANCE.setWorkingDirectory(workingDirectory);
 				}
 				ap.selectXPath("//application/@implementation");
 				if (ap.evalXPath() != -1) {
@@ -260,7 +260,7 @@ public final class Configuration {
 	private static void tryConfiguration(String path) {
 		String xsdPath = path.substring(0, path.lastIndexOf(".")) + ".xsd";
 		try {
-			FileHandle handle = FileSystem.getFileHandle(xsdPath, true, true);
+			FileHandle handle = FileSystem.INSTANCE.getFileHandle(xsdPath, true, true);
 			if (handle.wasGenerated()) {
 				String xsd = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
 						"<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" elementFormDefault=\"qualified\" attributeFormDefault=\"unqualified\">\n" + //
@@ -337,7 +337,7 @@ public final class Configuration {
 		}
 
 		try {
-			FileHandle handle = FileSystem.getFileHandle(path, true, true);
+			FileHandle handle = FileSystem.INSTANCE.getFileHandle(path, true, true);
 			if (handle.wasGenerated()) {
 				String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
 						"<application implementation=\"\" version=\"" + Version.getVersion() + "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"" + xsdPath + "\">\n" + //
@@ -345,7 +345,7 @@ public final class Configuration {
 						"\t\t<updatesPerSecond>60</updatesPerSecond>\n" + //
 						"\t\t<fixedUpdatesPerSecond>60</fixedUpdatesPerSecond>\n" + //
 						"\t\t<debug>true</debug>\n" + //
-						"\t\t<workingDirectory>" + FileSystem.defaultWorkingDirectory() + "</workingDirectory>\n" + //
+						"\t\t<workingDirectory>" + FileSystem.INSTANCE.defaultWorkingDirectory() + "</workingDirectory>\n" + //
 						"\t</runtime>\n" + //
 						"\t<window>\n" + //
 						"\t\t<title>Kronos</title>\n" + //

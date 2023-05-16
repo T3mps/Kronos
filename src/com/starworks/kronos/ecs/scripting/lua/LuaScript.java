@@ -21,7 +21,7 @@ public final class LuaScript implements Script {
 	private LuaScript(LuaEngine engine, String fileName) {
 		FileHandle handle = null;
 		try {
-			handle = FileSystem.getFileHandle(fileName, false, false);
+			handle = FileSystem.INSTANCE.getFileHandle(fileName, false, false);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -41,7 +41,7 @@ public final class LuaScript implements Script {
 	}
 	
 	public static LuaScript attach(LuaEngine engine, Entity entity, String fileName) {
-		LuaScript script = new LuaScript(engine, FileSystem.get(fileName));
+		LuaScript script = new LuaScript(engine, FileSystem.INSTANCE.get(fileName));
 		entity.add(script);
 		script.m_initializeFunction.call(CoerceJavaToLua.coerce(entity));
 		return script;

@@ -13,6 +13,8 @@ import com.starworks.kronos.input.InputManager;
 import com.starworks.kronos.jobs.Job;
 import com.starworks.kronos.jobs.JobManager;
 import com.starworks.kronos.logging.Logger;
+import com.starworks.kronos.resources.InternalResourceLoader;
+import com.starworks.kronos.resources.ResourceManager;
 import com.starworks.kronos.scene.Scene;
 import com.starworks.kronos.scene.SceneManager;
 import com.starworks.kronos.toolkit.concurrent.ArrivalGate;
@@ -50,6 +52,8 @@ public abstract class Application implements AutoCloseable {
 		}
 		s_instance = this;
 		
+		ResourceManager.INSTANCE.load(new InternalResourceLoader());
+		
 		int width = Configuration.window.width();
 		int height = Configuration.window.height();
 		String title = Configuration.window.title();
@@ -61,7 +65,7 @@ public abstract class Application implements AutoCloseable {
 		this.m_imGuiLayer = new ImGuiLayer();
 		this.m_jobManager = JobManager.create();
 		this.m_inputManager = new InputManager(m_eventManager);
-		this.m_scene = SceneManager.get().getCurrentScene();
+		this.m_scene = SceneManager.INSTANCE.getCurrentScene();
 		this.m_timeStep = new TimeStep(updateRate);
 		this.m_fixedTimeStep = new TimeStep(fixedUpdateRate);
 		this.m_fixedUpdateRate = fixedUpdateRate;
@@ -178,7 +182,7 @@ public abstract class Application implements AutoCloseable {
 		m_window.close();
 		m_jobManager.shutdown();
 		LOGGER.close();
-		FileSystem.shutdown();
+		FileSystem.INSTANCE.shutdown();
 	}
 	
 	public static final Application get() {

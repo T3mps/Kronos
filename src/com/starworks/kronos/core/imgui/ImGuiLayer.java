@@ -14,6 +14,7 @@ import com.starworks.kronos.core.Layer;
 import com.starworks.kronos.event.Event;
 import com.starworks.kronos.files.FileSystem;
 import com.starworks.kronos.logging.Logger;
+import com.starworks.kronos.resources.ResourceManager;
 import com.starworks.kronos.toolkit.SystemInfo;
 
 import imgui.ImGui;
@@ -45,7 +46,7 @@ public class ImGuiLayer extends Layer {
 		LOGGER.debug("Created Dear ImGui context");
 
 		m_io = ImGui.getIO();
-		Path dirPath = Paths.get(FileSystem.get("data"));
+		Path dirPath = Paths.get(FileSystem.INSTANCE.get("data"));
 		if (!Files.exists(dirPath)) {
 		    try {
 		        Files.createDirectories(dirPath);
@@ -61,8 +62,8 @@ public class ImGuiLayer extends Layer {
 		m_io.addConfigFlags(ImGuiConfigFlags.ViewportsEnable);
 
 		float fontSize = 18;
-		m_io.getFonts().addFontFromFileTTF(FileSystem.get("assets/fonts/OpenSans-Bold.ttf"), fontSize);
-		m_io.setFontDefault(m_io.getFonts().addFontFromFileTTF(FileSystem.get("assets/fonts/OpenSans-Bold.ttf"), fontSize));
+		m_io.getFonts().addFontFromFileTTF(ResourceManager.INSTANCE.fetchLocalResourcePath("fonts/opensans/OpenSans-Bold.ttf"), fontSize);
+		m_io.setFontDefault(m_io.getFonts().addFontFromFileTTF(ResourceManager.INSTANCE.fetchLocalResourcePath("fonts/opensans/OpenSans-Regular.ttf"), fontSize));
 
 		ImGui.styleColorsDark();
 

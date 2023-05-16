@@ -5,9 +5,9 @@ import java.lang.ref.SoftReference;
 import java.util.ArrayList;
 import java.util.List;
 
-public final class SceneManager {
+public enum SceneManager {
 
-	private static SceneManager s_instance = null;
+	INSTANCE;
 	
 	private Scene m_currentScene;
 	private final List<Reference<Scene>> m_previousScenes;
@@ -56,16 +56,5 @@ public final class SceneManager {
 	
 	public Scene getCurrentScene() {
 		return m_currentScene;
-	}
-	
-	public static SceneManager get() {
-		if (s_instance == null) {
-			synchronized (SceneManager.class) {
-				if (s_instance == null) {
-					s_instance = new SceneManager();
-				}
-			}
-		}
-		return s_instance;
 	}
 }

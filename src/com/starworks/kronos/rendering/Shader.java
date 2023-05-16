@@ -64,7 +64,7 @@ public final class Shader implements Closeable {
 		this.m_programID = -1;
 		FileHandle file = null;
 		try {
-			file = FileSystem.getFileHandle(filepath, false, false);
+			file = FileSystem.INSTANCE.getFileHandle(filepath, false, false);
 		} catch (IOException e) {
 			LOGGER.error("Error opening shader file", e);
 		}
