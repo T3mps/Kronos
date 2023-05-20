@@ -54,7 +54,6 @@ public class ImGuiLayer extends Layer {
 		    	LOGGER.error("Unsuccessfully attempted to generated data folder");
 		    }
 		}
-
 		m_io.setIniFilename(dirPath.resolve("imgui.ini").toString());
 		
 		m_io.addConfigFlags(ImGuiConfigFlags.NavEnableKeyboard);

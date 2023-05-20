@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.StampedLock;
 
+import com.starworks.kronos.maths.Mathk;
 import com.starworks.kronos.toolkit.collections.stack.IntStack;
 
 /**
  * <p>
- * The `ChunkedPool` class is designed to store a large number of objects in a
+ * The ChunkedPool class is designed to store a large number of objects in a
  * way that optimizes memory. It does this by dividing the objects into smaller
  * chunks and only allocating memory for the chunks that are currently in use.
  * This can help to avoid the overhead of constantly allocating and deallocating
@@ -19,15 +20,11 @@ import com.starworks.kronos.toolkit.collections.stack.IntStack;
  * due to a sudden increase in the number of objects being stored.
  *
  * <p>
- * The `ChunkedPool` class is implemented using a minimal-locking, chunked data
- * structure that allows multiple threads to safely and concurrently access and
- * modify the pool. It also provides a number of utility methods for managing
- * the objects in the pool, such as adding, removing, and iterating over the
+ * Implementation includes using a minimal-locking, chunked data structure that
+ * allows multiple threads to safely and concurrently access and modify the pool.
+ * It also provides a number of utility methods for managing the objects in the
+ * pool, such as adding, removing, and iterating over the
  * objects.
- *
- * <p>
- * The `ChunkedPool` class is intended to be interfaced with via the use of
- * `Allocator` objects.
  *
  * @param <T> the type of objects in the pool.
  * @author Ethan Temprovich
@@ -406,6 +403,7 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		private Chunk<T> m_next;
 		private final AtomicInteger m_index;
 		private final IDFactory m_idFactory;
+		private final StampedLock m_lock;
 
 		/**
 		 * 
@@ -421,6 +419,7 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 			this.m_next = null;
 			this.m_index = new AtomicInteger(-1);
 			this.m_idFactory = idFactory;
+			this.m_lock = new StampedLock();
 		}
 
 		/**
@@ -432,7 +431,12 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		 *         object is stored at the id
 		 */
 		public T get(int id) {
-			return m_data[m_idFactory.getObjectID(id)];
+			long stamp = m_lock.readLock();
+			try {
+				return m_data[m_idFactory.getObjectID(id)];
+			} finally {
+				m_lock.unlockRead(stamp);
+			}
 		}
 
 		/**
@@ -444,7 +448,12 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		 * @return the stored element at the specified position
 		 */
 		public T set(int id, T value) {
-			return (m_data[m_idFactory.getObjectID(id)] = value);
+			long stamp = m_lock.writeLock();
+			try {
+				return (m_data[m_idFactory.getObjectID(id)] = value);
+			} finally {
+				m_lock.unlockWrite(stamp);
+			}
 		}
 
 		/**
@@ -465,20 +474,25 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		 *         the `Chunk` is empty or the last index is out of bounds
 		 */
 		public int remove(int id) {
-			int removedIndex = m_idFactory.getObjectID(id);
-			int lastIndex = m_index.decrementAndGet() + (m_next == null ? 0 : 1);
-			if (lastIndex < 0 || lastIndex >= m_idFactory.getChunkCapacity()) {
-				return IDFactory.DETACHED_BIT;
+			long stamp = m_lock.writeLock();
+			try {
+				int removedIndex = m_idFactory.getObjectID(id);
+				int lastIndex = m_index.decrementAndGet() + (m_next == null ? 0 : 1);
+				if (lastIndex < 0 || lastIndex >= m_idFactory.getChunkCapacity()) {
+					return IDFactory.DETACHED_BIT;
+				}
+				T last = m_data[lastIndex];
+				T removed = m_data[removedIndex];
+				if (last != null && last != removed) {
+					last.setID(id);
+					m_data[removedIndex] = m_data[lastIndex];
+				} else {
+					m_data[removedIndex] = null;
+				}
+				return m_idFactory.mergeChunkIDs(id, lastIndex);
+			} finally {
+				m_lock.unlockWrite(stamp);
 			}
-			T last = m_data[lastIndex];
-			T removed = m_data[removedIndex];
-			if (last != null && last != removed) {
-				last.setID(id);
-				m_data[removedIndex] = m_data[lastIndex];
-			} else {
-				m_data[removedIndex] = null;
-			}
-			return m_idFactory.mergeChunkIDs(id, lastIndex);
 		}
 
 		/**
@@ -600,7 +614,7 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		 *
 		 * @return the unique identifier for this object.
 		 */
-		public abstract int getID();
+		public int getID();
 
 		/**
 		 * Sets the unique identifier for this object.
@@ -608,7 +622,7 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		 * @param id the new unique identifier for this object.
 		 * @return depends on implementation.
 		 */
-		public abstract int setID(int id);
+		public int setID(int id);
 	}
 
 	/**
@@ -664,7 +678,7 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 			this.m_chunkCount = 1 << chunkCountBit;
 			this.m_chunkIDBitMask = (1 << (BIT_LENGTH - chunkBit)) - 1;
 			this.m_chunkIDBitMaskShifted = ((1 << (BIT_LENGTH - chunkBit)) - 1) << chunkBit;
-			this.m_chunkCapacity = 1 << Math.min(Math.max(chunkBit, MIN_CHUNK_BIT), MAX_CHUNK_BIT);
+			this.m_chunkCapacity = 1 << Mathk.clamp(MIN_CHUNK_BIT, MAX_CHUNK_BIT, chunkBit);
 			this.m_objectIDBitMask = (1 << chunkBit) - 1;
 		}
 
@@ -676,6 +690,14 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 			return (id & m_chunkIDBitMaskShifted) | objectID;
 		}
 
+		public int getDetachedID(int id) {
+			return ((id & DETACHED_BIT) >>> DETACHED_BIT_INDEX);
+		}
+		
+		public int getFlagID(int id) {
+			return ((id & FLAG_BIT) >>> FLAG_BIT_INDEX);
+		}
+		
 		public int getChunkID(int id) {
 			return (id >>> m_chunkBit) & m_chunkIDBitMask;
 		}
@@ -685,7 +707,15 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		}
 
 		public String idToString(int id) {
-			return ((id & DETACHED_BIT) >>> DETACHED_BIT_INDEX) + ":" + ((id & FLAG_BIT) >>> FLAG_BIT_INDEX) + ":" + (getChunkID(id)) + ":" + (getObjectID(id));
+			StringBuilder sb = new StringBuilder();
+			sb.append(getDetachedID(id));
+			sb.append(':');
+			sb.append(getFlagID(id));
+			sb.append(':');
+			sb.append(getChunkID(id));
+			sb.append(':');
+			sb.append(getObjectID(id));
+			return sb.toString();
 		}
 
 		public int getChunkBit() {

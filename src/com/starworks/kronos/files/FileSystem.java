@@ -10,15 +10,16 @@ import com.starworks.kronos.toolkit.SystemInfo;
 public enum FileSystem {
 
 	INSTANCE;
-	
+
 	public static final char separatorChar = '/';
 	public static final String separator = "" + separatorChar;
 
 	private static final FileTree s_tree = new FileTree();
 
-	private String m_workingDirectory = defaultWorkingDirectory();
-	
-	private FileSystem() {}
+	private String m_workingDirectory = getDefaultWorkingDirectory();
+
+	private FileSystem() {
+	}
 
 	public FileHandle getFileHandle(String fileName, boolean createDirectories, boolean generateIfNotExist) throws IOException {
 		if (createDirectories) {
@@ -74,20 +75,20 @@ public enum FileSystem {
 	public String stringify() {
 		return s_tree.toString();
 	}
-	
+
 	public String get(String filepath) {
 		return m_workingDirectory + separator + filepath;
 	}
-	
-	public String defaultWorkingDirectory() {
+
+	public String getDefaultWorkingDirectory() {
 		String wkdir = SystemInfo.getUserHome() + "\\AppData\\Roaming\\Kronos\\";
 		return wkdir.replace("\\\\", separator).replace("\\", separator);
 	}
-	
+
 	public String getWorkingDirectory() {
 		return m_workingDirectory;
 	}
-	
+
 	public void setWorkingDirectory(String workingDirectory) {
 		if (workingDirectory != null) {
 			m_workingDirectory = workingDirectory.replace("\\\\", separator).replace("\\", separator);

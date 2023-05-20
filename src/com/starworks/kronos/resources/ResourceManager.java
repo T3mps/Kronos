@@ -10,6 +10,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.locks.StampedLock;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -38,12 +39,23 @@ public enum ResourceManager {
 		this.m_lock = new StampedLock();
 	}
 
-	public ResourceManager load(ResourceLoader... loaders) {
+	/*
+	 * Validates the local file system and ensures required root folders exist
+	 */
+	public void validate() {
+		String workingDirectory = FileSystem.INSTANCE.getWorkingDirectory();
+		
+		// data folder
+		File file = new File(workingDirectory + "data/");
+		if (!file.exists()) {
+			file.mkdir();
+		}
+	}
+	
+	public void load(ResourceLoader... loaders) {
 		for (var loader : loaders) {
 			loader.load();
 		}
-
-		return this;
 	}
 
 	public CompletableFuture<InputStream> fetchWebResource(String resourcePath) {
@@ -97,9 +109,8 @@ public enum ResourceManager {
 				return new ByteArrayInputStream(resource);
 			} catch (IOException e) {
 				LOGGER.error("Unable to download resource '{0}{1}", directoryURL, resourceURL);
-				CompletableFuture.failedFuture(e); // Propagate exception
+				throw new CompletionException(e);
 			}
-			return null;
 		});
 	}
 

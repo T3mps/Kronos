@@ -52,7 +52,7 @@ public final class Configuration {
 				}
 				
 				if (Version.getVersion() != version) {
-					throw new IllegalStateException("Version of config file doesn't match version of engine!");
+					throw new IllegalStateException("Version of config file does not match version of engine!");
 				}
 
 				// runtime
@@ -345,7 +345,7 @@ public final class Configuration {
 						"\t\t<updatesPerSecond>60</updatesPerSecond>\n" + //
 						"\t\t<fixedUpdatesPerSecond>60</fixedUpdatesPerSecond>\n" + //
 						"\t\t<debug>true</debug>\n" + //
-						"\t\t<workingDirectory>" + FileSystem.INSTANCE.defaultWorkingDirectory() + "</workingDirectory>\n" + //
+						"\t\t<workingDirectory>" + FileSystem.INSTANCE.getDefaultWorkingDirectory() + "</workingDirectory>\n" + //
 						"\t</runtime>\n" + //
 						"\t<window>\n" + //
 						"\t\t<title>Kronos</title>\n" + //

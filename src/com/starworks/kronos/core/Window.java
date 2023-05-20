@@ -49,7 +49,7 @@ public final class Window implements AutoCloseable {
 		if (height <= 0) throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidHeight"));
 		if (title == null) throw new KronosRuntimeException(Exceptions.getMessage("core.window.invalidTitle"));
 		Window window = new Window(width, height, title);
-		LOGGER.info("Window[{2}] created; width: {0}, height: {1}", width, height, title);
+		LOGGER.info("Window \"{2}\" created; width: {0}, height: {1}", width, height, title);
 		window.initialize();
 		return window;
 	}
@@ -65,7 +65,6 @@ public final class Window implements AutoCloseable {
 		LOGGER.info("GLFW initialized");
 		
 		setWindowHints();
-		LOGGER.info("Window[{0}] hints set", m_title);
 
 		m_windowPointer = GLFW.glfwCreateWindow(m_width, m_height, m_title, MemoryUtil.NULL, MemoryUtil.NULL);
 		if (m_windowPointer == MemoryUtil.NULL) {
@@ -120,7 +119,7 @@ public final class Window implements AutoCloseable {
 		GLFW.glfwSetWindowSizeCallback(m_windowPointer, (window, width, height) -> {
 			m_onEvent.accept(new Event.WindowResized(width, height, System.nanoTime()));
 		});
-		GLFW.glfwSetWindowCloseCallback(m_windowPointer, (window) -> {
+		GLFW.glfwSetWindowCloseCallback(m_windowPointer, window -> {
 			m_onEvent.accept(new Event.WindowClosed(System.nanoTime()));
 		});
 		GLFW.glfwSetWindowPosCallback(m_windowPointer, (window, xpos, ypos) -> {
@@ -147,7 +146,7 @@ public final class Window implements AutoCloseable {
 				m_onEvent.accept(new Event.WindowUnmaximized(System.nanoTime()));
 			}
 		});
-		GLFW.glfwSetWindowRefreshCallback(m_windowPointer, (window) -> {
+		GLFW.glfwSetWindowRefreshCallback(m_windowPointer, window -> {
 			m_onEvent.accept(new Event.WindowRefreshed(System.nanoTime()));
 		});
 	}
@@ -168,7 +167,6 @@ public final class Window implements AutoCloseable {
 		LOGGER.debug("Set GLFW window hint 'GLFW_VISIBLE' to `GLFW_FALSE`");
 		GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, GLFW.GLFW_TRUE);
 		LOGGER.debug("Set GLFW window hint 'GLFW_RESIZABLE' to `GLFW_TRUE`");
-
 		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MAJOR, 3);
 		LOGGER.debug("Set GLFW window hint 'GLFW_CONTEXT_VERSION_MAJOR' to `{0}`", 3);
 		GLFW.glfwWindowHint(GLFW.GLFW_CONTEXT_VERSION_MINOR, 0);

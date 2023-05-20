@@ -3,9 +3,7 @@ package com.starworks.kronos.toolkit.memory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 import sun.misc.Unsafe;
 
@@ -110,50 +108,39 @@ public final class UnsafeSupport {
     }
 
     public static long sizeOf(Object obj) {
-        Set<Field> fields = new HashSet<Field>();
-        Class<?> c = obj.getClass();
-
-        while (c != Object.class) {
-            for (var f : c.getDeclaredFields()) {
-                if ((f.getModifiers() & Modifier.STATIC) == 0) {
-                    fields.add(f);
-                }
-            }
-
-            c = c.getSuperclass();
-        }
-    
-        // get offset
-        long maxSize = 0;
-        for (var field : fields) {
-            long offset = unsafe.objectFieldOffset(field);
-
-            if (offset > maxSize) {
-                maxSize = offset;
-            }
-        }
-    
-        return round8(maxSize);
+        return sizeOf(obj.getClass());
     }
 
     public static long sizeOf(Class<?> clazz) {
-        long maxSize = headerSize(clazz);
+        long maxSize = Unsafe.ARRAY_OBJECT_INDEX_SCALE;
 
-        while (clazz != Object.class) {
+        while (clazz != null && clazz != Object.class) {
             for (var f : clazz.getDeclaredFields()) {
-                if ((f.getModifiers() & Modifier.STATIC) == 0) {
+                if ((f.getModifiers() & Modifier.STATIC) == 0 && (f.getModifiers() & Modifier.TRANSIENT) == 0) {
                     long offset = unsafe.objectFieldOffset(f);
-                    if (offset > maxSize) {
-                        // Assume 1 byte of the field width. This is ok as it gets padded out at the end
-                        maxSize = offset + 1;
-                    }
+                    long fieldSize = sizeOfField(f.getType());
+                    maxSize = Math.max(maxSize, offset + fieldSize);
                 }
             }
             clazz = clazz.getSuperclass();
         }
 
-        // The whole class always pads to a 8 bytes boundary, so we round up to 8 bytes.
         return round8(maxSize);
+    }
+
+    private static long sizeOfField(Class<?> fieldType) {
+        if (fieldType == boolean.class || fieldType == byte.class) {
+            return 1;
+        } else if (fieldType == char.class || fieldType == short.class) {
+            return 2;
+        } else if (fieldType == int.class || fieldType == float.class) {
+            return 4;
+        } else if (fieldType == long.class || fieldType == double.class) {
+            return 8;
+        } else {
+            // For non-primitive types, make a rough estimate (this might not be accurate)
+            return Unsafe.ARRAY_OBJECT_INDEX_SCALE;
+        }
     }
 
     public static long headerSize(Object obj) {
@@ -203,7 +190,7 @@ public final class UnsafeSupport {
     }
 
     private static long round8(final long n) {
-        return ((n / 8 ) + 1) * 8;
+        return ((n + 7L) / 8L) * 8L;
     }
 
     private static long normalize(int value) {
