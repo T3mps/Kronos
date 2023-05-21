@@ -622,7 +622,7 @@ public final class ChunkedPool<T extends ChunkedPool.Poolable> implements Closea
 		 * @param id the new unique identifier for this object.
 		 * @return depends on implementation.
 		 */
-		public int setID(int id);
+		public void setID(int id);
 	}
 
 	/**

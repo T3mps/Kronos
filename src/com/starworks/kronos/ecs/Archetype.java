@@ -7,13 +7,13 @@ public final class Archetype {
 
 	public static final int COMPONENT_INDEX_CAPACITY = 1 << 10;
 
-	private final ArchetypeList m_parentList;
+	private final ArchetypeList m_list;
 	private final ChunkedPool.Allocator<Entity> m_allocator;
 	private final Class<?>[] m_componentTypes;
 	private final int[] m_componentIndices;
 
 	protected Archetype(ArchetypeList archetypeList, ChunkedPool.Allocator<Entity> allocator, Class<?>... componentTypes) {
-		this.m_parentList = archetypeList;
+		this.m_list = archetypeList;
 		this.m_allocator = allocator;
 		this.m_componentTypes = componentTypes;
 		if (m_componentTypes.length < 1) {
@@ -32,18 +32,22 @@ public final class Archetype {
 	}
 
 	public boolean destroy(Entity entity) {
-		m_allocator.freeID(entity.getID());
-		entity.setID(entity.getID() | IDFactory.DETACHED_BIT);
-		entity.setData(null, null);
+		int id = entity.getID();
+		m_allocator.freeID(id);
+		entity.setID(id | IDFactory.DETACHED_BIT);
+		entity.setArchetype(null);
+		entity.setComponents(null);
 		return true;
 	}
 
 	public Entity attach(Entity entity, Object... components) {
-		entity = m_allocator.register(entity.setID(m_allocator.nextID()), switch (length()) {
-		case 00 -> entity.setData(this, null);
-		case 01 -> entity.setData(this, components);
-		default -> entity.setData(this, sort(components));
+		entity.setID(m_allocator.nextID());
+		entity = m_allocator.register(entity.getID(), switch (m_componentTypes.length) {
+		case 00 -> entity.setArchetype(this).setComponents(null);
+		case 01 -> entity.setArchetype(this).setComponents(components);
+		default -> entity.setArchetype(this).setComponents(sort(components));
 		});
+		entity.setRegistry(m_list.getRegistry());
 		return entity;
 	}
 
@@ -56,6 +60,7 @@ public final class Archetype {
 	public Entity reattach(Entity entity) {
 		entity.setID(m_allocator.nextID());
 		m_allocator.register(entity.getID(), entity);
+		entity.setRegistry(m_list.getRegistry());
 		return entity;
 	}
 	
@@ -79,7 +84,8 @@ public final class Archetype {
 	}
 
 	public int indexOf(Class<?> componentType) {
-		return m_componentIndices == null ? 0 : m_componentIndices[m_parentList.getClassMap().indexOf(componentType)] - 1;
+		if (m_componentIndices == null) return 0;
+		return m_componentIndices[m_list.getClassMap().indexOf(componentType)] - 1;
 	}
 
 	public int length() {
@@ -87,7 +93,7 @@ public final class Archetype {
 	}
 
 	public ArchetypeList getParentList() {
-		return m_parentList;
+		return m_list;
 	}
 
 	public ChunkedPool.Allocator<Entity> getAllocator() {

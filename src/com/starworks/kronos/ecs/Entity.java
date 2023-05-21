@@ -2,13 +2,10 @@ package com.starworks.kronos.ecs;
 
 import com.starworks.kronos.toolkit.collections.pool.ChunkedPool.IDFactory;
 import com.starworks.kronos.toolkit.collections.pool.ChunkedPool.Poolable;
-import com.starworks.kronos.toolkit.concurrent.AtomicUpdater;
 
 public final class Entity implements Poolable {
 
-	private static final AtomicUpdater<Entity, Integer> s_idUpdater = AtomicUpdater.forInteger(Entity.class, "m_id");
-
-	private volatile int m_id;
+	private int m_id;
 	private Registry m_registry;
 	private Archetype m_archetype;
 	private Object[] m_components;
@@ -20,47 +17,50 @@ public final class Entity implements Poolable {
 		this.m_components = components;
 	}
 
-	public String serialize() {
-		return m_registry.serialize(this);
-	}
-	
 	public Entity add(Object... components) {
-		return !isEnabled() ? null : m_archetype.getParentList().getRegistry().add(this, components);
+		if (!isEnabled()) return null;
+		return m_registry.add(this, components);
 	}
 
 	public Object replace(Object component) {
-		if (component == null || !isEnabled()) {
-			return this;
-		}
+		if (component == null || !isEnabled()) return null;
 		int index = m_archetype.indexOf((Class<?>) component.getClass());
-		if (m_components[index] == null) {
-			return this;
-		}
+		var oldComponent = m_components[index];
+		if (oldComponent == null) return null;
 		m_components[index] = component;
-		return this;
+		return oldComponent;
 	}
 
 	public Object remove(Object component) {
-		return (!isEnabled() || !contains(component)) ? null : m_archetype.getParentList().getRegistry().remove(this, component.getClass());
+		if (!isEnabled() || !contains(component)) return null;
+		return m_registry.remove(this, component.getClass());
 	}
 
 	public Object remove(Class<?> componentType) {
-		return (!isEnabled() || !contains(componentType)) ? null : m_archetype.getParentList().getRegistry().remove(this, componentType);
+		if (!isEnabled() || !contains(componentType)) return null;
+		return m_registry.remove(this, componentType);
 	}
 
-	@SuppressWarnings("unchecked")
 	public <T> T get(Class<T> componentType) {
 		int index = m_archetype.indexOf(componentType);
-		return index < 0 ? null : (T) m_components[index];
+		if (index < 0) return null;
+		var component = m_components[index];
+		if (componentType.isInstance(component)) return componentType.cast(component);
+		return null;
 	}
 
 	public boolean contains(Class<?> componentType) {
-		return (m_components != null && (m_archetype.length() > 1) ? m_archetype.indexOf(componentType) > -1 : m_components[0].getClass().equals(componentType));
+		if (m_components == null) return false;
+		if (m_archetype.length() == 1) return m_components[0].getClass().equals(componentType);
+		return m_archetype.indexOf(componentType) > -1;
 	}
 
 	public boolean contains(Object component) {
-		int index;
-		return (m_components != null && (m_archetype.length() > 1) ? ((index = m_archetype.indexOf(component.getClass())) > -1 && m_components[index].equals(component)) : m_components[0].equals(component));
+		if (m_components == null) return false;
+		if (m_archetype.length() == 1) m_components[0].equals(component);
+		int index = m_archetype.indexOf(component.getClass());
+		if (index > -1) return m_components[index].equals(component);
+		return false;
 	}
 
 	public <S extends Enum<S>> void register(S signal, EventSink.ComponentEvent event) {
@@ -71,15 +71,18 @@ public final class Entity implements Poolable {
 		m_registry.eventSink().unregister(this, signal);
 	}
 
+	public String serialize() {
+		return m_registry.serialize(this);
+	}
+	
 	@Override
 	public int getID() {
 		return m_id;
 	}
 
 	@Override
-	public int setID(int id) {
-		int prev = m_id;
-		return s_idUpdater.compareAndSet(this, prev, id | (m_id & IDFactory.FLAG_BIT)) ? m_id : prev;
+	public void setID(int id) {
+		m_id = id;
 	}
 
 	public String getFormattedID() {
@@ -91,27 +94,42 @@ public final class Entity implements Poolable {
 	}
 
 	public Entity setEnabled(boolean enabled) {
-		return (enabled && !isEnabled()) ? m_archetype.reattach(this) : (!enabled && isEnabled()) ? m_archetype.detach(this) : this;
+		if (enabled && !isEnabled()) return m_archetype.reattach(this);
+		else if (!enabled && isEnabled()) return m_archetype.detach(this);
+		return this;
 	}
 
 	public boolean isReleased() {
 		return (m_id & IDFactory.FLAG_BIT) == IDFactory.FLAG_BIT;
 	}
 
+	public Registry getRegistry() {
+		return m_registry;
+	}
+	
+	Entity setRegistry(Registry registry) {
+		m_registry = registry;
+		return this;
+	}
+	
 	public Archetype getArchetype() {
 		return m_archetype;
+	}
+	
+	Entity setArchetype(Archetype archetype) {
+		m_archetype = archetype;
+		return this;
 	}
 
 	public Object[] getComponents() {
 		return m_components;
 	}
 
-	Entity setData(Archetype archetype, Object[] components) {
-		this.m_archetype = archetype;
-		this.m_components = components;
+	Entity setComponents(Object[] components) {
+		m_components = components;
 		return this;
 	}
-
+	
 	@Override
 	public int hashCode() {
 		final int prime = 31;

@@ -149,7 +149,7 @@ public abstract class Application implements AutoCloseable {
 		}
 	}
 
-	private void time() {
+	private final void time() {
 		m_currentTime = System.nanoTime();
 		m_deltaTime = (m_currentTime - m_lastTime) / NANOS_PER_SECOND;
 		m_lastTime = m_currentTime;

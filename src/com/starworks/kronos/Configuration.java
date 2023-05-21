@@ -34,13 +34,11 @@ public final class Configuration {
 			throw new InstanceAlreadyExistsException();
 		}
 		
-		String absolutePath = FileSystem.INSTANCE.get(path);
-
-		tryConfiguration(absolutePath);
+		tryConfiguration(path);
 
 		try {
 			VTDGen vg = new VTDGen();
-			if (vg.parseFile(absolutePath, true)) {
+			if (vg.parseFile(path, true)) {
 				VTDNav vn = vg.getNav();
 				AutoPilot ap = new AutoPilot(vn);
 
