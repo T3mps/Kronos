@@ -3,7 +3,10 @@ package com.starworks.kronos.core;
 import javax.management.InstanceAlreadyExistsException;
 
 import com.starworks.kronos.Configuration;
+import com.starworks.kronos.Kronos;
 import com.starworks.kronos.Version;
+import com.starworks.kronos.exception.KronosException;
+import com.starworks.kronos.files.FileSystem;
 import com.starworks.kronos.logging.Logger;
 import com.starworks.kronos.toolkit.Reflections;
 import com.starworks.kronos.toolkit.SystemInfo;
@@ -25,14 +28,25 @@ public final class EntryPoint {
 
 	/** More than one instance of {@link EntryPoint} was instantiated. This should never happen. */
 	private static final int MULTIPLE_INSTANTIATION_VIOLATION = 1;
+	
+	/** Kronos has been provided an invalid license key. */
+	private static final int INVALID_LICENSE_KEY = 2;
 
 	static {
 		try {
 			Configuration.load("data/configuration.xml");
 		} catch (InstanceAlreadyExistsException e) {
+			System.err.println(e);
 			System.exit(CONFIGURATION_ALREADY_LOADED);
 		} catch (IllegalStateException e) {
+			System.err.println(e);
 			System.exit(NON_MATCHING_CONFIGURATION_VERSION);
+		}
+		try {
+			Kronos.load(FileSystem.INSTANCE.get("data/kronos.xml"));
+		} catch (KronosException e) {
+			System.err.println(e);
+			System.exit(INVALID_LICENSE_KEY);
 		}
 	}
 	

@@ -50,13 +50,13 @@ public final class Entity implements Poolable {
 	}
 
 	public boolean contains(Class<?> componentType) {
-		if (m_components == null) return false;
+		if (componentType == null || m_components == null) return false;
 		if (m_archetype.length() == 1) return m_components[0].getClass().equals(componentType);
 		return m_archetype.indexOf(componentType) > -1;
 	}
 
 	public boolean contains(Object component) {
-		if (m_components == null) return false;
+		if (component == null || m_components == null) return false;
 		if (m_archetype.length() == 1) m_components[0].equals(component);
 		int index = m_archetype.indexOf(component.getClass());
 		if (index > -1) return m_components[index].equals(component);

@@ -1,51 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src">
 		<attributes>
-			<attribute name="module" value="true"/>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="vendor/gson-2.10.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-glfw.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-glfw-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-glfw-natives-windows.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-glfw-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-lz4.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-lz4-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-lz4-natives-windows.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-lz4-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-natives-windows.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-openal.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-openal-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-openal-natives-windows.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-openal-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-opengl.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-opengl-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-opengl-natives-windows.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-opengl-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-stb.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-stb-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-stb-natives-windows.jar"/>
-	<classpathentry kind="lib" path="vendor/lwjgl-stb-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/vtd-xml_2.13_4.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-app-1.86.7.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-app-1.86.7-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-app-1.86.7-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-binding-1.86.7.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-binding-1.86.7-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-binding-1.86.7-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7-javadoc.jar"/>
-	<classpathentry kind="lib" path="vendor/imgui-lwjgl3-1.86.7-sources.jar"/>
-	<classpathentry kind="lib" path="vendor/luaj-jse-3.0.2.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-17">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="vendor/gson-2.10.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-glfw.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-glfw-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-glfw-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-glfw-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-lz4.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-lz4-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-lz4-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-lz4-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-openal.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-openal-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-openal-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-openal-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-opengl.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-opengl-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-opengl-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-opengl-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-stb.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-stb-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-stb-natives-windows.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/lwjgl-stb-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/vtd-xml_2.13_4.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-app-1.86.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-app-1.86.7-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-app-1.86.7-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-binding-1.86.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-binding-1.86.7-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-binding-1.86.7-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-lwjgl3-1.86.7.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-lwjgl3-1.86.7-javadoc.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/imgui-lwjgl3-1.86.7-sources.jar"/>
+	<classpathentry exported="true" kind="lib" path="vendor/luaj-jse-3.0.2.jar"/>
 	<classpathentry kind="src" path=".apt_generated">
 		<attributes>
 			<attribute name="optional" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>

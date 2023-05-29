@@ -51,8 +51,6 @@ public abstract class Application implements AutoCloseable {
 		}
 		Application.s_instance = this;
 
-		ResourceManager.INSTANCE.load(new InternalResourceLoader());
-
 		int width = Configuration.window.width();
 		int height = Configuration.window.height();
 		String title = Configuration.window.title();

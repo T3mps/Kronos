@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Collectors;
 
 import com.starworks.kronos.toolkit.collections.ClassMap;
@@ -15,7 +16,7 @@ public final class ArchetypeList implements Closeable {
 
 	private final Registry m_registry;
 	private final ClassMap m_classMap;
-	private final Map<ClassIndex, Node> m_nodes;
+	private final ConcurrentMap<ClassIndex, Node> m_nodes;
 	private final Archetype m_baseArchetype;
 
 	public ArchetypeList(Registry registry) {
@@ -69,11 +70,10 @@ public final class ArchetypeList implements Closeable {
 			return node == null ? null : node.getLinkedNodes();
 		default:
 			Map<ClassIndex, Node> currentArchetypes = null;
-			for (int i = 0; i < componentTypes.length; i++) {
+			int size = componentTypes.length;
+			for (int i = 0; i < size; ++i) {
 				node = m_nodes.get(m_classMap.getClassIndex(m_classMap.indexOf(componentTypes[i])));
-				if (node == null) {
-					continue;
-				}
+				if (node == null) continue;
 				currentArchetypes = currentArchetypes == null ? node.getLinkedNodes() : intersect(currentArchetypes, node.m_linkedNodes);
 			}
 			return currentArchetypes;
@@ -81,28 +81,22 @@ public final class ArchetypeList implements Closeable {
 	}
 
 	protected void include(Map<ClassIndex, Node> nodeMap, Class<?>... componentTypes) {
-		if (componentTypes.length == 0) {
-			return;
-		}
+		if (componentTypes.length == 0) return;
 		for (var componentType : componentTypes) {
 			Node node = m_nodes.get(m_classMap.getClassIndex(m_classMap.indexOf(componentType)));
-			if (node == null) {
-				continue;
-			}
+			if (node == null) continue;
 			intersect(nodeMap, node.m_linkedNodes);
 		}
 	}
 
 	protected void exclude(Map<ClassIndex, Node> nodeMap, Class<?>... componentTypes) {
-		if (componentTypes.length == 0) {
-			return;
-		}
+		if (componentTypes.length == 0) return;
 		for (var componentType : componentTypes) {
 			var classIndex = m_classMap.getClassIndex(m_classMap.indexOf(componentType));
 			nodeMap.remove(classIndex);
 			Node node = m_nodes.get(classIndex);
 			if (node != null) {
-				for (ClassIndex linkedNodeKey : node.m_linkedNodes.keySet()) {
+				for (var linkedNodeKey : node.m_linkedNodes.keySet()) {
 					nodeMap.remove(linkedNodeKey);
 				}
 			}
@@ -122,11 +116,12 @@ public final class ArchetypeList implements Closeable {
 
 	private Node getOrCreateNode(ClassIndex key, Class<?>... componentTypes) {
 		Node node = m_nodes.computeIfAbsent(key, k -> new Node(componentTypes));
-		if (componentTypes.length <= 1) {
+		int size = componentTypes.length;
+		if (size <= 1) {
 			node.link(key, node);
 			return node;
 		}
-		for (int i = 0; i < componentTypes.length; i++) {
+		for (int i = 0; i < size; i++) {
 			Class<?> componentType = componentTypes[i];
 			var typeKey = m_classMap.getClassIndex(m_classMap.indexOf(componentType));
 			Node singleTypeNode = m_nodes.computeIfAbsent(typeKey, k -> new Node(componentType));

@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.locks.StampedLock;
 
 import com.starworks.kronos.exception.KronosRuntimeException;
-import com.starworks.kronos.files.FileSystem;
 import com.starworks.kronos.logging.Logger;
 
 public enum StringTable {
@@ -46,7 +45,7 @@ public enum StringTable {
 	private volatile boolean m_isRunning;
 
 	private StringTable() {
-		this.m_dirPath = Paths.get(FileSystem.INSTANCE.getWorkingDirectory() + "/data/locale/");
+		this.m_dirPath = Paths.get("data/locale/");
 		this.m_currentLocale = Locale.getDefault();
 
 		if (!Files.exists(m_dirPath)) {
@@ -140,7 +139,8 @@ public enum StringTable {
 	}
 
 	public String getString(String table, String key) {
-	    var stringTable = m_stringTables.getOrDefault(table, new ConcurrentHashMap<String, String>());
+	    var stringTable = m_stringTables.getOrDefault(table, null);
+	    if (stringTable == null) return EMPTY_STRING;
 	    return stringTable.getOrDefault(key, EMPTY_STRING);
 	}
 

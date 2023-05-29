@@ -108,6 +108,7 @@ public class Scheduler implements Closeable {
 			m_time= System.nanoTime();
 			m_elapsedTime = m_time - prevTime;
 			var futures = m_mainExecutor.invokeAll(m_mainTasks);
+			if (futures.isEmpty()) return;
 			futures.get(0).get(m_timeoutSeconds, TimeUnit.SECONDS);
 		} catch (InterruptedException e) {
 			LOGGER.error("Scheduler interrupted during update", e);
@@ -134,7 +135,7 @@ public class Scheduler implements Closeable {
 				}
 			});
 		} catch (RuntimeException e) {
-			LOGGER.error("Failed to execute subsystem", e);
+//			LOGGER.error("Failed to execute subsystem", e);
 		}
 	}
 	

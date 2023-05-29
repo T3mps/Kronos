@@ -9,14 +9,7 @@ import java.util.stream.StreamSupport;
 
 import com.starworks.kronos.toolkit.collections.ClassMap.ClassIndex;
 
-public abstract sealed class View<T> implements Iterable<T> permits View.Of1<?>,
-																	View.Of2<?, ?>,
-																	View.Of3<?, ?, ?>,
-																	View.Of4<?, ?, ?, ?>,
-																	View.Of5<?, ?, ?, ?, ?>,
-																	View.Of6<?, ?, ?, ?, ?, ?>,
-																	View.Of7<?, ?, ?, ?, ?, ?, ?>,
-																	View.Of8<?, ?, ?, ?, ?, ?, ?, ?> {
+public abstract class View<T> implements Iterable<T> {
 
 	private final ArchetypeList m_archetypeList;
 	private final Map<ClassIndex, ArchetypeList.Node> m_nodeMap;

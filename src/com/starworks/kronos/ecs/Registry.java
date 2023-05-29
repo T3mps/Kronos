@@ -26,7 +26,6 @@ public final class Registry implements Closeable {
 	private final EventSink m_eventSink;
 	private final Deque<Scheduler> m_schedulers;
 	private final int m_systemTimeoutSeconds;
-
 	private final StripedReadWriteLock m_lock;
 	private final GsonBuilder m_gsonBuilder;
 
@@ -99,7 +98,7 @@ public final class Registry implements Closeable {
 
 		int length = entities.length;
 		String[] serializedEntities = new String[length];
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < length; ++i) {
 			int index = i;
 			Entity entity = entities[i];
 			executor.submit(() -> {
@@ -146,7 +145,7 @@ public final class Registry implements Closeable {
 
 		int length = serializedEntities.length;
 		Entity[] entities = new Entity[length];
-		for (int i = 0; i < length; i++) {
+		for (int i = 0; i < length; ++i) {
 			int index = i;
 			String serializedEntity = serializedEntities[i];
 			executor.submit(() -> {
@@ -223,24 +222,20 @@ public final class Registry implements Closeable {
 	}
 
 	public Object replace(Entity entity, Object component) {
-		if (entity == null || component == null) {
-			return null;
-		}
+		if (entity == null) return null;
 		Object result = entity.replace(component);
 		m_eventSink.emit(EventSink.ListenerType.ON_COMPONENT_REPLACE, component.getClass(), entity, component);
 		return result;
 	}
 
 	public Object remove(Entity entity, Class<?> componentType) {
-		if (componentType == null) {
-			return null;
-		}
+		if (entity == null || componentType == null) return null;
+		
 		Archetype prevArchetype = entity.getArchetype();
 		Object[] entityComponents = entity.getComponents();
 		int prevComponentsLength = prevArchetype.length();
-		if (prevComponentsLength == 0) {
-			return null;
-		}
+		if (prevComponentsLength == 0) return null;
+
 		Object[] newComponentArray;
 		Object removed;
 		if (prevComponentsLength == 1) {
@@ -265,54 +260,65 @@ public final class Registry implements Closeable {
 	}
 
 	public Object get(Entity entity, Class<?> componentType) {
+		if (entity == null) return null;
 		return entity.get(componentType);
 	}
 
 	public boolean contains(Entity entity, Class<?> componentType) {
+		if (entity == null) return false;
 		return entity.contains(componentType);
 	}
 
 	public boolean contains(Entity entity, Object component) {
+		if (entity == null) return false;
 		return entity.contains(component);
 	}
 
 	public <T> View<View.With1<T>> view(Class<T> componentType) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType);
+		if (nodes == null) return null;
 		return new View.Of1<T>(m_archetypeList, nodes, componentType);
 	}
 
 	public <T1, T2> View<View.With2<T1, T2>> view(Class<T1> componentType1, Class<T2> componentType2) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType1, componentType2);
+		if (nodes == null) return null;
 		return new View.Of2<T1, T2>(m_archetypeList, nodes, componentType1, componentType2);
 	}
 
 	public <T1, T2, T3> View<View.With3<T1, T2, T3>> view(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType1, componentType2, componentType3);
+		if (nodes == null) return null;
 		return new View.Of3<T1, T2, T3>(m_archetypeList, nodes, componentType1, componentType2, componentType3);
 	}
 
 	public <T1, T2, T3, T4> View<View.With4<T1, T2, T3, T4>> view(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType1, componentType2, componentType3, componentType4);
+		if (nodes == null) return null;
 		return new View.Of4<T1, T2, T3, T4>(m_archetypeList, nodes, componentType1, componentType2, componentType3, componentType4);
 	}
 
 	public <T1, T2, T3, T4, T5> View<View.With5<T1, T2, T3, T4, T5>> view(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType1, componentType2, componentType3, componentType4, componentType5);
+		if (nodes == null) return null;
 		return new View.Of5<T1, T2, T3, T4, T5>(m_archetypeList, nodes, componentType1, componentType2, componentType3, componentType4, componentType5);
 	}
 
 	public <T1, T2, T3, T4, T5, T6> View<View.With6<T1, T2, T3, T4, T5, T6>> view(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType1, componentType2, componentType3, componentType4, componentType5, componentType6);
+		if (nodes == null) return null;
 		return new View.Of6<T1, T2, T3, T4, T5, T6>(m_archetypeList, nodes, componentType1, componentType2, componentType3, componentType4, componentType5, componentType6);
 	}
 
 	public <T1, T2, T3, T4, T5, T6, T7> View<View.With7<T1, T2, T3, T4, T5, T6, T7>> view(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Class<T7> componentType7) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7);
+		if (nodes == null) return null;
 		return new View.Of7<T1, T2, T3, T4, T5, T6, T7>(m_archetypeList, nodes, componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7);
 	}
 
 	public <T1, T2, T3, T4, T5, T6, T7, T8> View<View.With8<T1, T2, T3, T4, T5, T6, T7, T8>> view(Class<T1> componentType1, Class<T2> componentType2, Class<T3> componentType3, Class<T4> componentType4, Class<T5> componentType5, Class<T6> componentType6, Class<T7> componentType7, Class<T8> componentType8) {
 		Map<ClassIndex, Node> nodes = m_archetypeList.find(componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7, componentType8);
+		if (nodes == null) return null;
 		return new View.Of8<T1, T2, T3, T4, T5, T6, T7, T8>(m_archetypeList, nodes, componentType1, componentType2, componentType3, componentType4, componentType5, componentType6, componentType7, componentType8);
 	}
 

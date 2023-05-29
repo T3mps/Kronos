@@ -220,9 +220,10 @@ public final class EventSink {
 	protected void emit(ListenerType type, Class<?> componentType, Entity entity, Object data) {
 		Iterator<ComponentEvent> specializedIterator;
 		Iterator<ComponentEvent> anyIterator;
+		List<ComponentEvent> listeners;
 		switch (type) {
 		case ON_COMPONENT_ADD:
-			var listeners = m_onComponentAddListeners.getOrDefault(componentType, null);
+			listeners = m_onComponentAddListeners.getOrDefault(componentType, null);
 			specializedIterator = listeners == null ? null : listeners.iterator();
 			anyIterator = m_onComponentAddListeners.get(Any.class).iterator();
 			break;

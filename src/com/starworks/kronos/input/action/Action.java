@@ -8,7 +8,7 @@ import com.starworks.kronos.event.Event;
 import com.starworks.kronos.event.EventType;
 import com.starworks.kronos.maths.Vector2f;
 
-public sealed abstract class Action<T extends Enum<T> & ActionMap> permits KeyboardAction<T>, MouseAction<T> {
+public abstract class Action<T extends Enum<T> & ActionMap> {
 
 	protected final T m_actionKey;
 	protected final int[] m_bindings;
