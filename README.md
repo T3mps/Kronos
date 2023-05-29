@@ -23,6 +23,9 @@
 - Toolkit API included
 - ImGui integration
 
+## Downloading
+Upon first download and run, a `kronos.xml` file will be generated in the working directory data folder. By default, this is `%appdata%/Kronos/data`. Inside, you will need to specify your license key acquired from ([kronosengine.com](https://kronosengine.com/)].
+
 ## Creating an application with Kronos
 The only required implementations are a `Main` class, and a one which extends the `Application` base class.
 
@@ -59,8 +62,7 @@ public class MyApplication extends Application {
 	}
 }
 ```
-
-Go ahead and run the main class, which will result in a crash. Thereafter, two files, `configuration.xml` and `configuration.xsd`, will be generated in working directory data folder. By default, this is `%appdata%/Kronos/data`. Inside of `configuration.xml` there is an attribute of the root element which specifies the target implementation of `Application`; left blank by default. Go ahead and fill in the FQN (fully-qualified name) of your `Application` implementation and run the project again.
+Go ahead and run the main class, which will result in a crash. Thereafter, two files, `configuration.xml` and `configuration.xsd`, will be generated in the classpath data folder. Inside of `configuration.xml` there is an attribute of the root element which specifies the target implementation of `Application`; left blank by default. Go ahead and fill in the FQN (fully-qualified name) of your `Application` implementation and run the project again.
 
 [![Twitter](https://img.shields.io/twitter/follow/AcidFrogLLC?style=social)](https://twitter.com/AcidFrogLLC)
 [![Forks](https://img.shields.io/github/forks/tempsies/kronos?style=social)](https://github.com/Tempsies/Kronos)
