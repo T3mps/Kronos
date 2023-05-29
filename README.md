@@ -24,7 +24,7 @@
 - ImGui integration
 
 ## Downloading
-Upon first download and run, a `kronos.xml` file will be generated in the working directory data folder. By default, this is `%appdata%/Kronos/data`. Inside, you will need to specify your license key acquired from ([kronosengine.com](https://kronosengine.com/)].
+Upon first download and run, a `kronos.xml` file will be generated in the working directory data folder. By default, this is `%appdata%/Kronos/data`. Inside, you will need to specify your license key acquired from [kronosengine.com](https://kronosengine.com/).
 
 ## Creating an application with Kronos
 The only required implementations are a `Main` class, and a one which extends the `Application` base class.
