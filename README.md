@@ -23,6 +23,9 @@
 - Toolkit API included
 - ImGui integration
 
+## install.bat
+`install.bat` will setup environmental variables needed for future features of Kronos. Currently, this is not a requirement, but soon will be.
+
 ## Downloading
 Upon first download and run, a `kronos.xml` file will be generated in the working directory data folder. By default, this is `%appdata%/Kronos/data`. Inside, you will need to specify your license key acquired from [kronosengine.com](https://kronosengine.com/).
 
