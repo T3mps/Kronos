@@ -27,7 +27,7 @@ public final class Configuration {
 
 	private static final ArrivalGate s_gate = new ArrivalGate(1);
 
-	public static void load(String path) throws InstanceAlreadyExistsException, IllegalStateException {
+	public static void load(String path) throws InstanceAlreadyExistsException {
 		try {
 			s_gate.arrive();
 		} catch (InterruptedException e) {
@@ -41,17 +41,6 @@ public final class Configuration {
 			if (vg.parseFile(path, true)) {
 				VTDNav vn = vg.getNav();
 				AutoPilot ap = new AutoPilot(vn);
-
-				int version = -1;
-				// version
-				ap.selectXPath("//application/@version");
-				if (ap.evalXPath() != -1) {
-					version = Integer.parseInt(vn.toString(vn.getAttrVal("version")));
-				}
-				
-				if (Version.getVersion() != version) {
-					throw new IllegalStateException("Version of config file does not match version of engine!");
-				}
 
 				// runtime
 				int updatesPerSecond = 60;
@@ -272,7 +261,6 @@ public final class Configuration {
 						"\t\t\t\t<xs:element name=\"math\" type=\"mathType\" />\n" + //
 						"\t\t\t</xs:sequence>\n" + //
 						"\t\t\t<xs:attribute name=\"implementation\" type=\"xs:string\" use=\"required\" />\n" + //
-						"\t\t\t<xs:attribute name=\"version\" type=\"xs:integer\" use=\"required\" />\n" + //
 						"\t\t</xs:complexType>\n" + //
 						"\t</xs:element>\n" + //
 						"\t<xs:complexType name=\"runtimeType\">\n" + //
@@ -338,7 +326,7 @@ public final class Configuration {
 			FileHandle handle = FileSystem.INSTANCE.getFileHandle(path, true, true);
 			if (handle.wasGenerated()) {
 				String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //
-						"<application implementation=\"\" version=\"" + Version.getVersion() + "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"" + xsdPath + "\">\n" + //
+						"<application implementation=\"\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:noNamespaceSchemaLocation=\"" + xsdPath + "\">\n" + //
 						"\t<runtime>\n" + //
 						"\t\t<updatesPerSecond>60</updatesPerSecond>\n" + //
 						"\t\t<fixedUpdatesPerSecond>60</fixedUpdatesPerSecond>\n" + //

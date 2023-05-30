@@ -13,6 +13,7 @@ import com.ximpleware.VTDNav;
 import com.ximpleware.XPathEvalException;
 import com.ximpleware.XPathParseException;
 
+@Deprecated
 public class XMLMap implements AutoCloseable {
 
 	private static final String MAP_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" + //

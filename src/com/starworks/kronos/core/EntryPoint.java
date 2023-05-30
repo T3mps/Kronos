@@ -5,7 +5,6 @@ import javax.management.InstanceAlreadyExistsException;
 import com.starworks.kronos.Configuration;
 import com.starworks.kronos.Kronos;
 import com.starworks.kronos.Version;
-import com.starworks.kronos.exception.KronosException;
 import com.starworks.kronos.files.FileSystem;
 import com.starworks.kronos.logging.Logger;
 import com.starworks.kronos.toolkit.Reflections;
@@ -13,9 +12,6 @@ import com.starworks.kronos.toolkit.SystemInfo;
 import com.starworks.kronos.toolkit.concurrent.ArrivalGate;
 
 public final class EntryPoint {
-
-	/** The target {@link Configuration configuration} file specifies a different version of Kronos. */
-	private static final int NON_MATCHING_CONFIGURATION_VERSION = -3;
 
 	/** We only want to load the {@link Configuration configuration} file once. */
 	private static final int CONFIGURATION_ALREADY_LOADED = -2;
@@ -38,15 +34,6 @@ public final class EntryPoint {
 		} catch (InstanceAlreadyExistsException e) {
 			System.err.println(e);
 			System.exit(CONFIGURATION_ALREADY_LOADED);
-		} catch (IllegalStateException e) {
-			System.err.println(e);
-			System.exit(NON_MATCHING_CONFIGURATION_VERSION);
-		}
-		try {
-			Kronos.load(FileSystem.INSTANCE.get("data/kronos.xml"));
-		} catch (KronosException e) {
-			System.err.println(e);
-			System.exit(INVALID_LICENSE_KEY);
 		}
 	}
 	
@@ -55,6 +42,10 @@ public final class EntryPoint {
 	private static final ArrivalGate s_gate = new ArrivalGate(1);
 
 	public EntryPoint() {
+		if (!Kronos.validate(FileSystem.INSTANCE.get("data/kronos.xml"))) {
+			exit(INVALID_LICENSE_KEY);
+		}
+		
 		LOGGER.info("Kronos Engine v{0}", Version.getVersionString());
 		LOGGER.info("Developed by Starworks");
 

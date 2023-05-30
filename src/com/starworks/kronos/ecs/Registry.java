@@ -61,7 +61,8 @@ public final class Registry implements Closeable {
 		Object[] componentArray = components.length == 0 ? null : components;
 		Archetype archetype = m_archetypeList.getOrCreateArchetype(componentArray);
 		Entity entity = archetype.createEntity(this, componentArray);
-		for (int i = 0; i < components.length; ++i) {
+		int size = components.length;
+		for (int i = 0; i < size; ++i) {
 			m_eventSink.emit(EventSink.ListenerType.ON_COMPONENT_ADD, components[i].getClass(), entity, components[i]);
 		}
 		return entity;
@@ -69,12 +70,13 @@ public final class Registry implements Closeable {
 
 	public Entity emulate(Entity entity, Object... addedComponents) {
 		Object[] originComponents = entity.getComponents();
-		if (originComponents == null || originComponents.length == 0) {
+		int originComponentsLength = originComponents.length;
+		if (originComponents == null || originComponentsLength == 0) {
 			return emplace(addedComponents);
 		}
-		Object[] targetComponents = new Object[originComponents.length + addedComponents.length];
-		System.arraycopy(originComponents, 0, targetComponents, 0, originComponents.length);
-		System.arraycopy(addedComponents, 0, targetComponents, originComponents.length, addedComponents.length);
+		Object[] targetComponents = new Object[originComponentsLength + addedComponents.length];
+		System.arraycopy(originComponents, 0, targetComponents, 0, originComponentsLength);
+		System.arraycopy(addedComponents, 0, targetComponents, originComponentsLength, addedComponents.length);
 		return emplace(targetComponents);
 	}
 
@@ -115,7 +117,6 @@ public final class Registry implements Closeable {
 
 			});
 		}
-
 		executor.shutdown();
 		return serializedEntities;
 	}
@@ -161,7 +162,6 @@ public final class Registry implements Closeable {
 				}
 			});
 		}
-
 		executor.shutdown();
 		return entities;
 	}
@@ -196,7 +196,7 @@ public final class Registry implements Closeable {
 		if (prevComponentsLength == 0) {
 			Archetype archetype = m_archetypeList.getOrCreateArchetype(components);
 			Entity result = archetype.attach(prevArchetype.detach(entity), components);
-			for (int i = 0; i < components.length; ++i) {
+			for (int i = 0; i < componentsLength; ++i) {
 				m_eventSink.emit(EventSink.ListenerType.ON_COMPONENT_ADD, components[i].getClass(), result, components[i]);
 			}
 			return result;

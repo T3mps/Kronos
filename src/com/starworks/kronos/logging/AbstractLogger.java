@@ -2,6 +2,7 @@ package com.starworks.kronos.logging;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.ConcurrentModificationException;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -218,6 +219,11 @@ public abstract class AbstractLogger implements Logger, Runnable {
 	public Logger setAnsiFormatting(boolean flag) {
 		m_ansiFormatting = flag;
 		return this;
+	}
+	
+	@Override
+	public List<Appender> getAppenders() {
+		return Collections.unmodifiableList(m_appenders);
 	}
 
 	@Override

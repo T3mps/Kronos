@@ -14,8 +14,6 @@ import com.starworks.kronos.jobs.Job;
 import com.starworks.kronos.jobs.JobManager;
 import com.starworks.kronos.locale.StringTable;
 import com.starworks.kronos.logging.Logger;
-import com.starworks.kronos.resources.InternalResourceLoader;
-import com.starworks.kronos.resources.ResourceManager;
 import com.starworks.kronos.scene.Scene;
 import com.starworks.kronos.scene.SceneManager;
 import com.starworks.kronos.toolkit.concurrent.ArrivalGate;
@@ -71,8 +69,8 @@ public abstract class Application implements AutoCloseable {
 
 		registerEvents();
 		addOverlay(m_imGuiLayer);
-
 		m_jobManager.start();
+		initialize();
 	}
 	
 	protected final synchronized void start() {

@@ -1,5 +1,6 @@
 package com.starworks.kronos;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -8,9 +9,19 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+
+import org.w3c.dom.Document;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
-import com.starworks.kronos.exception.KronosException;
+import com.starworks.kronos.exception.KronosRuntimeException;
 import com.starworks.kronos.files.FileHandle;
 import com.starworks.kronos.files.FileSystem;
 import com.starworks.kronos.resources.InternalResourceLoader;
@@ -26,42 +37,59 @@ public final class Kronos {
 	private Kronos() {
 	}
 
-	public static void load(String path) throws KronosException {
-		try {
-			FileHandle handle = FileSystem.INSTANCE.getFileHandle(path, true, true);
-			if (handle.wasGenerated()) {
-				String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
-						+ "<kronos version=\"" + Version.getVersion() + "\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n"
-						+ "\t<license>0</license>\r\n"
-						+ "</kronos>";
-				handle.write(xml);
-			}
-			VTDGen vg = new VTDGen();
-			if (vg.parseFile(path, true)) {
-				VTDNav vn = vg.getNav();
-				AutoPilot ap = new AutoPilot(vn);
-				
-				int version = -1;
-				// version
-				ap.selectXPath("//kronos/@version");
-				if (ap.evalXPath() != -1) {
-					version = Integer.parseInt(vn.toString(vn.getAttrVal("version")));
-				}
-				if (Version.getVersion() != version) {
-					throw new IllegalStateException("Version of kronos file does not match version of engine!");
-				}
-				
-				// license
-				ap.selectXPath("//kronos/license");
-				if (ap.evalXPath() != -1) {
-					s_license = vn.toString(vn.getText());
-				}
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		LicenseValidator.INSTANCE.validate(s_license);
+	public static boolean validate(String path) {
+	    try {
+	        FileHandle handle = FileSystem.INSTANCE.getFileHandle(path, true, true);
+	        if (handle.wasGenerated()) {
+	            String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n" //
+	                       + "<kronos version=\"-1\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\r\n" //
+	                       + "\t<license></license>\r\n"//
+	                       + "</kronos>"; 
+	            handle.write(xml);
+	        }
+	        VTDGen vg = new VTDGen();
+	        if (vg.parseFile(path, true)) {
+	            VTDNav vn = vg.getNav();
+	            AutoPilot ap = new AutoPilot(vn);
+
+	            // license
+	            ap.selectXPath("//kronos/license");
+	            if (ap.evalXPath() != -1) {
+	                s_license = vn.toString(vn.getText());
+	            }
+	            
+	            if (!LicenseValidator.INSTANCE.validate(s_license)) return false;
+
+	            // version
+	            int version = -1;
+	            ap.selectXPath("//kronos/@version");
+	            if (ap.evalXPath() != -1) {
+	                version = Integer.parseInt(vn.toString(vn.getAttrVal("version")));
+	            }
+	            if (Version.getVersion() != version) {
+	            	DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+                    DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+                    Document doc = dBuilder.parse(path);
+
+                    doc.getDocumentElement().setAttribute("version", Integer.toString(Version.getVersion()));
+
+                    TransformerFactory transformerFactory = TransformerFactory.newInstance();
+                    Transformer transformer = transformerFactory.newTransformer();
+                    transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+                    transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+                    
+                    DOMSource source = new DOMSource(doc);
+                    StreamResult result = new StreamResult(new File(path));
+                    transformer.transform(source, result);
+	            }
+	            
+	            return true;
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    
+	    return false;
 	}
 
 	private enum LicenseValidator {
@@ -78,10 +106,10 @@ public final class Kronos {
 			this.m_client = HttpClient.newHttpClient();
 		}
 
-		private boolean validate(final String licenseKey) throws KronosException {
+		private boolean validate(final String licenseKey) {
 			boolean valid = isLicenseValid(licenseKey);
-			if (!(valid)) {
-				throw new KronosException("Invalid Kronos license key!");
+			if (!valid) {
+				throw new KronosRuntimeException("Invalid Kronos license key!");
 			}
 			if (!isSetupComplete(licenseKey)) {
 				ResourceManager.INSTANCE.load(new InternalResourceLoader());
@@ -97,7 +125,11 @@ public final class Kronos {
 
 			HttpRequest request = null;
 			try {
-				request = HttpRequest.newBuilder().uri(new URI(VALIDATION_SERVER_URL)).header("Content-Type", "application/json").POST(HttpRequest.BodyPublishers.ofString(jsonString, StandardCharsets.UTF_8)).build();
+				request = HttpRequest.newBuilder()
+						.uri(new URI(VALIDATION_SERVER_URL))
+						.header("Content-Type", "application/json")
+						.POST(HttpRequest.BodyPublishers.ofString(jsonString, StandardCharsets.UTF_8))
+						.build();
 			} catch (URISyntaxException e) {
 				e.printStackTrace();
 			}

@@ -21,10 +21,10 @@ package com.starworks.kronos;
 public final class Version {
 
 	// The major version number
-	private static final int MAJOR = 1;
+	private static final int MAJOR = 0;
 
 	// The minor version number
-	private static final int MINOR = 0;
+	private static final int MINOR = 1;
 
 	// The revision version number
 	private static final int REVISION = 0;
@@ -41,6 +41,9 @@ public final class Version {
 		if (REVISION > (version & 0xFFFF)) return false;
 		// otherwise they are compatible
 		return true;
+	}
+	
+	public static void main(String[] args) {
 	}
 
 	// Returns the major version number

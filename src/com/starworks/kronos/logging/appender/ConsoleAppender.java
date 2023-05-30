@@ -21,6 +21,10 @@ public final class ConsoleAppender implements Appender {
 		m_reusableString = Ansi.colorize(message.msg(), message.ansiTraits());
 		m_stream.write(m_reusableString.getBytes());
 	}
+	
+	public OutputStream getOutputStream() {
+		return m_stream;
+	}
 
 	@Override
 	public void close() throws IOException {

@@ -1,6 +1,7 @@
 package com.starworks.kronos.logging;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import com.starworks.kronos.logging.appender.Appender;
 
@@ -145,6 +146,8 @@ public interface Logger extends AutoCloseable {
 	Logger setLayout(Layout layout);
 
 	Logger setAnsiFormatting(boolean flag);
+	
+	List<Appender> getAppenders();
 	
 	boolean isEnabled();
 
